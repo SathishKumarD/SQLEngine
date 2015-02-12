@@ -30,4 +30,10 @@ public class GroupByOperator implements Operator {
 
 	}
 
+	@Override
+	public Operator peekNextOp() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }
