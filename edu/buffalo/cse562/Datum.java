@@ -10,9 +10,7 @@ import java.util.Date;
  *
  */
 public class Datum {
-	
-	Datum[] ret;
-	
+
 	public Object value;
 	
 	public static Datum giveDatum(String type, String colItem) {
@@ -47,6 +45,7 @@ public class Datum {
 	public Datum(Double value) {
 		this.value = value;
 	}
+	
 	/**
 	 * 
 	 * @param input

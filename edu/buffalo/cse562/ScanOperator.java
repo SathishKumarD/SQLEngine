@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
- * @author Sathish
+ * @author Shiva
  *
  */
 public class ScanOperator implements Operator {
@@ -30,7 +30,7 @@ public class ScanOperator implements Operator {
 	 */	
 	 ScanOperator(String tableName){
 		//this.tableSource = new File (tableName);	
-		 this.tableName = tableName;
+		this.tableName = tableName;
 		this.dataFile = FileSystems.getDefault().getPath("data\\"+tableName);
 		reset();
 	}
@@ -43,7 +43,8 @@ public class ScanOperator implements Operator {
 		
 		try {
 			line = buffer.readLine();
-		} catch (IOException e) {
+		} 
+		catch (IOException e) {
 			e.printStackTrace();
 		}
 		
@@ -51,14 +52,11 @@ public class ScanOperator implements Operator {
 		
 		String col[] = line.split("\\|");	
 		colLength =	col.length;
-		Datum[] data = new Datum[colLength];//column length
+		Datum[] data = new Datum[colLength];
 		
-		for(int i=0; i < colLength; i++){						
-			//data[i] =   ;//new Datum   
-			//TODO
-			//ArrayList<HashMap<?,?>> 
+		for(int i=0; i < colLength;i++){						 
 			@SuppressWarnings("unchecked")
-			HashMap<Integer, String> indexDataTypeMap = (HashMap<Integer, String>) (Main.tableMappings1.get(tableName)).get(0);	
+			HashMap<Integer, String> indexDataTypeMap = (HashMap<Integer, String>) (Main.tableMappings.get(tableName)).get(0);	
 			String type = indexDataTypeMap.get(i);
 						
 			data[i] = Datum.giveDatum(type, col[i]);			
@@ -76,7 +74,8 @@ public class ScanOperator implements Operator {
 		try {
 			Charset charset = Charset.forName("US-ASCII");
 			this.buffer = Files.newBufferedReader(dataFile, charset);
-		} catch (IOException e) {
+		} 
+		catch (IOException e) {
 			e.printStackTrace();
 		}			
 	}

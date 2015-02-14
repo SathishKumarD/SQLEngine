@@ -22,8 +22,12 @@ import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectBody;
 
 public class Main {
-	static HashMap<String, HashMap<String, ArrayList<String>>> tableMappings = new HashMap<String, HashMap<String, ArrayList<String>>>();
-	static HashMap<String, ArrayList<HashMap<?,?>>> tableMappings1 = new HashMap<String, ArrayList<HashMap<?,?>>>();
+	/* 
+	 *   tableMappings : {tableName : [ {ColumnIndex : ColumnType}, { ColumnName : ColumnIndex}]}
+	 *   first hashMap (indexDataTypeMap) -  used in Scan Operators too get the data Type given the index number from iterating data files
+	 *   second HashMap (nameIndex)  - for future use guess will be needed in Projection , Selection - use  
+	 */
+	static HashMap<String, ArrayList<HashMap<?,?>>> tableMappings = new HashMap<String, ArrayList<HashMap<?,?>>>();
 	
 	public static void main(String[] args) {		
 		//the sql file starts from 3rd argument
@@ -113,13 +117,11 @@ public class Main {
 		ColIndexNameMap_list.add(colIndexDataType_Map); 
 		ColIndexNameMap_list.add(colNameIndex_Map);
 		
-		tableMappings1.put(createTableObj.getTable().getWholeTableName(),ColIndexNameMap_list);		
+		tableMappings.put(createTableObj.getTable().getWholeTableName(),ColIndexNameMap_list);		
 	}
 	
 	/**	 
 	 * test code print
-	 * @param string
-	 * @author Shiva
 	 */
 	static void println(String string) {
 		// TODO Auto-generated method stub

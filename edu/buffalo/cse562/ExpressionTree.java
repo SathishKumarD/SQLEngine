@@ -24,7 +24,7 @@ public class ExpressionTree {
 			String tn = ((Table) fi).getWholeTableName();
 			current = new ScanOperator(tn);
 			
-			Main.printTuple(current.readOneTuple());			
+			Main.printTuple(current.readOneTuple());	// to remove @TODO @shiva		
 		}
 		else if (fi instanceof SubSelect){
 			 
