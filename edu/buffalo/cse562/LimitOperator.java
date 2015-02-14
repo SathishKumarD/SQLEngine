@@ -1,0 +1,38 @@
+/**
+ * 
+ */
+package edu.buffalo.cse562;
+
+/**
+ * @author Sathish
+ *
+ */
+public class LimitOperator implements Operator {
+
+	/* (non-Javadoc)
+	 * @see edu.buffalo.cse562.Operator#readOneTuple()
+	 */
+	@Override
+	public Datum[] readOneTuple() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+
+	/* (non-Javadoc)
+	 * @see edu.buffalo.cse562.Operator#reset()
+	 */
+	@Override
+	public void reset() {
+		// TODO Auto-generated method stub
+
+	}
+
+
+	@Override
+	public Operator peekNextOp() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+}
