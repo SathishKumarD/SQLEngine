@@ -28,7 +28,7 @@ public class Main {
 	 *   second HashMap (nameIndex)  - for future use guess will be needed in Projection , Selection - use  
 	 */
 	static HashMap<String, ArrayList<HashMap<?,?>>> tableMappings = new HashMap<String, ArrayList<HashMap<?,?>>>();
-	
+	 
 	public static void main(String[] args) {		
 		//the sql file starts from 3rd argument
 		if(args.length < 3) return;

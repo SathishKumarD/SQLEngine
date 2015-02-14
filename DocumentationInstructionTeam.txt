@@ -1,7 +1,8 @@
 Global Variables
 ----------------
 Give arguments for main in this format: 
---data data <directory to the path where query files exist/table01.sql> <directory to the path where query files exist/table02.sql> 
+--data data <directory to the path where query files exist/TABLE01.SQL> <directory to the path where query files exist/table02.sql>
+ 
 1. 	static HashMap<String, ArrayList<HashMap<?,?>>> tableMappings = new HashMap<String, ArrayList<HashMap<?,?>>>();
 	/* 
 	 *   tableMappings : {tableName : [ {ColumnIndex : ColumnType}, { ColumnName : ColumnIndex}]}

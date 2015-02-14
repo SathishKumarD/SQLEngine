@@ -17,7 +17,7 @@ import java.util.HashMap;
 /**
  * @author Shiva
  *
- */
+ */ 
 public class ScanOperator implements Operator {
 
 	//private File tableSource;

@@ -14,7 +14,7 @@ import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SelectItem;
 import net.sf.jsqlparser.statement.select.SubJoin;
 import net.sf.jsqlparser.statement.select.SubSelect;
-
+ 
 public class ExpressionTree {
 	public Operator generateTree(SelectBody sel){
 		Operator current = null;	
