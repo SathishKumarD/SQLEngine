@@ -3,22 +3,61 @@
  */
 package edu.buffalo.cse562;
 
+import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.schema.Column;
+
 /**
  * @author Sathish
  *
  */
 public class SelectionOperator implements Operator {
 
-	/* (non-Javadoc)
-	 * @see edu.buffalo.cse562.Operator#readOneTuple()
+
+	Operator input;
+	Column[] schema;
+	Expression condition;
+
+	/**
+	 * 
+	 * @param input
+	 * @param schema
+	 * @param condtion
 	 */
-	public Datum[] readOneTuple() {
-		// TODO Auto-generated method stub
-		return null;
+	public SelectionOperator(Operator input, Column[] schema, Expression condtion)
+	{
+		this.condition = condtion;
+		this.schema = schema;
+		this.input = input;
+
+
 	}
 
-	/* (non-Javadoc)
-	 * @see edu.buffalo.cse562.Operator#reset()
+	/**
+	 * 
+	 */
+	public Datum[] readOneTuple() {
+
+		Datum[] tuple = null;
+		do
+		{
+			tuple = input.readOneTuple();
+			if(tuple == null ){
+				return null;
+			}
+
+			Evaluator eval = new Evaluator(schema ,tuple);
+			condition.accept(eval);
+			if(!eval.isTrue())
+			{
+				tuple=null;
+			}
+		}while(tuple==null);
+		
+		return tuple;
+	}
+
+	/**
+	 * 
 	 */
 	public void reset() {
 		// TODO Auto-generated method stub
