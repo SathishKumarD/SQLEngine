@@ -14,7 +14,6 @@ import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SelectItem;
 import net.sf.jsqlparser.statement.select.SubJoin;
 import net.sf.jsqlparser.statement.select.SubSelect;
-<<<<<<< HEAD
  
 public class ExpressionTree {
 	public Operator generateTree(SelectBody sel){
@@ -23,20 +22,7 @@ public class ExpressionTree {
 		FromItem fi = select.getFromItem();
 		if (fi instanceof Table){
 			String tn = ((Table) fi).getWholeTableName();
-			current = new ScanOperator(tn);
-			
-			Main.printTuple(current.readOneTuple());	// to remove @TODO @shiva		
-=======
-
-public class ExpressionTree {
-	public Operator generateTree(SelectBody sel){
-		Operator current = null;	
-		PlainSelect select = (PlainSelect) sel;
-		FromItem fi = select.getFromItem();
-		if (fi instanceof Table){
-			String tn = ((Table) fi).getWholeTableName();
-			current = new ScanOperator(tn);
->>>>>>> refs/remotes/origin/master
+			current = new ScanOperator(tn);			
 		}
 		else if (fi instanceof SubSelect){
 			 
