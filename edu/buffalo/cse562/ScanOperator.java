@@ -1,6 +1,4 @@
-/**
- * 
- */
+
 package edu.buffalo.cse562;
 
 import java.io.BufferedReader;
@@ -37,6 +35,8 @@ public class ScanOperator implements Operator {
 	
 	@Override
 	public Datum[] readOneTuple() {
+		
+		System.out.println("reading one tuple in Scan Operator");
 		if(buffer == null) return null;
 		int colLength = 0;	
 		String line = null;

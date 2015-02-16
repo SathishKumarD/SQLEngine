@@ -93,10 +93,13 @@ public class Main {
 								if (select instanceof PlainSelect){
 									Operator op = e.generateTree(select);
 									System.out.println(op);
-									while (op.peekNextOp() != null){
+									
+									/*while (op.peekNextOp() != null){
 										op = op.peekNextOp();
 										System.out.println(op);
-									}
+									}*/
+									
+									ExecuteQuery(op);
 								}
 							}
 							else if(statement instanceof CreateTable){
@@ -176,4 +179,16 @@ public class Main {
 			}
 			System.out.println();
 		}	
+		
+		static void ExecuteQuery(Operator op)
+		{
+			Datum[] dt  =null;
+			do
+			{
+				dt = op.readOneTuple();
+				if(dt !=null) printTuple(dt);
+				
+			}while(dt!=null);
+			
+		}
 	}

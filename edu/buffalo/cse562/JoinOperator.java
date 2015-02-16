@@ -15,13 +15,20 @@ public class JoinOperator implements Operator {
 	 * @see edu.buffalo.cse562.Operator#readOneTuple()
 	 */
 	
-	//TODO: Create setters and getters
+	//TODO: Create setters and gettersa
+	
 	public ArrayList<Operator> sources;
 	
 	@Override
 	public Datum[] readOneTuple() {
 		// TODO Auto-generated method stub
-		return null;
+		
+		System.out.println("sources has "+ sources.size() + "items");
+		System.out.println("Evaluating read one tuple on join");
+		
+		
+		// temporary code
+		return sources.get(0).readOneTuple();
 	}
 
 	/* (non-Javadoc)
