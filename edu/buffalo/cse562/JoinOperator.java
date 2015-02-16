@@ -16,7 +16,8 @@ public class JoinOperator implements Operator {
 	 */
 	
 	//TODO: Create setters and getters
-	public ArrayList<Operator> sources;
+	private Operator left;
+	private Operator right;
 	
 	@Override
 	public Datum[] readOneTuple() {
@@ -30,24 +31,20 @@ public class JoinOperator implements Operator {
 	@Override
 	public void reset() {
 		// TODO Auto-generated method stub
-
 	}
 
-	public JoinOperator(Operator base){
-		sources = new ArrayList<Operator>();
-		sources.add(base);
+	public JoinOperator(Operator left, Operator right){
+		this.left = left;
+		this.right = right;
 	}
 	
 	public String toString(){
-		StringBuilder b = new StringBuilder("JOIN [ \n");
-		for (Operator op : sources){
-			b.append('\t' +op.toString() + '\n');
-		}
-		b.append(']');
+		StringBuilder b = new StringBuilder("JOIN WITH \n");
+		b.append('\t' +this.right.toString() + '\n');
 		return b.toString();
 	}
 	
 	public Operator peekNextOp(){
-		return this.sources.get(0);
+		return this.left;
 	}
 }

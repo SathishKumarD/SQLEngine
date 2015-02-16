@@ -33,14 +33,12 @@ public class ExpressionTree {
 		List<Join> joins = (List<Join>) select.getJoins();
 		if (joins != null){
 			if (joins.size() > 0){
-				JoinOperator jo = new JoinOperator(current);
 				for (Join j : joins){
 					FromItem fr = j.getRightItem();
 					if (fr instanceof Table){
-						jo.sources.add(new ScanOperator(((Table) fr).getName()));
+						current = new JoinOperator(current, new ScanOperator(((Table) fr).getName()));
 					}
 				}
-				current = jo;
 			}
 		}
 		
