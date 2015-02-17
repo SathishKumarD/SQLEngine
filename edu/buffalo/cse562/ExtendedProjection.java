@@ -25,7 +25,8 @@ public class ExtendedProjection implements Operator {
 	@Override
 	public Datum[] readOneTuple() {
 		// TODO Auto-generated method stub
-		return null;
+		
+		return source.readOneTuple();
 	}
 
 	/* (non-Javadoc)

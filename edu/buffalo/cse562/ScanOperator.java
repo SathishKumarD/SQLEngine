@@ -12,7 +12,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-/**
+;/**
  * @author Shiva
  *
  */ 
@@ -29,7 +29,7 @@ public class ScanOperator implements Operator {
 	 ScanOperator(String tableName){
 		//this.tableSource = new File (tableName);	
 		this.tableName = tableName;
-		this.dataFile = FileSystems.getDefault().getPath("data\\"+tableName);
+		this.dataFile = FileSystems.getDefault().getPath(ConfigManager.getDataDir(), tableName.toLowerCase() +".dat");
 		reset();
 	}
 	
@@ -61,7 +61,7 @@ public class ScanOperator implements Operator {
 						
 			data[i] = Datum.giveDatum(type, col[i]);			
 		}
-				
+		System.out.println(line);
 		return data;
 	}
 

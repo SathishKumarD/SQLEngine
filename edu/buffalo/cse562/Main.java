@@ -10,58 +10,26 @@ package edu.buffalo.cse562;
 
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.List;
 
 import net.sf.jsqlparser.parser.CCJSqlParser;
-import net.sf.jsqlparser.parser.ParseException;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
-import net.sf.jsqlparser.statement.select.FromItem;
 import net.sf.jsqlparser.statement.select.Select;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
-import java.util.List;
-
-import net.sf.jsqlparser.parser.CCJSqlParser;
-import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
-import net.sf.jsqlparser.statement.create.table.CreateTable;
 import net.sf.jsqlparser.statement.select.PlainSelect;
-import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectBody;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.StringReader;
-import java.nio.charset.Charset;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import edu.buffalo.cse562.Datum;
-import net.sf.jsqlparser.parser.CCJSqlParser;
-import net.sf.jsqlparser.statement.Statement;
-import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
-import net.sf.jsqlparser.statement.create.table.CreateTable;
-import net.sf.jsqlparser.statement.select.PlainSelect;
-import net.sf.jsqlparser.statement.select.Select;
-import net.sf.jsqlparser.statement.select.SelectBody;
 
 public class Main {
 	/* 
@@ -73,8 +41,15 @@ public class Main {
 	 
 	public static void main(String[] args) {		
 		//the sql file starts from 3rd argument
-		if(args.length < 3) return;
+		if(args.length < 3){
+			System.out.println("Incomplete arguments");
+			return;
+		}
 		
+		if (args[0].equals("--data")){
+			ConfigManager.setDataDir(args[1]);
+		}
+			
 		for(int i=2; i < args.length; i++){				
 			Path sqlFile = FileSystems.getDefault().getPath(args[i]);		
 			Charset charset = Charset.forName("US-ASCII");				
@@ -92,14 +67,11 @@ public class Main {
 								ExpressionTree e = new ExpressionTree();
 								if (select instanceof PlainSelect){
 									Operator op = e.generateTree(select);
-									System.out.println(op);
-									
-									/*while (op.peekNextOp() != null){
+									while (op.peekNextOp() != null){
 										op = op.peekNextOp();
 										System.out.println(op);
-									}*/
-									
-									ExecuteQuery(op);
+									}
+									System.out.println(op.readOneTuple());
 								}
 							}
 							else if(statement instanceof CreateTable){
@@ -179,16 +151,4 @@ public class Main {
 			}
 			System.out.println();
 		}	
-		
-		static void ExecuteQuery(Operator op)
-		{
-			Datum[] dt  =null;
-			do
-			{
-				dt = op.readOneTuple();
-				if(dt !=null) printTuple(dt);
-				
-			}while(dt!=null);
-			
-		}
 	}

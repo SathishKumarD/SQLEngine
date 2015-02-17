@@ -25,7 +25,11 @@ public class SelectionOperator implements Operator {
 	
 	public Datum[] readOneTuple() {
 		// TODO Auto-generated method stub
-		return null;
+		
+		
+		System.out.println("EVALUATING Select - ");
+		System.out.println(exp.toString());
+		return source.readOneTuple();
 	}
 
 	/* (non-Javadoc)
@@ -37,7 +41,8 @@ public class SelectionOperator implements Operator {
 	}
 	
 	public String toString(){
-		return "EVALUATE "+ this.exp;
+		
+		return "EVALUATE Select - "+ this.exp;
 	}
 	
 	public Operator peekNextOp(){
