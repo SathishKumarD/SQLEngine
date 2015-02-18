@@ -125,7 +125,7 @@ public class Main {
 		
 		static void ExecuteQuery(Operator op)
 		{
-			ArrayList<Tuple> dt  =null;
+			ArrayList<Tuple> dt=null;
 			do
 			{
 				dt = op.readOneTuple();

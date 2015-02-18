@@ -2,8 +2,6 @@
  * 
  */
 package edu.buffalo.cse562;
-import edu.buffalo.cse562.*;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -25,57 +23,52 @@ public class JoinOperator implements Operator {
 	private Operator left;
 	private Operator right;
 	private HashMap<String, ColumnDetail> outputSchema = null;
+	private HashMap<String, ColumnDetail> leftSchema;
+	private HashMap<String, ColumnDetail> rightSchema;
 	private Expression expr = null;
 	private ArrayList<Tuple> leftTuple;
 	private ArrayList<Tuple> rightTuple;
 
 	public JoinOperator(Operator left, Operator right, Expression expr){
-		outputSchema = new HashMap<String, ColumnDetail>(left.getOutputTupleSchema());
-		HashMap<String, ColumnDetail> rightSchema = right.getOutputTupleSchema();
-		for (Entry<String, ColumnDetail> en : rightSchema.entrySet()){
-			String key = en.getKey();
-			ColumnDetail value = en.getValue();
-			outputSchema.put(key, value);
-		}
 		this.left = left;
 		this.right = right;
 		this.expr = expr;
+		this.reset();
 	}
 	
 	@Override
 	public ArrayList<Tuple> readOneTuple() {
 		// TODO Auto-generated method stub
-		
 		ArrayList<Tuple> outputTuple = new ArrayList<Tuple>();
-		
+		rightTuple = right.readOneTuple();		
+
 		if (rightTuple == null){
-			leftTuple = left.readOneTuple();
 			right.reset();
+			rightTuple = right.readOneTuple();
+			this.reset();
 		}
 		
-		rightTuple = right.readOneTuple();
-
 		if (leftTuple == null){
 			return null;
 		}
-		
-		// Cross product expression
+
+		int posCount = 0;
+
 		if (this.expr == null){
-//			System.out.println(this.outputSchema);
-			ArrayList<Tuple> rightTuple = right.readOneTuple();
-			
 			for (Map.Entry<String, ColumnDetail> mp : left.getOutputTupleSchema().entrySet()){
 				int index = mp.getValue().getIndex();
 				Tuple value = leftTuple.get(index);
-				int outputIndex = outputSchema.get(mp.getKey()).getIndex();
-				outputTuple.add(outputIndex, value);
+				outputTuple.add(value);
+			    outputSchema.get(mp.getKey()).setIndex(posCount);
+			    posCount += 1;
 			}
-			
+
 			for (Map.Entry<String, ColumnDetail> mp : right.getOutputTupleSchema().entrySet()){
 				int index = mp.getValue().getIndex();
 				Tuple value = rightTuple.get(index);
-				int outputIndex = outputSchema.get(mp.getKey()).getIndex();
-				outputTuple.add(outputIndex, value);
+				outputTuple.add(value);
+			    outputSchema.get(mp.getKey()).setIndex(posCount);
+			    posCount += 1;
 			}
 		}
 		return outputTuple;
@@ -87,6 +80,20 @@ public class JoinOperator implements Operator {
 	@Override
 	public void reset() {
 		// TODO Auto-generated method stub
+		outputSchema = new HashMap<String, ColumnDetail>();
+		leftSchema = new HashMap<String, ColumnDetail>(left.getOutputTupleSchema());
+		rightSchema = new HashMap<String, ColumnDetail>(right.getOutputTupleSchema());
+		for (Entry<String, ColumnDetail> en : rightSchema.entrySet()){
+			String key = en.getKey();
+			ColumnDetail value = en.getValue().clone();
+			outputSchema.put(key, value);
+		}
+		for (Entry<String, ColumnDetail> en : leftSchema.entrySet()){
+			String key = en.getKey();
+			ColumnDetail value = en.getValue().clone();
+			outputSchema.put(key, value);
+		}
+		this.leftTuple = left.readOneTuple();
 	}
 	
 	public String toString(){

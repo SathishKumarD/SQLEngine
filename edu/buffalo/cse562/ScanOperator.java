@@ -65,7 +65,6 @@ public class ScanOperator implements Operator {
 			tuples.add(new Tuple(type, col[counter]));	
 			counter++;
 		}
-
 		return tuples;
 	}
 

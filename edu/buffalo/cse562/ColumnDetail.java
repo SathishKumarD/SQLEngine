@@ -45,4 +45,16 @@ public class ColumnDetail {
 	public void setTableName(String tableName) {
 		this.tableName = tableName;
 	}
+	public ColumnDetail clone(){
+		ColumnDetail ret = new ColumnDetail();
+		ret.setIndex(this.index);
+		ret.setColumnAliasName(this.columnAliasName);
+		ret.setColumnDefinition(this.columnDefinition);
+		ret.setTableName(this.tableName);
+		return ret;
+	}
+	
+	public String toString(){
+		return this.getColumnDefinition().toString() + " " + this.getIndex();
+	}
 }
