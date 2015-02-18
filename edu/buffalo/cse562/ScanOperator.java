@@ -32,7 +32,7 @@ public class ScanOperator implements Operator {
 	ScanOperator(String tableName){
 		//this.tableSource = new File (tableName);	
 		this.tableName = tableName;
-		this.dataFile = FileSystems.getDefault().getPath("data\\"+tableName);
+		this.dataFile = FileSystems.getDefault().getPath(ConfigManager.getDataDir(), tableName.toLowerCase() +".dat");
 		this.tableSchema = Main.tableMapping.get(this.tableName);
 		reset();
 	}
