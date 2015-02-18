@@ -38,7 +38,7 @@ public class ExpressionTree {
 				for (Join j : joins){
 					FromItem fr = j.getRightItem();
 					if (fr instanceof Table){
-						current = new JoinOperator(current, new ScanOperator(((Table) fr).getName()));
+						current = new JoinOperator(current, new ScanOperator(((Table) fr).getName()), j.getOnExpression());
 					}
 				}
 			}

@@ -90,13 +90,11 @@ public class Main {
  */
 		private static void prepareTableSchema(CreateTable createTableObj){		
 			@SuppressWarnings("unchecked")
-
 			String tableName = createTableObj.getTable().getWholeTableName();
 			List<ColumnDefinition> cds = (List<ColumnDefinition>) createTableObj.getColumnDefinitions();
 			HashMap<String, ColumnDetail> tableSchema = new HashMap<String, ColumnDetail>();
 			int colCount = 0;
 			for(ColumnDefinition colDef : cds){
-
 				ColumnDetail columnDetail = new ColumnDetail();
 				columnDetail.setTableName(tableName);
 				columnDetail.setColumnDefinition(colDef);
@@ -105,7 +103,6 @@ public class Main {
 				tableSchema.put(columnFullName, columnDetail);
 				colCount++;
 			}
-			
 			tableMapping.put(tableName,tableSchema);		
 		}
 		
@@ -135,7 +132,6 @@ public class Main {
 				
 			}while(dt!=null);
 			
-		}
-		
+		}	
 		
 	}
