@@ -21,13 +21,13 @@ public class SelectionOperator implements Operator {
 	 * @see edu.buffalo.cse562.Operator#readOneTuple()
 	 */
 	
-	Operator source;
+	Operator input;
 	Expression exp;
 	Column[] schema;
 	private  HashMap<String, ColumnDetail> inputSchema = null;
 	
-	public SelectionOperator(Operator input, Expression exp, Column[] schema){
-		this.source = input;
+	public SelectionOperator(Operator input, Expression exp){
+		this.input = input;
 		this.exp = exp;
 		this.inputSchema = input.getOutputTupleSchema();
 	}
@@ -41,7 +41,7 @@ public class SelectionOperator implements Operator {
 		ArrayList<Tuple> tuple = null;
 		do
 		{
-			tuple = source.readOneTuple();
+			tuple = input.readOneTuple();
 			if(tuple==null) return null;
 			Evaluator evaluator = new Evaluator(tuple,inputSchema);
 			
@@ -81,7 +81,7 @@ public class SelectionOperator implements Operator {
 	}
 	
 	public Operator peekNextOp(){
-		return this.source;
+		return this.input;
 	}
 
 	@Override

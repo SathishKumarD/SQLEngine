@@ -3,6 +3,9 @@
  */
 package edu.buffalo.cse562;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 /**
  * @author Sathish
  *
@@ -16,7 +19,7 @@ public class GroupByOperator implements Operator {
 	
 	
 	@Override
-	public Datum[] readOneTuple() {
+	public ArrayList<Tuple> readOneTuple() {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -32,6 +35,12 @@ public class GroupByOperator implements Operator {
 
 	@Override
 	public Operator peekNextOp() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public HashMap<String, ColumnDetail> getOutputTupleSchema() {
 		// TODO Auto-generated method stub
 		return null;
 	}

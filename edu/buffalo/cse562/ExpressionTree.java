@@ -20,9 +20,11 @@ public class ExpressionTree {
 		Operator current = null;	
 		PlainSelect select = (PlainSelect) sel;
 		FromItem fi = select.getFromItem();
+		Table table  = null;
 		if (fi instanceof Table){
-			String tn = ((Table) fi).getWholeTableName();
-			current = new ScanOperator(tn);			
+			table = (Table) fi;
+			String tableName = (table).getWholeTableName();
+			current = new ScanOperator(tableName);			
 		}
 		else if (fi instanceof SubSelect){
 			 
@@ -41,6 +43,8 @@ public class ExpressionTree {
 				}
 			}
 		}
+		
+		
 		
 		Expression exp = (Expression) select.getWhere();
 		if (exp != null){

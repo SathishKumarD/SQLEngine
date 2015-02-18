@@ -26,6 +26,8 @@ public class Evaluator extends Eval {
 		this.tupleSchema = tupleSchema;
 	}
 
+	
+
 	@Override
 	public LeafValue eval(Column column) throws SQLException {
 		return null;

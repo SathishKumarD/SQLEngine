@@ -23,7 +23,6 @@ import net.sf.jsqlparser.statement.select.SelectBody;
 
 import java.util.ArrayList;
 
-import edu.buffalo.cse562.Datum;
 
 public class Main {
 	
@@ -118,17 +117,17 @@ public class Main {
 			System.out.println(string);
 		}
 		
-		static void printTuple(Datum[] singleTuple) {
-			for(int i=0; i < singleTuple.length;i++){
-				System.out.print(singleTuple[i].value.toString());
-				if(i != singleTuple.length - 1) System.out.print("|");
+		static void printTuple(ArrayList<Tuple> singleTuple) {
+			for(int i=0; i < singleTuple.size();i++){
+				System.out.print(singleTuple.get(i).toString());
+				if(i != singleTuple.size() - 1) System.out.print("|");
 			}
 			System.out.println();
 		}	
 		
 		static void ExecuteQuery(Operator op)
 		{
-			Datum[] dt  =null;
+			ArrayList<Tuple> dt  =null;
 			do
 			{
 				dt = op.readOneTuple();

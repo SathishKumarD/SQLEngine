@@ -3,6 +3,9 @@
  */
 package edu.buffalo.cse562;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 
 /**
@@ -11,22 +14,25 @@ import net.sf.jsqlparser.statement.select.SelectExpressionItem;
  */
 public class ExtendedProjection implements Operator {
 
-	Operator source;
+	Operator input;
 	SelectExpressionItem selexp;
-	public ExtendedProjection(Operator current, SelectExpressionItem s) {
+	private  HashMap<String, ColumnDetail> inputSchema = null;
+	
+	public ExtendedProjection(Operator input, SelectExpressionItem s) {
 		// TODO Auto-generated constructor stub
-		this.source = current;
+		this.input = input;
 		this.selexp = s;
+		this.inputSchema = input.getOutputTupleSchema();
 	}
 
 	/* (non-Javadoc)
 	 * @see edu.buffalo.cse562.Operator#readOneTuple()
 	 */
 	@Override
-	public Datum[] readOneTuple() {
+ 	public ArrayList<Tuple> readOneTuple() {
 		// TODO Auto-generated method stub
 		
-		return source.readOneTuple();
+		return input.readOneTuple();
 	}
 
 	/* (non-Javadoc)
@@ -43,6 +49,12 @@ public class ExtendedProjection implements Operator {
 	}
 	
 	public Operator peekNextOp(){
-		return this.source;
+		return this.input;
+	}
+
+	@Override
+	public HashMap<String, ColumnDetail> getOutputTupleSchema() {
+		// TODO Here input schema gets changed. columns will be removed.
+		return null;
 	}
 }

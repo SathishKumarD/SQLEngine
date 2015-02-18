@@ -4,6 +4,7 @@
 package edu.buffalo.cse562;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * @author Sathish
@@ -20,7 +21,7 @@ public class JoinOperator implements Operator {
 	private Operator right;
 	
 	@Override
-	public Datum[] readOneTuple() {
+	public ArrayList<Tuple> readOneTuple() {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -46,5 +47,11 @@ public class JoinOperator implements Operator {
 	
 	public Operator peekNextOp(){
 		return this.left;
+	}
+
+	@Override
+	public HashMap<String, ColumnDetail> getOutputTupleSchema() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }
