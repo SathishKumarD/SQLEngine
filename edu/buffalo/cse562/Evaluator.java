@@ -4,6 +4,7 @@
 package edu.buffalo.cse562;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 import net.sf.jsqlparser.expression.LeafValue;
 import net.sf.jsqlparser.schema.Column;
@@ -15,9 +16,9 @@ import edu.buffalo.cse562.Eval;
  */
 public class Evaluator extends Eval {
 	
-	Datum[] tuple;
+	ArrayList<Tuple> tuple;
 	
-	public Evaluator(Datum[] tuple)
+	public Evaluator(ArrayList<Tuple> tuple)
 	{
 		this.tuple = tuple;
 		
