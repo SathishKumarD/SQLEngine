@@ -3,9 +3,11 @@
  */
 package edu.buffalo.cse562;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.LeafValue;
 import net.sf.jsqlparser.schema.Column;
 import edu.buffalo.cse562.Eval;
@@ -18,6 +20,10 @@ public class Evaluator extends Eval {
 	{
 		this.tuple = tuple;
 		this.tupleSchema = tupleSchema;
+	}
+	
+	public LeafValue eval(Expression e) throws SQLException{
+		return super.eval(e);
 	}
 	
 	@Override
