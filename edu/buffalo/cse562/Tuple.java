@@ -32,5 +32,14 @@ public class Tuple {
 		}
 		}		
 	}
+	
+	 @Override 
+	 public String toString()
+	 {
+		return val.toString();
+		 
+	 
+	 }
+	 
 
 }

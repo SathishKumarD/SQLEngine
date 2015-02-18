@@ -1,3 +1,3 @@
 CREATE TABLE R (A int, B int);
-CREATE TABLE RS (A int, B int);
-SELECT R.A FROM R JOIN RS ON R.A = RS.A WHERE R.A > 4; 
+CREATE TABLE S (A int, B int);
+SELECT R.A FROM R WHERE R.A > 4; 

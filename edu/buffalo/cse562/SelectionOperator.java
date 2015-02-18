@@ -35,10 +35,11 @@ public class SelectionOperator implements Operator {
 	public ArrayList<Tuple> readOneTuple() {
 		// TODO Auto-generated method stub
 		
-		System.out.println("EVALUATING Select - ");
-		System.out.println(exp.toString());
+		//System.out.println("EVALUATING Select - ");
+		//System.out.println(exp.toString());
 		
 		ArrayList<Tuple> tuple = null;
+		boolean result =  false;
 		do
 		{
 			tuple = input.readOneTuple();
@@ -48,7 +49,8 @@ public class SelectionOperator implements Operator {
 			try {
 				
 				BooleanValue bv= (BooleanValue) evaluator.eval(exp);
-				if(bv.getValue())
+				result = bv.getValue();
+				if(result)
 				{
 					return tuple;
 				}
@@ -62,7 +64,7 @@ public class SelectionOperator implements Operator {
 			
 			
 			
-		}while(tuple==null);
+		}while(!result);
 		
 		return tuple;
 	}
