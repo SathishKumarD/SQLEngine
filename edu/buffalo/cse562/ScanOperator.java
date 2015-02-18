@@ -11,8 +11,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-;/**
+/**
  * @author Shiva
  *
  */ 
@@ -22,47 +24,48 @@ public class ScanOperator implements Operator {
 	private BufferedReader buffer;
 	private Path dataFile;
 	private String tableName = "";
-	
+	private  HashMap<String, ColumnDetail> tableSchema = null;
+
 	/* (non-Javadoc)
 	 * @see edu.buffalo.cse562.Operator#readOneTuple()
 	 */	
-	 ScanOperator(String tableName){
+	ScanOperator(String tableName){
 		//this.tableSource = new File (tableName);	
 		this.tableName = tableName;
-		this.dataFile = FileSystems.getDefault().getPath(ConfigManager.getDataDir(), tableName.toLowerCase() +".dat");
+		this.dataFile = FileSystems.getDefault().getPath("data\\"+tableName);
+		this.tableSchema = Main.tableMapping.get(this.tableName);
 		reset();
 	}
-	
+
 	@Override
-	public Datum[] readOneTuple() {
-		
-		System.out.println("reading one tuple in Scan Operator");
+	public ArrayList<Tuple> readOneTuple() {
 		if(buffer == null) return null;
 		int colLength = 0;	
 		String line = null;
-		
+
 		try {
 			line = buffer.readLine();
 		} 
 		catch (IOException e) {
 			e.printStackTrace();
 		}
-		
+
 		if(line == null) return null;
-		
+
 		String col[] = line.split("\\|");	
 		colLength =	col.length;
-		Datum[] data = new Datum[colLength];
-		
-		for(int i=0; i < colLength;i++){						 
+
+		ArrayList<Tuple> tuples = new ArrayList<Tuple>();
+
+		int counter = 0;
+		for(Map.Entry<String, ColumnDetail> colDetail: this.tableSchema.entrySet()){	
 			@SuppressWarnings("unchecked")
-			HashMap<Integer, String> indexDataTypeMap = (HashMap<Integer, String>) (Main.tableMappings.get(tableName)).get(0);	
-			String type = indexDataTypeMap.get(i);
-						
-			data[i] = Datum.giveDatum(type, col[i]);			
+			String type = colDetail.getValue().getColumnDefinition().getColDataType().toString();
+			tuples.add(new Tuple(type, col[counter]));	
+			counter++;
 		}
-		System.out.println(line);
-		return data;
+
+		return tuples;
 	}
 
 	/* (non-Javadoc)
@@ -79,7 +82,7 @@ public class ScanOperator implements Operator {
 			e.printStackTrace();
 		}			
 	}
-	
+
 	public String toString(){
 		return "SCAN TABLE " + dataFile.getFileName().toString();
 	}
@@ -88,5 +91,12 @@ public class ScanOperator implements Operator {
 	public Operator peekNextOp() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+
+	@Override
+	public HashMap<String, ColumnDetail> getOutputTupleSchema() {
+
+		return this.tableSchema;
 	}
 }
