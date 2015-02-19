@@ -20,6 +20,7 @@ import java.util.HashMap;
 import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.SelectBody;
+import net.sf.jsqlparser.statement.select.Union;
 
 import java.util.ArrayList;
 
@@ -49,22 +50,25 @@ public class Main {
 				String line = null;
 				while ((line = reader.readLine()) != null){
 					CCJSqlParser parser = new CCJSqlParser(new StringReader(line));
-					
+					ExpressionTree e = new ExpressionTree();
 					try{
 						if((statement = parser.Statement()) != null){
 							if(statement instanceof Select){
 								SelectBody select = ((Select) statement).getSelectBody();
-								ExpressionTree e = new ExpressionTree();
 								if (select instanceof PlainSelect){
 									Operator op = e.generateTree(select);
-									/*while (op.peekNextOp() != null){
-										op = op.peekNextOp();
-										System.out.println(op);
-									}
-									System.out.println(op.readOneTuple());*/
 									ExecuteQuery(op);
 								}
-								
+								else if (select instanceof Union){
+									Union un = (Union) select;
+									Operator op;
+									UnionOperator uop = new UnionOperator();
+									List<PlainSelect> pselects = (List<PlainSelect>) un.getPlainSelects();
+									for (PlainSelect s : pselects){
+										uop.addOperator(e.generateTree(s));
+									}
+									ExecuteQuery(uop);
+								}								
 							}
 							else if(statement instanceof CreateTable){
 								CreateTable createTableObj = (CreateTable) statement;								
@@ -72,8 +76,8 @@ public class Main {
 							}
 						}
 					}
-					catch (Exception e){
-						System.out.println(e);
+					catch (Exception ex){
+						System.out.println(ex);
 					}
 				}
 			}
