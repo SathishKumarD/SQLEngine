@@ -40,7 +40,6 @@ public class ExtendedProjection implements Operator {
 	 */
 	@Override
 	public void reset() {
-		// TODO Auto-generated method stub
 
 	}
 	
