@@ -1,3 +1,3 @@
 CREATE TABLE R (A int, B int);
 CREATE TABLE S (A int, B int);
-SELECT R.A FROM R WHERE R.A > 4; 
+SELECT R.A FROM R RAM WHERE R.A > 4; 
