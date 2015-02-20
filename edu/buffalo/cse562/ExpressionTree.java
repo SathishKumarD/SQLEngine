@@ -14,6 +14,7 @@ import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SelectItem;
 import net.sf.jsqlparser.statement.select.SubJoin;
 import net.sf.jsqlparser.statement.select.SubSelect;
+import net.sf.jsqlparser.statement.select.Union;
  
 public class ExpressionTree {
 	public Operator generateTree(SelectBody sel){
@@ -24,7 +25,7 @@ public class ExpressionTree {
 		if (fi instanceof Table){
 			table = (Table) fi;
 			String tableName = (table).getWholeTableName();
-			current = new ScanOperator(tableName);	
+			current = new ScanOperator(tableName);			
 		}
 		else if (fi instanceof SubSelect){
 			 
@@ -32,6 +33,7 @@ public class ExpressionTree {
 		else if (fi instanceof SubJoin){
 
 		}
+		
 		List<Join> joins = (List<Join>) select.getJoins();
 		if (joins != null){
 			if (joins.size() > 0){
@@ -42,36 +44,29 @@ public class ExpressionTree {
 					}
 				}
 			}
-		}
-					
+		}		
+		
 		Expression exp = (Expression) select.getWhere();
 		if (exp != null){
 			current = new SelectionOperator(current, exp);
 		}
 		
-		@SuppressWarnings("unchecked")
 		List<SelectItem> selItems = (List<SelectItem>) select.getSelectItems();
-//		if (selItems != null){
-//			if (selItems.size() > 0){
-//				for (SelectItem s : selItems){
-//					if (s instanceof AllColumns){
-//						//do nothing, I guess
-//					}
-//					else if (s instanceof AllTableColumns){
-//						//do something
-//					}
-//					else if (s instanceof SelectExpressionItem){
-//						current = new ExtendedProjection(current, (SelectExpressionItem) s);
-//					}
-//				}
-//			}
-//		}
 		if (selItems != null){
-			if (selItems.size() > 0){				
-						current = new ExtendedProjection(current, selItems);
+			if (selItems.size() > 0){
+				for (SelectItem s : selItems){
+					if (s instanceof AllColumns){
+						//do nothing, I guess
+					}
+					else if (s instanceof AllTableColumns){
+						//do something
+					}
+					else if (s instanceof SelectExpressionItem){
+						current = new ExtendedProjection(current, (SelectExpressionItem) s);
+					}
+				}
 			}
 		}
-		
 		return current;
 	}
 }
