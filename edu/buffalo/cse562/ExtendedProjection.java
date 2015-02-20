@@ -29,8 +29,10 @@ public class ExtendedProjection implements Operator {
 	List<SelectItem> SelectItem_List;
 	private  HashMap<String, ColumnDetail> inputSchema = null;
 	
-	private  HashMap<String, ColumnDetail> outputSchema = new HashMap<String, ColumnDetail>(); // this will be given to SubQueries!	
-	//private List<String> outputColumnExpressions_List = new ArrayList<String>();
+	// this will be given to SubQueries!
+	// the key is (currentColumnWholeName or Expressions or aliases)+"."+index to maintain uniqueness of keys since this operator may contain same column twice in its schema
+	// So splice the last two characters separated by "." in SubQuery to make new wholecolumnName. " R.A.0" -> TableAlias of subquery + "A.0" 
+	private  HashMap<String, ColumnDetail> outputSchema = new HashMap<String, ColumnDetail>(); 	
 	ArrayList<Tuple> inputTuples = null;
 	private ArrayList<Tuple> outputTuples = new ArrayList<Tuple> ();
 	
@@ -39,7 +41,7 @@ public class ExtendedProjection implements Operator {
 		this.SelectItem_List = SelectItem_List;		
 		this .inputSchema = input.getOutputTupleSchema();
 		
-		reset();
+		reset(); 
 	}
 
 	/* (non-Javadoc)
@@ -207,7 +209,7 @@ public class ExtendedProjection implements Operator {
 			}					
 		}		
 	}
-	
+	 
 	public String toString(){
 		return "SELECT " + this.SelectItem_List.toString();
 	}

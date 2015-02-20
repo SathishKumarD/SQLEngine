@@ -52,19 +52,24 @@ public class ExpressionTree {
 		}
 		
 		List<SelectItem> selItems = (List<SelectItem>) select.getSelectItems();
+//		if (selItems != null){
+//			if (selItems.size() > 0){
+//				for (SelectItem s : selItems){
+//					if (s instanceof AllColumns){
+//						//do nothing, I guess
+//					}
+//					else if (s instanceof AllTableColumns){
+//						//do something
+//					}
+//					else if (s instanceof SelectExpressionItem){
+//						current = new ExtendedProjection(current, (SelectExpressionItem) s);
+//					}
+//				}
+//			}
+//		}
 		if (selItems != null){
-			if (selItems.size() > 0){
-				for (SelectItem s : selItems){
-					if (s instanceof AllColumns){
-						//do nothing, I guess
-					}
-					else if (s instanceof AllTableColumns){
-						//do something
-					}
-					else if (s instanceof SelectExpressionItem){
-						current = new ExtendedProjection(current, (SelectExpressionItem) s);
-					}
-				}
+			if (selItems.size() > 0){				
+						current = new ExtendedProjection(current, selItems);
 			}
 		}
 		return current;
