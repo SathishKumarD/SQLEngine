@@ -3,13 +3,17 @@
  */
 package edu.buffalo.cse562;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
-
-import com.sun.corba.se.impl.encoding.OSFCodeSetRegistry.Entry;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.statement.select.AllColumns;
 import net.sf.jsqlparser.statement.select.AllTableColumns;
 import net.sf.jsqlparser.statement.select.SelectExpressionItem;
@@ -24,14 +28,18 @@ public class ExtendedProjection implements Operator {
 	Operator input;
 	List<SelectItem> SelectItem_List;
 	private  HashMap<String, ColumnDetail> inputSchema = null;
-	private ArrayList<Tuple> outputTuples = null;
-	private  HashMap<String, ColumnDetail> outputSchema = null;
+	
+	private  HashMap<String, ColumnDetail> outputSchema = null; // this will be given to SubQueries!	
+	//private List<String> outputColumnExpressions_List = new ArrayList<String>();
+	ArrayList<Tuple> inputTuples = null;
+	private ArrayList<Tuple> outputTuples = new ArrayList<Tuple> ();
 	
 	public ExtendedProjection(Operator input, List<SelectItem> SelectItem_List) {
 		this.input = input;
 		this.SelectItem_List = SelectItem_List;		
 		this .inputSchema = input.getOutputTupleSchema();
-		reset();
+		
+		//reset();
 	}
 
 	/* (non-Javadoc)
@@ -39,9 +47,62 @@ public class ExtendedProjection implements Operator {
 	 */
 	@Override
  	public ArrayList<Tuple> readOneTuple() {
-		// TODO Auto-generated method stub
-		
-		return input.readOneTuple();
+		do{
+			inputTuples = input.readOneTuple(); 
+			outputTuples.removeAll(outputTuples);
+			
+			for(SelectItem selectItem : SelectItem_List)	
+			{
+				if(selectItem instanceof AllColumns)
+				{
+					outputTuples.addAll(inputTuples);
+				}
+				else if(selectItem instanceof AllTableColumns)
+				{
+					Set<Integer> tableColumnIndex = new HashSet();
+					
+					String tableName = ((AllTableColumns) selectItem).getTable().getName();
+					for(Entry<String, ColumnDetail> es : inputSchema.entrySet()){
+						if(es.getKey().contains(tableName))
+						{
+							tableColumnIndex.add(es.getValue().getIndex());
+						}
+						
+						for(Iterator<Integer> itr = tableColumnIndex.iterator(); itr.hasNext(); ){
+							int index = itr.next();
+							outputTuples.add(inputTuples.get(index));
+						}
+					}				
+				}
+				
+				else if(selectItem instanceof SelectExpressionItem)
+				{
+					Expression expr = ((SelectExpressionItem) selectItem).getExpression();
+					
+					if(expr instanceof Function)
+					{				
+						String key = expr.toString();
+						if(inputSchema.containsKey(key))
+						{
+						   int index = inputSchema.get(expr.toString()).getIndex(); //.get(column.getWholeColumnName()).getIndex();
+						   outputTuples.add(inputTuples.get(index));
+						}					   							 
+					}
+					else 
+					{
+						Evaluator evaluator = new Evaluator(inputTuples, inputSchema);					
+						try {
+							outputTuples.add(new Tuple(evaluator.eval(expr)));
+						} catch (SQLException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+				}			
+	
+			}		
+			return outputTuples;
+		} while(inputTuples != null);
 	}
 
 	/* (non-Javadoc)
@@ -55,7 +116,7 @@ public class ExtendedProjection implements Operator {
 		{
 			if(selectItem instanceof AllColumns){
 				// *
-				for(java.util.Map.Entry<String, ColumnDetail> es : inputSchema.entrySet()){
+				for(Entry<String, ColumnDetail> es : inputSchema.entrySet()){
 					String key = es.getKey();
 					if(!outputSchema.containsKey(key)){
 						ColumnDetail colDetail = es.getValue().clone();
@@ -86,25 +147,59 @@ public class ExtendedProjection implements Operator {
 				//<columnName> or <columnName> AS <columnAlias> or <columnA + columnB> [AS <columnAlias>]'expression
 				String aliasName = ((SelectExpressionItem) selectItem).getAlias();
 				
+				//alias name is present!
 				if(aliasName != null  &&  !aliasName.isEmpty()){
 					Expression exp = ((SelectExpressionItem) selectItem).getExpression();
 					String colName = exp.toString();
-					 //TODO remove @shiva
-					if(!outputSchema.containsKey(colName){
+
+					if(!outputSchema.containsKey(colName)){										
+						if(inputSchema.containsKey(colName)){
+						
 						ColumnDetail colDetail = inputSchema.get(colName).clone();
 						colDetail.setIndex(index);						
-						outputSchema.put(colName, colDetail);
+						
+						outputSchema.put(colName, colDetail);						
+						//add additional schema for alias names as well
+						outputSchema.put(aliasName, colDetail);
+						}												
+						else
+						{ //if its a expression... ex: A+B , C*D 
+							// a new column not found in previous schema basically an expression							
+							ColumnDetail colDetail = new ColumnDetail();
+							colDetail.setIndex(index);														
+							
+							outputSchema.put(colName, colDetail);	
+							outputSchema.put(aliasName, colDetail);
+						}
 						
 						index++;
 					}
 				}
-				else{
+				else{//alias name is not present
+					Expression exp = ((SelectExpressionItem) selectItem).getExpression();
+					String colName = exp.toString();
 					
+					if(!outputSchema.containsKey(colName)){																
+						
+						if(inputSchema.containsKey(colName)){
+							ColumnDetail colDetail = inputSchema.get(colName).clone();
+							colDetail.setIndex(index);						
+							outputSchema.put(colName, colDetail);
+						}									
+						else 
+						{ // a new column not found in previous schema basically an expression
+							// //if its a expression... A+B , C*D 
+							ColumnDetail colDetail = new ColumnDetail();
+							colDetail.setIndex(index);														
+							
+							outputSchema.put(colName, colDetail);							
+						}						
+						
+						index++;
+					}					
 				}
 				
-				//((SelectExpressionItem) selectItem).getAlias()
-			}
-						
+			}					
 		}		
 	}
 	
