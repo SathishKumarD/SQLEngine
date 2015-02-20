@@ -50,7 +50,7 @@ public class ScanOperator implements Operator {
 			e.printStackTrace();
 		}
 
-		if(line == null) return null;
+		if(line == null || line.isEmpty()) return null;
 		
 		String col[] = line.split("\\|");	
 		colLength =	col.length;

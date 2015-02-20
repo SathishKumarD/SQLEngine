@@ -29,7 +29,7 @@ public class ExtendedProjection implements Operator {
 	List<SelectItem> SelectItem_List;
 	private  HashMap<String, ColumnDetail> inputSchema = null;
 	
-	private  HashMap<String, ColumnDetail> outputSchema = null; // this will be given to SubQueries!	
+	private  HashMap<String, ColumnDetail> outputSchema = new HashMap<String, ColumnDetail>(); // this will be given to SubQueries!	
 	//private List<String> outputColumnExpressions_List = new ArrayList<String>();
 	ArrayList<Tuple> inputTuples = null;
 	private ArrayList<Tuple> outputTuples = new ArrayList<Tuple> ();
@@ -39,7 +39,7 @@ public class ExtendedProjection implements Operator {
 		this.SelectItem_List = SelectItem_List;		
 		this .inputSchema = input.getOutputTupleSchema();
 		
-		//reset();
+		reset();
 	}
 
 	/* (non-Javadoc)
@@ -49,7 +49,9 @@ public class ExtendedProjection implements Operator {
  	public ArrayList<Tuple> readOneTuple() {
 		do{
 			inputTuples = input.readOneTuple(); 
-			outputTuples.removeAll(outputTuples);
+			if(inputTuples == null) return null;
+			
+			outputTuples.clear();
 			
 			for(SelectItem selectItem : SelectItem_List)	
 			{
@@ -58,7 +60,9 @@ public class ExtendedProjection implements Operator {
 					outputTuples.addAll(inputTuples);
 				}
 				else if(selectItem instanceof AllTableColumns)
-				{
+				{	 // R.*
+					//for a table name R if there exists a column key R.<> pull all the index values in hash set, preventing multiple entries of same columns.
+					// we iterate through the hash set of indexes to all add columns of R to outputTuples
 					Set<Integer> tableColumnIndex = new HashSet();
 					
 					String tableName = ((AllTableColumns) selectItem).getTable().getName();
@@ -67,11 +71,10 @@ public class ExtendedProjection implements Operator {
 						{
 							tableColumnIndex.add(es.getValue().getIndex());
 						}
-						
-						for(Iterator<Integer> itr = tableColumnIndex.iterator(); itr.hasNext(); ){
-							int index = itr.next();
-							outputTuples.add(inputTuples.get(index));
-						}
+					}
+					for(Iterator<Integer> itr = tableColumnIndex.iterator(); itr.hasNext(); ){
+						int index = itr.next();
+						outputTuples.add(inputTuples.get(index));
 					}				
 				}
 				
@@ -117,11 +120,12 @@ public class ExtendedProjection implements Operator {
 			if(selectItem instanceof AllColumns){
 				// *
 				for(Entry<String, ColumnDetail> es : inputSchema.entrySet()){
-					String key = es.getKey();
-					if(!outputSchema.containsKey(key)){
+					String oldkey = es.getKey();
+					String newKey = oldkey+"."+index;
+					if(!outputSchema.containsKey(newKey)){
 						ColumnDetail colDetail = es.getValue().clone();
 						colDetail.setIndex(index);
-						outputSchema.put(key, colDetail);	
+						outputSchema.put(newKey, colDetail);	
 						
 						index++;
 					}
@@ -131,12 +135,13 @@ public class ExtendedProjection implements Operator {
 				//<tableName>.*
 				String tableName = ((AllTableColumns) selectItem).getTable().getName();
 				for(java.util.Map.Entry<String, ColumnDetail> es : inputSchema.entrySet()){
-					String keyStr = es.getKey();
-					if(keyStr.contains(tableName.concat("."))) {
-						if(!outputSchema.containsKey(keyStr)){
-							ColumnDetail colDetail = inputSchema.get(keyStr).clone();
+					String oldKey = es.getKey();
+					if(oldKey.contains(tableName.concat("."))) {
+						String newKey = oldKey+"."+index;
+						if(!outputSchema.containsKey(newKey)){
+							ColumnDetail colDetail = inputSchema.get(oldKey).clone();
 							colDetail.setIndex(index);
-							outputSchema.put(keyStr, es.getValue());
+							outputSchema.put(newKey, es.getValue());
 							
 							index++;
 						}
@@ -151,48 +156,48 @@ public class ExtendedProjection implements Operator {
 				if(aliasName != null  &&  !aliasName.isEmpty()){
 					Expression exp = ((SelectExpressionItem) selectItem).getExpression();
 					String colName = exp.toString();
-
-					if(!outputSchema.containsKey(colName)){										
-						if(inputSchema.containsKey(colName)){
-						
+					String newKey = aliasName+"."+index;
+					
+					if(!outputSchema.containsKey(newKey)){										
+						if(inputSchema.containsKey(colName)){						
 						ColumnDetail colDetail = inputSchema.get(colName).clone();
-						colDetail.setIndex(index);						
-						
-						outputSchema.put(colName, colDetail);						
+						colDetail.setIndex(index);												
+																					//outputSchema.put(colName, colDetail);						
 						//add additional schema for alias names as well
-						outputSchema.put(aliasName, colDetail);
+						outputSchema.put(newKey, colDetail);
 						}												
 						else
-						{ //if its a expression... ex: A+B , C*D 
-							// a new column not found in previous schema basically an expression							
+						{    //if its a expression... ex: A+B , C*D 
+							// a new column not found in previous schema example an arith expression							
 							ColumnDetail colDetail = new ColumnDetail();
-							colDetail.setIndex(index);														
-							
-							outputSchema.put(colName, colDetail);	
-							outputSchema.put(aliasName, colDetail);
+							colDetail.setIndex(index);																					
+																				    //outputSchema.put(colName, colDetail);	
+							outputSchema.put(newKey, colDetail);
 						}
 						
 						index++;
 					}
 				}
-				else{//alias name is not present
+				else{
+					//alias name is not present!
 					Expression exp = ((SelectExpressionItem) selectItem).getExpression();
 					String colName = exp.toString();
+					String newKey = colName+"."+index;
 					
-					if(!outputSchema.containsKey(colName)){																
-						
+					if(!outputSchema.containsKey(newKey)){																						
+						// an existing clumn
 						if(inputSchema.containsKey(colName)){
 							ColumnDetail colDetail = inputSchema.get(colName).clone();
 							colDetail.setIndex(index);						
-							outputSchema.put(colName, colDetail);
+							outputSchema.put(newKey, colDetail);
 						}									
 						else 
-						{ // a new column not found in previous schema basically an expression
+						{ // a new column not found in previous schema example an arith expression
 							// //if its a expression... A+B , C*D 
 							ColumnDetail colDetail = new ColumnDetail();
 							colDetail.setIndex(index);														
 							
-							outputSchema.put(colName, colDetail);							
+							outputSchema.put(newKey, colDetail);							
 						}						
 						
 						index++;
@@ -213,7 +218,6 @@ public class ExtendedProjection implements Operator {
 
 	@Override
 	public HashMap<String, ColumnDetail> getOutputTupleSchema() {
-		// TODO Here input schema gets changed. columns will be removed.
-		return null;
+		return outputSchema;
 	}
 }

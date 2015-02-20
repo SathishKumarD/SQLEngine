@@ -16,9 +16,7 @@ public class ColumnDetail {
 	private ColumnDefinition columnDefinition;
 	private int index;
 	private String columnAliasName;
-	private String tableName;
-	
-	
+	private String tableName;		
 	
 	public int getIndex() {
 		return index;
