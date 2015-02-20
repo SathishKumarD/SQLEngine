@@ -100,7 +100,6 @@ public class Main {
 				ColumnDetail columnDetail = new ColumnDetail();
 				columnDetail.setTableName(tableName);
 				columnDetail.setColumnDefinition(colDef);
-				columnDetail.setIndex(colCount);
 				String columnFullName = tableName + "."+ colDef.getColumnName();
 				columnDetail.setIndex(colCount);
 				tableSchema.put(columnFullName, columnDetail);
