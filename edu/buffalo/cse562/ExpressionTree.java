@@ -28,7 +28,8 @@ public class ExpressionTree {
 			current = new ScanOperator(tableName);			
 		}
 		else if (fi instanceof SubSelect){
-			 
+			ExpressionTree exp = new ExpressionTree();
+			current = exp.generateTree(((SubSelect) fi).getSelectBody());
 		}		
 		else if (fi instanceof SubJoin){
 
