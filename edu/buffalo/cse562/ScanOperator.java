@@ -50,21 +50,21 @@ public class ScanOperator implements Operator {
 			e.printStackTrace();
 		}
 
-		if(line == null) return null;
-
+		if(line == null || line.isEmpty()) return null;
+		
 		String col[] = line.split("\\|");	
 		colLength =	col.length;
 
 		ArrayList<Tuple> tuples = new ArrayList<Tuple>();
 
 		int counter = 0;
-		for(Map.Entry<String, ColumnDetail> colDetail: this.tableSchema.entrySet()){	
+		for(Map.Entry<String, ColumnDetail> colDetail: this.tableSchema.entrySet()){
+
 			@SuppressWarnings("unchecked")
 			String type = colDetail.getValue().getColumnDefinition().getColDataType().toString();
 			tuples.add(new Tuple(type, col[counter]));	
 			counter++;
 		}
-
 		return tuples;
 	}
 
@@ -96,7 +96,6 @@ public class ScanOperator implements Operator {
 
 	@Override
 	public HashMap<String, ColumnDetail> getOutputTupleSchema() {
-
 		return this.tableSchema;
 	}
 }

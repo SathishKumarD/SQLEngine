@@ -16,9 +16,7 @@ public class ColumnDetail {
 	private ColumnDefinition columnDefinition;
 	private int index;
 	private String columnAliasName;
-	private String tableName;
-	
-	
+	private String tableName;		
 	
 	public int getIndex() {
 		return index;
@@ -44,5 +42,17 @@ public class ColumnDetail {
 	}
 	public void setTableName(String tableName) {
 		this.tableName = tableName;
+	}
+	public ColumnDetail clone(){
+		ColumnDetail ret = new ColumnDetail();
+		ret.setIndex(this.index);
+		ret.setColumnAliasName(this.columnAliasName);
+		ret.setColumnDefinition(this.columnDefinition);
+		ret.setTableName(this.tableName);
+		return ret;
+	}
+	
+	public String toString(){
+		return this.getColumnDefinition().toString() + " " + this.getIndex();
 	}
 }

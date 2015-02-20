@@ -33,6 +33,11 @@ public class Tuple {
 		}		
 	}
 	
+	//in extended projection while evaluating expressions, we dont get type
+	public Tuple(LeafValue value){
+		this.val = value;
+	}
+	
 	 @Override 
 	 public String toString()
 	 {
