@@ -15,7 +15,7 @@ import net.sf.jsqlparser.statement.select.SubSelect;
  
 public class ExpressionTree {
 	public Operator generateTree(SelectBody sel){
-		Operator current = null;	
+		Operator current = null;
 		PlainSelect select = (PlainSelect) sel;		
 		current = addScanOperator(current, select);
 		current = addJoinOperator(current, select);
@@ -55,6 +55,7 @@ public class ExpressionTree {
 				current = new ExtendedProjection(current, selItems);
 			}
 		}
+		System.out.println(current);
 		return current;
 	}
 	private Operator addScanOperator(Operator current,PlainSelect select)
@@ -86,6 +87,6 @@ public class ExpressionTree {
 		if (lim != null){
 			return new LimitOperator(current, lim);
 		}
-		return null;
+		return current;
 	}
 }
