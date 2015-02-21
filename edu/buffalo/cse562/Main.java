@@ -105,7 +105,7 @@ public class Main {
 				tableSchema.put(columnFullName, columnDetail);
 				colCount++;
 			}
-			tableMapping.put(tableName,tableSchema);		
+			tableMapping.put(tableName,tableSchema);
 		}
 		
 		/**	 
