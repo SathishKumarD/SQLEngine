@@ -1,18 +1,23 @@
 package edu.buffalo.cse562;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.FromItem;
 import net.sf.jsqlparser.statement.select.Join;
 import net.sf.jsqlparser.statement.select.Limit;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.SelectBody;
+import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SelectItem;
 import net.sf.jsqlparser.statement.select.SubJoin;
 import net.sf.jsqlparser.statement.select.SubSelect;
- 
+import net.sf.jsqlparser.expression.Function;
+
+
 public class ExpressionTree {
 	public Operator generateTree(SelectBody sel){
 		Operator current = null;
@@ -20,11 +25,12 @@ public class ExpressionTree {
 		current = addScanOperator(current, select);
 		current = addJoinOperator(current, select);
 		current = addSelectionOperator(current, select);
+		current = addGroupByOperator(current,select);
 		current = addExtendedProjectionOperator(current, select);
 		current = addLimitOperator(current, select);
 		return current;
 	}
-	
+
 	private Operator addJoinOperator(Operator current,PlainSelect select)
 	{
 		List<Join> joins = (List<Join>) select.getJoins();
@@ -37,7 +43,7 @@ public class ExpressionTree {
 		}
 		return current;
 	}
-	
+
 	private Operator addSelectionOperator(Operator current,PlainSelect select)
 	{
 		Expression exp = (Expression) select.getWhere();
@@ -46,7 +52,7 @@ public class ExpressionTree {
 		}
 		return current;
 	}
-	
+
 	private Operator addExtendedProjectionOperator(Operator current,PlainSelect select)
 	{
 		List<SelectItem> selItems = (List<SelectItem>) select.getSelectItems();
@@ -81,7 +87,7 @@ public class ExpressionTree {
 		}	
 		return current;
 	}
-	
+
 	public Operator addLimitOperator(Operator current, PlainSelect select){
 		Limit lim = (Limit) select.getLimit();		
 		if (lim != null){
@@ -89,10 +95,63 @@ public class ExpressionTree {
 		}
 		return current;
 	}
-	
+
 	private Operator addGroupByOperator(Operator current,PlainSelect select)
 	{
-		List groupByColumns = select.getGroupByColumnReferences();
-		return null;
+
+		List<Column> groupByColumns =  getGroupByColumns(select);
+		List<Function> aggregateFunctions = getFunctionList( select);
+
+		if(groupByColumns!=null ||aggregateFunctions.size() >0 )
+		{
+			current = new GroupByOperator(current, groupByColumns,aggregateFunctions );
+		}
+
+		// if group by has a 'having' condition add a select operator
+		Expression exp = (Expression) select.getHaving();
+		if (exp != null){
+			current = new SelectionOperator(current, exp);
+		}
+		return current;
+	}
+
+	private List<Column> getGroupByColumns(PlainSelect select)
+	{
+		List<Expression> groupByColumnExp = (List<Expression>) select.getGroupByColumnReferences();
+		List<Column> groupByColumns = null;
+		if(groupByColumnExp!=null)
+		{
+			groupByColumns = new ArrayList<Column>();
+
+			for(Expression exp: groupByColumnExp)
+			{
+				if( exp instanceof Column)
+				{
+					groupByColumns.add((Column)exp);
+
+				}
+			}
+		}
+		return groupByColumns;
+	}
+
+
+
+	private List<Function> getFunctionList(PlainSelect select)
+	{
+		List<SelectItem> selItems = (List<SelectItem>) select.getSelectItems();
+		List<Function> functionList = new ArrayList<Function>();
+
+		for(SelectItem selItem:selItems )
+		{
+			if(selItem instanceof SelectExpressionItem)
+			{
+				Expression expr = ((SelectExpressionItem) selItem).getExpression();
+				if(expr instanceof Function)
+				{	
+					functionList.add((Function)expr);
+				}}		
+		}
+		return functionList;
 	}
 }
