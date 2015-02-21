@@ -19,8 +19,7 @@ public class ExpressionTree {
 		current = addScanOperator(current, select);
 		current = addJoinOperator(current, select);
 		current = addSelectionOperator(current, select);
-		current = addExtendedProjectionOperator(current, select);
-		
+		current = addExtendedProjectionOperator(current, select);		
 		return current;
 	}
 	
@@ -59,8 +58,8 @@ public class ExpressionTree {
 	private Operator addScanOperator(Operator current,PlainSelect select)
 	{
 		FromItem fi = select.getFromItem();
-		Table table  = null;
-				if (fi instanceof Table){
+		Table table  = null;		
+		if (fi instanceof Table){
 			table = (Table) fi;
 			String tableName = (table).getWholeTableName();
 			current = new ScanOperator(tableName);			
@@ -69,7 +68,6 @@ public class ExpressionTree {
 			current = generateTree(((SubSelect) fi).getSelectBody());
 		}		
 		else if (fi instanceof SubJoin){
-
 		}
 		return current;
 	}

@@ -83,7 +83,6 @@ public class ExtendedProjection implements Operator {
 				else if(selectItem instanceof SelectExpressionItem)
 				{
 					Expression expr = ((SelectExpressionItem) selectItem).getExpression();
-					
 					if(expr instanceof Function)
 					{				
 						String key = expr.toString();

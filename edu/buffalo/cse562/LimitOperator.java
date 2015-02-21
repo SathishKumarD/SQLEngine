@@ -12,13 +12,23 @@ import java.util.HashMap;
  */
 public class LimitOperator implements Operator {
 
+	private int limit;
+	private int counter;
+	private Operator source;
+
 	/* (non-Javadoc)
 	 * @see edu.buffalo.cse562.Operator#readOneTuple()
 	 */
 	@Override
 	public ArrayList<Tuple> readOneTuple() {
 		// TODO Auto-generated method stub
-		return null;
+		if (counter <= limit){
+			counter++;
+			return this.source.readOneTuple();
+		}
+		else{
+			return null;
+		}
 	}
 	
 
@@ -43,6 +53,12 @@ public class LimitOperator implements Operator {
 	public HashMap<String, ColumnDetail> getOutputTupleSchema() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+	
+	public LimitOperator(Operator input, int limit){
+		this.limit = limit;
+		this.counter = 0;
+		this.source = input;
 	}
 
 }
