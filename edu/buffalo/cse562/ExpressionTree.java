@@ -6,6 +6,7 @@ import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.FromItem;
 import net.sf.jsqlparser.statement.select.Join;
+import net.sf.jsqlparser.statement.select.Limit;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.SelectBody;
 import net.sf.jsqlparser.statement.select.SelectItem;
@@ -19,7 +20,8 @@ public class ExpressionTree {
 		current = addScanOperator(current, select);
 		current = addJoinOperator(current, select);
 		current = addSelectionOperator(current, select);
-		current = addExtendedProjectionOperator(current, select);		
+		current = addExtendedProjectionOperator(current, select);
+		current = addLimitOperator(current, select);
 		return current;
 	}
 	
@@ -77,5 +79,13 @@ public class ExpressionTree {
 			current = new JoinOperator(current, new ScanOperator(((Table) fr).getName()), j.getOnExpression());
 		}	
 		return current;
+	}
+	
+	public Operator addLimitOperator(Operator current, PlainSelect select){
+		Limit lim = (Limit) select.getLimit();		
+		if (lim != null){
+			return new LimitOperator(current, lim);
+		}
+		return null;
 	}
 }

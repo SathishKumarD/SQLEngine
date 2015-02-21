@@ -6,14 +6,16 @@ package edu.buffalo.cse562;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import net.sf.jsqlparser.statement.select.Limit;
+
 /**
  * @author Sathish
  *
  */
 public class LimitOperator implements Operator {
 
-	private int limit;
-	private int counter;
+	private Limit limit;
+	private long counter;
 	private Operator source;
 
 	/* (non-Javadoc)
@@ -22,13 +24,18 @@ public class LimitOperator implements Operator {
 	@Override
 	public ArrayList<Tuple> readOneTuple() {
 		// TODO Auto-generated method stub
-		if (counter <= limit){
+		if (limit.getOffset() > counter) {
+			counter++;
+			return readOneTuple();
+		}		
+		if (limit.isLimitAll()){
+			return this.source.readOneTuple();
+		}
+		else if (counter < limit.getRowCount()){
 			counter++;
 			return this.source.readOneTuple();
 		}
-		else{
-			return null;
-		}
+		return null;
 	}
 	
 
@@ -55,8 +62,8 @@ public class LimitOperator implements Operator {
 		return null;
 	}
 	
-	public LimitOperator(Operator input, int limit){
-		this.limit = limit;
+	public LimitOperator(Operator input, Limit limitObj){
+		this.limit = limitObj;
 		this.counter = 0;
 		this.source = input;
 	}
