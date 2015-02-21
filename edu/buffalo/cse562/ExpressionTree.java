@@ -8,6 +8,7 @@ import net.sf.jsqlparser.statement.select.AllColumns;
 import net.sf.jsqlparser.statement.select.AllTableColumns;
 import net.sf.jsqlparser.statement.select.FromItem;
 import net.sf.jsqlparser.statement.select.Join;
+import net.sf.jsqlparser.statement.select.OrderByElement;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.SelectBody;
 import net.sf.jsqlparser.statement.select.SelectExpressionItem;
@@ -71,6 +72,12 @@ public class ExpressionTree {
 			if (selItems.size() > 0){				
 						current = new ExtendedProjection(current, selItems);
 			}
+		}
+		
+		//List<OrderByElement> orderByElements = List<OrderByElement> select.getOrderByElements();
+		List<String> OrderByElements  = select.getOrderByElements();
+		if(OrderByElements != null && OrderByElements.size() > 0){
+			current = new SortOperator(current, OrderByElements);
 		}
 		return current;
 	}
