@@ -2,11 +2,13 @@
  * 
  */
 package edu.buffalo.cse562;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import net.sf.jsqlparser.expression.BooleanValue;
 import net.sf.jsqlparser.expression.Expression;
 
 /**
@@ -53,25 +55,41 @@ public class JoinOperator implements Operator {
 		}
 
 		int posCount = 0;
+		boolean returnThis = true;
 
-		if (this.expr == null){
-			for (Map.Entry<String, ColumnDetail> mp : left.getOutputTupleSchema().entrySet()){
-				int index = mp.getValue().getIndex();
-				Tuple value = leftTuple.get(index);
-				outputTuple.add(value);
-			    outputSchema.get(mp.getKey()).setIndex(posCount);
-			    posCount += 1;
-			}
+		for (Map.Entry<String, ColumnDetail> mp : left.getOutputTupleSchema().entrySet()){
+			int index = mp.getValue().getIndex();
+			Tuple value = leftTuple.get(index);
+			outputTuple.add(value);
+		    outputSchema.get(mp.getKey()).setIndex(posCount);
+		    posCount += 1;
+		}
 
-			for (Map.Entry<String, ColumnDetail> mp : right.getOutputTupleSchema().entrySet()){
-				int index = mp.getValue().getIndex();
-				Tuple value = rightTuple.get(index);
-				outputTuple.add(value);
-			    outputSchema.get(mp.getKey()).setIndex(posCount);
-			    posCount += 1;
+		for (Map.Entry<String, ColumnDetail> mp : right.getOutputTupleSchema().entrySet()){
+			int index = mp.getValue().getIndex();
+			Tuple value = rightTuple.get(index);
+			outputTuple.add(value);
+		    outputSchema.get(mp.getKey()).setIndex(posCount);
+		    posCount += 1;
+		}
+			
+		if (this.expr != null){
+			Evaluator evaluator = new Evaluator(outputTuple, outputSchema);
+			try {
+				returnThis = ((BooleanValue) evaluator.eval(this.expr)).getValue();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		}
-		return outputTuple;
+		
+		if(returnThis){
+			return outputTuple;
+		}
+		
+		else{
+			return readOneTuple();
+		}
 	}
 
 	/* (non-Javadoc)

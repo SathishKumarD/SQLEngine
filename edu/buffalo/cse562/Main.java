@@ -1,5 +1,7 @@
 package edu.buffalo.cse562;
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.List;
@@ -40,50 +42,46 @@ public class Main {
 		if (args[0].equals("--data")){
 			ConfigManager.setDataDir(args[1]);
 		}
-			
-		for(int i=2; i < args.length; i++){				
-			Path sqlFile = FileSystems.getDefault().getPath(args[i]);		
-			Charset charset = Charset.forName("US-ASCII");				
-			Statement statement;								
-			
-			try (BufferedReader reader = Files.newBufferedReader(sqlFile, charset)){
-				String line = null;
-				while ((line = reader.readLine()) != null){
-					CCJSqlParser parser = new CCJSqlParser(new StringReader(line));
-					ExpressionTree e = new ExpressionTree();
-					try{
-						if((statement = parser.Statement()) != null){
-							if(statement instanceof Select){
-								SelectBody select = ((Select) statement).getSelectBody();
-								if (select instanceof PlainSelect){
-									Operator op = e.generateTree(select);
-									ExecuteQuery(op);
-								}
-								else if (select instanceof Union){
-									Union un = (Union) select;
-									Operator op;
-									UnionOperator uop = new UnionOperator();
-									List<PlainSelect> pselects = (List<PlainSelect>) un.getPlainSelects();
-									for (PlainSelect s : pselects){
-										uop.addOperator(e.generateTree(s));
-									}
-									ExecuteQuery(uop);
-								}								
-							}
-							else if(statement instanceof CreateTable){
-								CreateTable createTableObj = (CreateTable) statement;								
-								prepareTableSchema(createTableObj);
-							}
+		
+		ArrayList<File> queryFiles = new ArrayList<File>();
+		
+		for(int i=2; i < args.length; i++){	
+			queryFiles.add(new File(args[i]));
+		}
+		Statement statement;						
+		
+		for (File f : queryFiles){		
+		try{
+			CCJSqlParser parser = new CCJSqlParser(new FileReader(f));
+			ExpressionTree e = new ExpressionTree();
+			while ((statement = parser.Statement()) != null){
+				System.out.println(statement);
+				if(statement instanceof Select){
+					SelectBody select = ((Select) statement).getSelectBody();
+					if (select instanceof PlainSelect){
+						Operator op = e.generateTree(select);
+						ExecuteQuery(op);
+					}
+					else if (select instanceof Union){
+						Union un = (Union) select;
+						Operator op;
+						UnionOperator uop = new UnionOperator();
+						List<PlainSelect> pselects = (List<PlainSelect>) un.getPlainSelects();
+						for (PlainSelect s : pselects){
+							uop.addOperator(e.generateTree(s));
 						}
-					}
-					catch (Exception ex){
-						System.out.println(ex);
-					}
+						ExecuteQuery(uop);
+					}								
+				}
+				else if(statement instanceof CreateTable){
+					CreateTable createTableObj = (CreateTable) statement;								
+					prepareTableSchema(createTableObj);
 				}
 			}
-			catch (IOException ex){
-				System.out.println("There was an IO error"+ ex.getMessage());
-			}
+		}
+		catch(Exception e){
+			e.printStackTrace();
+		}
 		}
 	}
 /**
