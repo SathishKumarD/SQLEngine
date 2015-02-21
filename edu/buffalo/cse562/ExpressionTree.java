@@ -84,4 +84,10 @@ public class ExpressionTree {
 		}
 		return current;
 	}
+	
+	private Operator addGroupByOperator(Operator current,PlainSelect select)
+	{
+		List groupByColumns = select.getGroupByColumnReferences();
+		return null;
+	}
 }
