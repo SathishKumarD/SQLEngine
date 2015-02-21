@@ -15,10 +15,17 @@ import net.sf.jsqlparser.statement.select.SubSelect;
 public class ExpressionTree {
 	public Operator generateTree(SelectBody sel){
 		Operator current = null;	
-		PlainSelect select = (PlainSelect) sel;
-		FromItem fi = select.getFromItem();		
-		current = buildFroms(fi);
-				
+		PlainSelect select = (PlainSelect) sel;		
+		current = addScanOperator(current, select);
+		current = addJoinOperator(current, select);
+		current = addSelectionOperator(current, select);
+		current = addExtendedProjectionOperator(current, select);
+		
+		return current;
+	}
+	
+	private Operator addJoinOperator(Operator current,PlainSelect select)
+	{
 		List<Join> joins = (List<Join>) select.getJoins();
 		if (joins != null){
 			if (joins.size() > 0){
@@ -26,13 +33,21 @@ public class ExpressionTree {
 					current = buildJoins(current, j);
 				}
 			}
-		}		
-		
+		}
+		return current;
+	}
+	
+	private Operator addSelectionOperator(Operator current,PlainSelect select)
+	{
 		Expression exp = (Expression) select.getWhere();
 		if (exp != null){
 			current = new SelectionOperator(current, exp);
 		}
-		
+		return current;
+	}
+	
+	private Operator addExtendedProjectionOperator(Operator current,PlainSelect select)
+	{
 		List<SelectItem> selItems = (List<SelectItem>) select.getSelectItems();
 		if (selItems != null){
 			if (selItems.size() > 0){				
@@ -41,10 +56,11 @@ public class ExpressionTree {
 		}
 		return current;
 	}
-	public Operator buildFroms(FromItem fi){
+	private Operator addScanOperator(Operator current,PlainSelect select)
+	{
+		FromItem fi = select.getFromItem();
 		Table table  = null;
-		Operator current = null;	
-		if (fi instanceof Table){
+				if (fi instanceof Table){
 			table = (Table) fi;
 			String tableName = (table).getWholeTableName();
 			current = new ScanOperator(tableName);			
@@ -53,9 +69,7 @@ public class ExpressionTree {
 			current = generateTree(((SubSelect) fi).getSelectBody());
 		}		
 		else if (fi instanceof SubJoin){
-			SubJoin sj = (SubJoin) fi;
-			System.out.println(sj);	
-//			current = buildJoins(buildFroms(sj.getLeft()), sj.getJoin());
+
 		}
 		return current;
 	}
