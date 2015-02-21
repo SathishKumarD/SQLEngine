@@ -20,20 +20,17 @@ public class ExpressionTree {
 	public Operator generateTree(SelectBody sel){
 		Operator current = null;	
 		PlainSelect select = (PlainSelect) sel;
-		FromItem fi = select.getFromItem();
-		Table table  = null;
-		if (fi instanceof Table){
-			table = (Table) fi;
-			String tableName = (table).getWholeTableName();
-			current = new ScanOperator(tableName);			
-		}
-		else if (fi instanceof SubSelect){
-			 
-		}		
-		else if (fi instanceof SubJoin){
-
-		}
 		
+		current = addScanOperator(current, select);
+		current = addJoinOperator(current, select);
+		current = addSelectionOperator(current, select);
+		current = addExtendedProjectionOperator(current, select);
+		
+		return current;
+	}
+	
+	private Operator addJoinOperator(Operator current,PlainSelect select)
+	{
 		List<Join> joins = (List<Join>) select.getJoins();
 		if (joins != null){
 			if (joins.size() > 0){
@@ -44,33 +41,46 @@ public class ExpressionTree {
 					}
 				}
 			}
-		}		
-		
+		}
+		return current;
+	}
+	
+	private Operator addSelectionOperator(Operator current,PlainSelect select)
+	{
 		Expression exp = (Expression) select.getWhere();
 		if (exp != null){
 			current = new SelectionOperator(current, exp);
 		}
-		
+		return current;
+	}
+	
+	private Operator addExtendedProjectionOperator(Operator current,PlainSelect select)
+	{
 		List<SelectItem> selItems = (List<SelectItem>) select.getSelectItems();
-//		if (selItems != null){
-//			if (selItems.size() > 0){
-//				for (SelectItem s : selItems){
-//					if (s instanceof AllColumns){
-//						//do nothing, I guess
-//					}
-//					else if (s instanceof AllTableColumns){
-//						//do something
-//					}
-//					else if (s instanceof SelectExpressionItem){
-//						current = new ExtendedProjection(current, (SelectExpressionItem) s);
-//					}
-//				}
-//			}
-//		}
+
 		if (selItems != null){
 			if (selItems.size() > 0){				
 						current = new ExtendedProjection(current, selItems);
 			}
+		}
+		return current;
+	}
+	
+	private Operator addScanOperator(Operator current,PlainSelect select)
+	{
+		FromItem fi = select.getFromItem();
+		Table table  = null;
+		
+		if (fi instanceof Table){
+			table = (Table) fi;
+			String tableName = (table).getWholeTableName();
+			current = new ScanOperator(tableName);			
+		}
+		else if (fi instanceof SubSelect){
+			 
+		}		
+		else if (fi instanceof SubJoin){
+
 		}
 		return current;
 	}
