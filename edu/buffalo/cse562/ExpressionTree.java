@@ -54,17 +54,12 @@ public class ExpressionTree {
 		}
 		
 		
-		List<OrderByElement> OrderByElements  = (List<OrderByElement>)select.getOrderByElements();
-		List<String> orderByElemList_Str = new ArrayList<String>();
-		for( OrderByElement orderByElem : OrderByElements)
-			orderByElemList_Str.add(orderByElem.getExpression().toString());
-		
+		List<OrderByElement> OrderByElements  = (List<OrderByElement>)select.getOrderByElements();		
 		if(OrderByElements != null && OrderByElements.size() > 0){
-			current = new SortOperator(current, orderByElemList_Str);
+			current = new SortOperator(current, OrderByElements);
 		}
 		
 		List<SelectItem> selItems = (List<SelectItem>) select.getSelectItems();
-
 		if (selItems != null){
 			if (selItems.size() > 0){				
 						current = new ExtendedProjection(current, selItems);
