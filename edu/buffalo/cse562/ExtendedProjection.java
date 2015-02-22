@@ -104,7 +104,9 @@ public class ExtendedProjection implements Operator {
 					}
 				}			
 	
-			}		
+			}	
+			
+			Util.printTuple(outputTuples);
 			return outputTuples;
 		} while(inputTuples != null);
 	}
@@ -122,11 +124,11 @@ public class ExtendedProjection implements Operator {
 				// *
 				for(Entry<String, ColumnDetail> es : inputSchema.entrySet()){
 					String oldkey = es.getKey();
-					String newKey = oldkey+"."+index;
-					if(!outputSchema.containsKey(newKey)){
+
+					if(!outputSchema.containsKey(oldkey)){
 						ColumnDetail colDetail = es.getValue().clone();
 						colDetail.setIndex(index);
-						outputSchema.put(newKey, colDetail);	
+						outputSchema.put(oldkey, colDetail);	
 						
 						index++;
 					}
@@ -135,14 +137,14 @@ public class ExtendedProjection implements Operator {
 			else if (selectItem instanceof AllTableColumns) {
 				//<tableName>.*
 				String tableName = ((AllTableColumns) selectItem).getTable().getName();
+				
 				for(java.util.Map.Entry<String, ColumnDetail> es : inputSchema.entrySet()){
 					String oldKey = es.getKey();
 					if(oldKey.contains(tableName.concat("."))) {
-						String newKey = oldKey+"."+index;
-						if(!outputSchema.containsKey(newKey)){
+						if(!outputSchema.containsKey(oldKey)){
 							ColumnDetail colDetail = inputSchema.get(oldKey).clone();
 							colDetail.setIndex(index);
-							outputSchema.put(newKey, es.getValue());
+							outputSchema.put(oldKey, es.getValue());
 							
 							index++;
 						}
@@ -157,22 +159,24 @@ public class ExtendedProjection implements Operator {
 				if(aliasName != null  &&  !aliasName.isEmpty()){
 					Expression exp = ((SelectExpressionItem) selectItem).getExpression();
 					String colName = exp.toString();
-					String newKey = aliasName+"."+index;
-					
+					String newKey = aliasName;
+
+					//R AS RAM,R+A AS RAM the new schema we 'll ve (RAM : ColDetail.IndexNum) if alias is present else {RAM : IndexNum}
 					if(!outputSchema.containsKey(newKey)){										
-						if(inputSchema.containsKey(colName)){						
-						ColumnDetail colDetail = inputSchema.get(colName).clone();
-						colDetail.setIndex(index);												
-																					//outputSchema.put(colName, colDetail);						
-						//add additional schema for alias names as well
-						outputSchema.put(newKey, colDetail);
+						if(inputSchema.containsKey(colName))
+						{						
+							ColumnDetail colDetail = inputSchema.get(colName).clone();
+							colDetail.setIndex(index);												
+																											
+							//add additional schema for alias names as well
+							outputSchema.put(newKey, colDetail);
 						}												
-						else
+					else
 						{    //if its a expression... ex: A+B , C*D 
 							// a new column not found in previous schema example an arith expression							
 							ColumnDetail colDetail = new ColumnDetail();
 							colDetail.setIndex(index);																					
-																				    //outputSchema.put(colName, colDetail);	
+																				
 							outputSchema.put(newKey, colDetail);
 						}
 						
@@ -183,14 +187,13 @@ public class ExtendedProjection implements Operator {
 					//alias name is not present!
 					Expression exp = ((SelectExpressionItem) selectItem).getExpression();
 					String colName = exp.toString();
-					String newKey = colName+"."+index;
 					
-					if(!outputSchema.containsKey(newKey)){																						
-						// an existing clumn
+					if(!outputSchema.containsKey(colName)){																						
+						// an existing column
 						if(inputSchema.containsKey(colName)){
 							ColumnDetail colDetail = inputSchema.get(colName).clone();
 							colDetail.setIndex(index);						
-							outputSchema.put(newKey, colDetail);
+							outputSchema.put(colName, colDetail);
 						}									
 						else 
 						{ // a new column not found in previous schema example an arith expression
@@ -198,7 +201,7 @@ public class ExtendedProjection implements Operator {
 							ColumnDetail colDetail = new ColumnDetail();
 							colDetail.setIndex(index);														
 							
-							outputSchema.put(newKey, colDetail);							
+							outputSchema.put(colName, colDetail);							
 						}						
 						
 						index++;

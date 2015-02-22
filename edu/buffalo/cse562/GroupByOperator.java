@@ -189,6 +189,7 @@ public class GroupByOperator implements Operator {
 			}
 			Tuple sumDatum = existingTuple.get(funcIndex);
 			sumDatum = sumDatum.add(tup);
+			
 			// System.out.println("AVG "+funcIndex+" " +sumDatum.toString() + " "+existingTuple.get(funcIndex) + " "+  outputData.get(hashKey).getOutputData().get(funcIndex) );
 		}
 
@@ -287,7 +288,6 @@ public class GroupByOperator implements Operator {
 				outputSchema.put(agf.getAliasName(), colDet.clone());
 			}
 			
-			
 			index++;
 		}
 		
@@ -300,8 +300,6 @@ public class GroupByOperator implements Operator {
 
 		//colDet.setColumnDefinition(coldef.setColDataType(););
 		ColumnDetail colDet = null;
-		
-		
 		
 		for( Object expObj: func.getParameters().getExpressions())
 		{

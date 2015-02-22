@@ -80,6 +80,7 @@ public class Tuple implements Comparable<Tuple> {
 		{
 			long longVal =  ((LongValue)this.val).getValue() + ((LongValue)tup.getValue()).getValue();
 			((LongValue) val).setValue(longVal);
+			
 		}
 
 		if(this.val instanceof DoubleValue)
