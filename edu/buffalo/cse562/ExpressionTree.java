@@ -80,7 +80,7 @@ public class ExpressionTree {
 		if (fi instanceof Table){
 			table = (Table) fi;
 			String tableName = (table).getWholeTableName();
-			current = new ScanOperator(tableName);			
+			current = new ScanOperator(table);			
 		}
 		else if (fi instanceof SubSelect){
 			current = generateTree(((SubSelect) fi).getSelectBody());
