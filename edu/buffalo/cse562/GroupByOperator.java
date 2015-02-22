@@ -303,7 +303,7 @@ public class GroupByOperator implements Operator {
 
 		ArrayList<Tuple> groupByColArrayList = new ArrayList<>();
 		if(columns==null)
-			return groupByColArrayList;
+			return groupByColArrayList; 
 		
 		for(Column col: columns)
 		{
