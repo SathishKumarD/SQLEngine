@@ -34,6 +34,7 @@ public class ScanOperator implements Operator {
 		this.tableName = table.getName();
 		this.tableAlias = table.getAlias();		
 		this.operatorTableSchema = initialiseOperatorTableSchema(Main.tableMapping.get(this.tableName));
+		System.err.println("Table " + this.tableName + " - " + Main.tableMapping.get(this.tableName));
 		this.dataFile = FileSystems.getDefault().getPath(ConfigManager.getDataDir(), tableName.toLowerCase() +".dat");		
 		this.indexMaps = Main.indexTypeMaps.get(this.tableName);
 		
