@@ -12,6 +12,7 @@ import java.util.Map;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.statement.select.AllColumns;
 
 /**
  * @author Sathish
@@ -299,6 +300,9 @@ public class GroupByOperator implements Operator {
 
 		//colDet.setColumnDefinition(coldef.setColDataType(););
 		ColumnDetail colDet = null;
+		
+		
+		
 		for( Object expObj: func.getParameters().getExpressions())
 		{
 			if(expObj instanceof Column)
