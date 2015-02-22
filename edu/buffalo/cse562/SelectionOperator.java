@@ -23,7 +23,6 @@ public class SelectionOperator implements Operator {
 	
 	Operator input;
 	Expression exp;
-	Column[] schema;
 	private  HashMap<String, ColumnDetail> inputSchema = null;
 	
 	public SelectionOperator(Operator input, Expression exp){
@@ -59,11 +58,13 @@ public class SelectionOperator implements Operator {
 				
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
+				System.out.println("exp has thrwn exp"+exp.toString());
 				e.printStackTrace();
 			}
-			
-			
-			
+			catch (Exception ex)
+			{
+				System.out.println("exp has thrwn exp  "+exp.toString());
+			}
 		}while(!result);
 		
 		return tuple;
