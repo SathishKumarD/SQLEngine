@@ -2,17 +2,13 @@
 package edu.buffalo.cse562;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 
 import net.sf.jsqlparser.schema.Table;
@@ -105,7 +101,7 @@ public class ScanOperator implements Operator {
 		{
 			String nameKey = es.getKey();
 			
-			if(tableAlias != null && !tableAlias.isEmpty()) 
+			if(tableAlias != null) 
 			{
 				if(nameKey.contains("."))
 				{
