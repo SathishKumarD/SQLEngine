@@ -1,5 +1,6 @@
 package edu.buffalo.cse562;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import net.sf.jsqlparser.expression.Expression;
@@ -52,33 +53,30 @@ public class ExpressionTree {
 			current = new SelectionOperator(current, exp);
 		}
 		
+		
+		List<OrderByElement> OrderByElements  = (List<OrderByElement>)select.getOrderByElements();
+		List<String> orderByElemList_Str = new ArrayList<String>();
+		for( OrderByElement orderByElem : OrderByElements)
+			orderByElemList_Str.add(orderByElem.getExpression().toString());
+		
+		if(OrderByElements != null && OrderByElements.size() > 0){
+			current = new SortOperator(current, orderByElemList_Str);
+		}
+		
 		List<SelectItem> selItems = (List<SelectItem>) select.getSelectItems();
-//		if (selItems != null){
-//			if (selItems.size() > 0){
-//				for (SelectItem s : selItems){
-//					if (s instanceof AllColumns){
-//						//do nothing, I guess
-//					}
-//					else if (s instanceof AllTableColumns){
-//						//do something
-//					}
-//					else if (s instanceof SelectExpressionItem){
-//						current = new ExtendedProjection(current, (SelectExpressionItem) s);
-//					}
-//				}
-//			}
-//		}
+
 		if (selItems != null){
 			if (selItems.size() > 0){				
 						current = new ExtendedProjection(current, selItems);
 			}
 		}
 		
-		//List<OrderByElement> orderByElements = List<OrderByElement> select.getOrderByElements();
-		List<String> OrderByElements  = select.getOrderByElements();
-		if(OrderByElements != null && OrderByElements.size() > 0){
-			current = new SortOperator(current, OrderByElements);
-		}
+//		List<OrderByElement> orderByElements = (List<OrderByElement>) select.getOrderByElements(); //TODO
+//		if(orderByElements != null && orderByElements.size() > 0){
+//			current = new SortOperator(current, OrderByElements);
+//		}
+		
+
 		return current;
 	}
 }

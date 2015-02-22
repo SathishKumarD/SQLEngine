@@ -54,8 +54,7 @@ public class Tuple implements Comparable<Tuple> {
 	{
 		try 
 		{
-			if(this.val.equals(nxtTuple.val))
-			{  // Only 4 Known types! in Project 1
+			  // Only 4 Known types! in Project 1
 				if(this.val instanceof StringValue)
 				{			
 					return (this.val.toString()).compareTo(nxtTuple.val.toString());
@@ -78,7 +77,6 @@ public class Tuple implements Comparable<Tuple> {
 	
 						 return dateCurr.compareTo(dateNxt);				 			
 				}			
-			}
 		}
 		catch(ParseException | InvalidLeaf e)
 		{
