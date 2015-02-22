@@ -22,6 +22,18 @@ public class Util {
 		}
 		
 	}
+	
+	public static String getSchemaAsString(HashMap<String, ColumnDetail> inputSchema)
+	{
+		StringBuilder str = new StringBuilder();
+		for(Map.Entry<String, ColumnDetail> colDetail: inputSchema.entrySet()){
+			
+			str.append(colDetail.getKey()) ;
+			str.append("|");
+		}
+		
+		return str.toString();
+	}
 	static void printTuple(ArrayList<Tuple> singleTuple) {
 		for(int i=0; i < singleTuple.size();i++){
 			

@@ -329,9 +329,15 @@ public class GroupByOperator implements Operator {
 			}
 			catch(Exception ex)
 			{
-				System.out.println(index + col.getWholeColumnName() );
+				
+				String errorMesage = Util.getSchemaAsString(inputSchema) + "\r\n col: " +col.getWholeColumnName() ; 
 				ex.printStackTrace();
-				throw ex;
+				try {
+					throw new MyException(errorMesage);
+				} catch (MyException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 			groupByColArrayList.add(tuple.get(index));
 		}
