@@ -11,9 +11,7 @@ import java.util.Map;
 
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
-import net.sf.jsqlparser.expression.LeafValue;
 import net.sf.jsqlparser.schema.Column;
-import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 
 /**
  * @author Sathish
@@ -416,7 +414,4 @@ public class GroupByOperator implements Operator {
 
 		}
 	}
-
-
-
 }

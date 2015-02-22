@@ -71,7 +71,6 @@ public class ExpressionTree {
 				current = new ExtendedProjection(current, selItems);
 			}
 		}
-		//System.out.println(current);
 		return current;
 	}
 	private Operator addScanOperator(Operator current,PlainSelect select)

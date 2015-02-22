@@ -9,7 +9,6 @@ import java.util.HashMap;
 
 import net.sf.jsqlparser.expression.BooleanValue;
 import net.sf.jsqlparser.expression.Expression;
-import net.sf.jsqlparser.schema.Column;
 
 /**
  * @author Sathish

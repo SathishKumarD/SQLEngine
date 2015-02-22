@@ -1,22 +1,12 @@
 package edu.buffalo.cse562;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.io.IOException;
-import java.io.StringReader;
 import java.util.List;
-import java.util.Map;
-
 import net.sf.jsqlparser.parser.CCJSqlParser;
-import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
 import net.sf.jsqlparser.statement.select.Select;
 
-import java.nio.charset.Charset;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.HashMap;
 
 import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
