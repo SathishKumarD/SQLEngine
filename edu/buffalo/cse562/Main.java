@@ -48,6 +48,7 @@ public class Main {
 				if(statement instanceof Select){
 					SelectBody select = ((Select) statement).getSelectBody();
 					if (select instanceof PlainSelect){
+						System.err.println(select);
 						Operator op = e.generateTree(select);
 						ExecuteQuery(op);
 					}
