@@ -331,13 +331,7 @@ public class GroupByOperator implements Operator {
 			{
 				
 				String errorMesage = Util.getSchemaAsString(inputSchema) + "\r\n col: " +col.getWholeColumnName() ; 
-				ex.printStackTrace();
-				try {
-					throw new MyException(errorMesage);
-				} catch (MyException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				System.out.println(errorMesage);
 			}
 			groupByColArrayList.add(tuple.get(index));
 		}
