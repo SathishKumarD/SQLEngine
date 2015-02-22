@@ -24,9 +24,8 @@ public class ScanOperator implements Operator {
 	private BufferedReader buffer;
 	private Path dataFile;
 	private String tableName = "";
-	private  HashMap<String, ColumnDetail> tableSchema = null;	
-	private HashMap<Integer,String> indexMaps = null;
-	
+	private  HashMap<String, ColumnDetail> tableSchema = null;
+	private HashMap<Integer, String> indexMaps = null;
 	/* (non-Javadoc)
 	 * @see edu.buffalo.cse562.Operator#readOneTuple()
 	 */	
@@ -34,7 +33,7 @@ public class ScanOperator implements Operator {
 		//this.tableSource = new File (tableName);	
 		this.tableName = tableName;
 		this.dataFile = FileSystems.getDefault().getPath(ConfigManager.getDataDir(), tableName.toLowerCase() +".dat");
-		this.tableSchema = Main.tableMapping.get(this.tableName);		
+		this.tableSchema = Main.tableMapping.get(this.tableName);
 		this.indexMaps = Main.indexTypeMaps.get(this.tableName);
 		reset();
 	}
@@ -53,19 +52,17 @@ public class ScanOperator implements Operator {
 		}
 
 		if(line == null || line.isEmpty()) return null;
-		
+
 		String col[] = line.split("\\|");	
 		colLength =	col.length;
 
 		ArrayList<Tuple> tuples = new ArrayList<Tuple>();
-
-		;
 		for(int counter = 0;counter < col.length;counter++)
-		if(indexMaps.containsKey(counter)){		
-			@SuppressWarnings("unchecked")
-			String type = indexMaps.get(counter);			
-			tuples.add(new Tuple(type, col[counter]));	
-		}
+			if(indexMaps.containsKey(counter)){		
+				@SuppressWarnings("unchecked")
+				String type = indexMaps.get(counter);			
+				tuples.add(new Tuple(type, col[counter]));	
+			}
 		return tuples;
 	}
 

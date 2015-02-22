@@ -2,10 +2,12 @@ package edu.buffalo.cse562;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 public class UnionOperator implements Operator {
 	List<Operator> operators;
+	HashSet<String> tuplesSeen;
 	
 	@Override
 	public ArrayList<Tuple> readOneTuple() {
@@ -13,7 +15,13 @@ public class UnionOperator implements Operator {
 		for (Operator op : operators){
 			ArrayList<Tuple> res = op.readOneTuple();
 			if (res != null){
-				return res;
+				if(tuplesSeen.contains(res.toString())){
+					return readOneTuple();
+				}
+				else{
+					tuplesSeen.add(res.toString());
+					return res;
+				}
 			}
 		}
 		return null;
@@ -22,6 +30,7 @@ public class UnionOperator implements Operator {
 	@Override
 	public void reset() {
 		// TODO Auto-generated method stub
+		this.tuplesSeen = new HashSet<String>();
 	}
 
 	@Override
@@ -38,6 +47,7 @@ public class UnionOperator implements Operator {
 	
 	public UnionOperator(){
 		this.operators = new ArrayList<Operator>();
+		this.tuplesSeen = new HashSet<String>();
 	}
 	
 	public void addOperator(Operator op) {
