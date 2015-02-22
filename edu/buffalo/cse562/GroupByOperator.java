@@ -232,11 +232,15 @@ public class GroupByOperator implements Operator {
 			ArrayList<Tuple> existingTuple = outputData.get(hashKey).getOutputData();
 			if(funcIndex ==existingTuple.size() )
 			{
+				
 				existingTuple.add(tup);
 			}
 			Tuple datum = existingTuple.get(funcIndex);
 			datum = (tup.isGreaterThan(datum))?tup:datum;
 			existingTuple.get(funcIndex).Update(datum);
+			
+			//Util.printTuple(existingTuple);
+			//Util.printTuple(outputData.get(hashKey).getOutputData());
 		}
 
 	}
@@ -271,7 +275,7 @@ public class GroupByOperator implements Operator {
 		for(AgrregateFunctionColumn agf :this.aggregateFunctions)
 		{
 			
-			String key = agf.toString();
+			String key = agf.getFunction().toString();
 			ColumnDetail colDet = getColumnDetailForFunction(agf.getFunction());
 			colDet.setIndex(index);
 			outputSchema.put(key, colDet);
@@ -279,7 +283,7 @@ public class GroupByOperator implements Operator {
 			if(agf.getAliasName()!=null && !agf.getAliasName().equalsIgnoreCase(""))
 			{
 				
-				outputSchema.put(agf.getAliasName(), colDet);
+				outputSchema.put(agf.getAliasName(), colDet.clone());
 			}
 			
 			

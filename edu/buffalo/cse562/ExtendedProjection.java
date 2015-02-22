@@ -40,7 +40,7 @@ public class ExtendedProjection implements Operator {
 		this.input = input;
 		this.SelectItem_List = SelectItem_List;		
 		this .inputSchema = input.getOutputTupleSchema();
-		
+		//Util.printSchema(inputSchema);
 		reset(); 
 	}
 
