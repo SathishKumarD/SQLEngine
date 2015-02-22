@@ -24,14 +24,14 @@ public class GroupByOperator implements Operator {
 	private ArrayList<ArrayList<Tuple>> outputDataList =null;
 	private Operator input;
 	private List<Column> groupByColumns;
-	private List<Function> aggregateFunctions;
+	private List<AgrregateFunctionColumn> aggregateFunctions;
 
 	private HashMap<String, GroupByOutput> outputData;
 	private boolean isGroupByComputed;
 	private int rowIndex;
 
 	public GroupByOperator(Operator input, List<Column> groupByColumns,
-			List<Function> aggregateFunctions) {
+			List<AgrregateFunctionColumn> aggregateFunctions) {
 		this.input = input;
 		this.inputSchema = input.getOutputTupleSchema();
 		this.groupByColumns = groupByColumns;
@@ -93,8 +93,9 @@ public class GroupByOperator implements Operator {
 
 				int funcIndex = inputtuple.size();
 				// System.out.println(funcIndex);
-				for(Function func:this.aggregateFunctions)
+				for(AgrregateFunctionColumn funcCol:this.aggregateFunctions)
 				{
+					Function func = funcCol.getFunction();
 					Expression exp = (Expression)func.getParameters().getExpressions().get(0);
 					Tuple tup= evaluateExpression( evaluator, exp);
 					handleAggregateFunctions(func,inputtuple,hashKey,funcIndex,tup);
@@ -267,12 +268,21 @@ public class GroupByOperator implements Operator {
 
 		copyInputSchemaToOutputSchema();
 		int index =inputSchema.keySet().size();
-		for(Function agf :this.aggregateFunctions)
+		for(AgrregateFunctionColumn agf :this.aggregateFunctions)
 		{
+			
 			String key = agf.toString();
-			ColumnDetail colDet = getColumnDetailForFunction(agf);
+			ColumnDetail colDet = getColumnDetailForFunction(agf.getFunction());
 			colDet.setIndex(index);
 			outputSchema.put(key, colDet);
+			
+			if(agf.getAliasName()!=null && !agf.getAliasName().equalsIgnoreCase(""))
+			{
+				
+				outputSchema.put(agf.getAliasName(), colDet);
+			}
+			
+			
 			index++;
 		}
 		
@@ -303,7 +313,7 @@ public class GroupByOperator implements Operator {
 
 		ArrayList<Tuple> groupByColArrayList = new ArrayList<>();
 		
-		if(columns==null)
+		if(columns==null||columns.size() ==0 )
 			return groupByColArrayList; 
 		
 		for(Column col: columns)
