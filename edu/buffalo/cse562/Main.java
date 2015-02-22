@@ -29,9 +29,8 @@ import java.util.ArrayList;
 
 public class Main {
 	
-	// static HashMap<String, ArrayList<HashMap<?,?>>> tableMappings = new HashMap<String, ArrayList<HashMap<?,?>>>();
 	   static HashMap<String, HashMap<String, ColumnDetail>> tableMapping = new HashMap<String, HashMap<String, ColumnDetail>>();
-	 
+	   static HashMap<String,HashMap<Integer, String>> indexTypeMaps = new HashMap<String, HashMap<Integer, String>>();
 	public static void main(String[] args) {		
 		//the sql file starts from 3rd argument
 		if(args.length < 3){
@@ -95,6 +94,7 @@ public class Main {
 			String tableName = createTableObj.getTable().getWholeTableName();
 			List<ColumnDefinition> cds = (List<ColumnDefinition>) createTableObj.getColumnDefinitions();
 			HashMap<String, ColumnDetail> tableSchema = new HashMap<String, ColumnDetail>();
+			HashMap<Integer, String> typeInfo = new HashMap<Integer, String>();
 			int colCount = 0;
 			for(ColumnDefinition colDef : cds){
 				ColumnDetail columnDetail = new ColumnDetail();
@@ -102,10 +102,12 @@ public class Main {
 				columnDetail.setColumnDefinition(colDef);
 				String columnFullName = tableName + "."+ colDef.getColumnName();
 				columnDetail.setIndex(colCount);
+				typeInfo.put(colCount, colDef.getColDataType().toString());
 				tableSchema.put(columnFullName, columnDetail);
 				colCount++;
 			}
 			tableMapping.put(tableName,tableSchema);
+			indexTypeMaps.put(tableName,typeInfo);
 		}
 		
 		/**	 

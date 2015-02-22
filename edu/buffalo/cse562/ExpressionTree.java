@@ -103,6 +103,7 @@ public class ExpressionTree {
 
 		if(groupByColumns!=null ||aggregateFunctions.size() >0 )
 		{
+			// System.out.println("groupby cols not null"+ groupByColumns.size());
 			current = new GroupByOperator(current, groupByColumns,aggregateFunctions );
 		}
 
@@ -124,8 +125,10 @@ public class ExpressionTree {
 
 			for(Expression exp: groupByColumnExp)
 			{
+			
 				if( exp instanceof Column)
 				{
+					
 					groupByColumns.add((Column)exp);
 
 				}
