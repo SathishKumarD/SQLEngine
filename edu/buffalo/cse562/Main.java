@@ -50,7 +50,6 @@ public class Main {
 					if (select instanceof PlainSelect){
 						System.err.println(select);
 						Operator op = e.generateTree(select);
-						System.err.println(statement);
 						ExecuteQuery(op);
 					}
 					else if (select instanceof Union){
