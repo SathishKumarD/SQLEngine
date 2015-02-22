@@ -57,12 +57,13 @@ public class ScanOperator implements Operator {
 		colLength =	col.length;
 
 		ArrayList<Tuple> tuples = new ArrayList<Tuple>();
-		for(int counter = 0;counter < col.length;counter++)
+		for(int counter = 0;counter < col.length;counter++) {
 			if(indexMaps.containsKey(counter)){		
 				@SuppressWarnings("unchecked")
 				String type = indexMaps.get(counter);			
 				tuples.add(new Tuple(type, col[counter]));	
 			}
+		}
 		return tuples;
 	}
 
