@@ -1,22 +1,12 @@
 package edu.buffalo.cse562;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.io.IOException;
-import java.io.StringReader;
 import java.util.List;
-import java.util.Map;
-
 import net.sf.jsqlparser.parser.CCJSqlParser;
-import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
 import net.sf.jsqlparser.statement.select.Select;
 
-import java.nio.charset.Charset;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.HashMap;
 
 import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
@@ -54,7 +44,7 @@ public class Main {
 			CCJSqlParser parser = new CCJSqlParser(new FileReader(f));
 			ExpressionTree e = new ExpressionTree();
 			while ((statement = parser.Statement()) != null){
-				System.out.println(statement);
+				// System.out.println(statement);
 				if(statement instanceof Select){
 					SelectBody select = ((Select) statement).getSelectBody();
 					if (select instanceof PlainSelect){
@@ -120,7 +110,18 @@ public class Main {
 		
 		static void printTuple(ArrayList<Tuple> singleTuple) {
 			for(int i=0; i < singleTuple.size();i++){
-				System.out.print(singleTuple.get(i).toString());
+				
+				try
+				{
+				String str = (singleTuple.get(i)==null)?"":singleTuple.get(i).toString();
+				System.out.print(str);
+				}
+				catch(Exception ex)
+				{
+					ex.printStackTrace();
+					System.out.println(singleTuple.get(i));
+				}
+				
 				if(i != singleTuple.size() - 1) System.out.print("|");
 			}
 			System.out.println();

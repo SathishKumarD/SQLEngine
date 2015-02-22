@@ -9,7 +9,6 @@ import java.util.HashMap;
 
 import net.sf.jsqlparser.expression.BooleanValue;
 import net.sf.jsqlparser.expression.Expression;
-import net.sf.jsqlparser.schema.Column;
 
 /**
  * @author Sathish
@@ -64,6 +63,8 @@ public class SelectionOperator implements Operator {
 			catch (Exception ex)
 			{
 				System.out.println("exp has thrwn exp  "+exp.toString());
+				ex.printStackTrace();
+				throw ex;
 			}
 		}while(!result);
 		

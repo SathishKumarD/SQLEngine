@@ -9,6 +9,7 @@ import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.FromItem;
 import net.sf.jsqlparser.statement.select.Join;
 import net.sf.jsqlparser.statement.select.Limit;
+import net.sf.jsqlparser.statement.select.OrderByElement;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.SelectBody;
 import net.sf.jsqlparser.statement.select.SelectExpressionItem;
@@ -25,12 +26,21 @@ public class ExpressionTree {
 		current = addScanOperator(current, select);
 		current = addJoinOperator(current, select);
 		current = addSelectionOperator(current, select);
-		current = addGroupByOperator(current,select);
+		current = addGroupByOperator(current,select);		
+		current = addSortOperator(current, select);
 		current = addExtendedProjectionOperator(current, select);
 		current = addLimitOperator(current, select);
 		return current;
 	}
 
+	private Operator addSortOperator(Operator current, PlainSelect select){
+		List<OrderByElement> OrderByElements  = (List<OrderByElement>)select.getOrderByElements();		
+		if(OrderByElements != null && OrderByElements.size() > 0){
+			current = new SortOperator(current, OrderByElements);
+		}
+		
+		return current;
+	}
 	private Operator addJoinOperator(Operator current,PlainSelect select)
 	{
 		List<Join> joins = (List<Join>) select.getJoins();
