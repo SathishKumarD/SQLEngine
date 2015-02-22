@@ -14,6 +14,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import net.sf.jsqlparser.schema.Table;
+
 /**
  * @author Shiva
  *
@@ -26,12 +28,14 @@ public class ScanOperator implements Operator {
 	private String tableName = "";
 	private  HashMap<String, ColumnDetail> tableSchema = null;
 	private HashMap<Integer, String> indexMaps = null;
+	private String alias;
 	/* (non-Javadoc)
 	 * @see edu.buffalo.cse562.Operator#readOneTuple()
 	 */	
-	ScanOperator(String tableName){
+	ScanOperator(Table table){
 		//this.tableSource = new File (tableName);	
-		this.tableName = tableName;
+		this.tableName = table.getName();
+		this.alias = table.getAlias();
 		this.dataFile = FileSystems.getDefault().getPath(ConfigManager.getDataDir(), tableName.toLowerCase() +".dat");
 		this.tableSchema = Main.tableMapping.get(this.tableName);
 		this.indexMaps = Main.indexTypeMaps.get(this.tableName);

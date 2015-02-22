@@ -44,10 +44,11 @@ public class Main {
 			CCJSqlParser parser = new CCJSqlParser(new FileReader(f));
 			ExpressionTree e = new ExpressionTree();
 			while ((statement = parser.Statement()) != null){
-				 System.out.println(statement);
+//				 System.out.println(statement);
 				if(statement instanceof Select){
 					SelectBody select = ((Select) statement).getSelectBody();
 					if (select instanceof PlainSelect){
+						System.err.println(select);
 						Operator op = e.generateTree(select);
 						ExecuteQuery(op);
 					}
