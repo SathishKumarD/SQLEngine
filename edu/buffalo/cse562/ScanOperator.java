@@ -60,7 +60,6 @@ public class ScanOperator implements Operator {
 		ArrayList<Tuple> tuples = new ArrayList<Tuple>();
 		for(int counter = 0;counter < col.length;counter++)
 			if(indexMaps.containsKey(counter)){		
-				@SuppressWarnings("unchecked")
 				String type = indexMaps.get(counter);			
 				tuples.add(new Tuple(type, col[counter]));	
 			}

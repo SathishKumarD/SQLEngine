@@ -43,7 +43,7 @@ public class ExpressionTree {
 	}
 	private Operator addJoinOperator(Operator current,PlainSelect select)
 	{
-		List<Join> joins = (List<Join>) select.getJoins();
+		List<Join> joins = select.getJoins();
 		if (joins != null){
 			if (joins.size() > 0){
 				for (Join j : joins){
@@ -79,7 +79,6 @@ public class ExpressionTree {
 		Table table  = null;		
 		if (fi instanceof Table){
 			table = (Table) fi;
-			String tableName = (table).getWholeTableName();
 			current = new ScanOperator(table);			
 		}
 		else if (fi instanceof SubSelect){
