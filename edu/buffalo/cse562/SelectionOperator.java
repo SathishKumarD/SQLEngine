@@ -64,6 +64,8 @@ public class SelectionOperator implements Operator {
 			catch (Exception ex)
 			{
 				System.out.println("exp has thrwn exp  "+exp.toString());
+				ex.printStackTrace();
+				throw ex;
 			}
 		}while(!result);
 		

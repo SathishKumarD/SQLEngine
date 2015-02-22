@@ -50,15 +50,16 @@ public class GroupByOperator implements Operator {
 
 	@Override
 	public ArrayList<Tuple> readOneTuple() {
-		
+
 		ComputeGroupBy();
+		ArrayList<Tuple> tuple =null;
 		if(outputDataList.size()>rowIndex)
 		{
-			return outputDataList.get(rowIndex);
+			tuple = outputDataList.get(rowIndex);
 		}
 		rowIndex ++;
 
-		return null;
+		return tuple;
 	}
 
 	@Override
@@ -84,20 +85,20 @@ public class GroupByOperator implements Operator {
 		if(!isGroupByComputed)
 		{
 			ArrayList<Tuple> inputtuple = input.readOneTuple();
-			ArrayList<Tuple> outputtuple = null;
+			ArrayList<Tuple> gropuByCols = null;
 			while(inputtuple!=null)
 			{
-				outputtuple = getGroupByColumnArrayList(inputtuple, this.groupByColumns);
-				String hashKey = getHashKey(outputtuple);
+				gropuByCols = getGroupByColumnArrayList(inputtuple, this.groupByColumns);
+				String hashKey = getHashKey(gropuByCols);
 				Evaluator evaluator = new Evaluator(inputtuple,inputSchema);
 
-				int funcIndex = outputtuple.size();
+				int funcIndex = inputtuple.size();
 				for(Function func:this.aggregateFunctions)
 				{
 					Expression exp = (Expression)func.getParameters().getExpressions().get(0);
 					System.out.println("Evaluating: " + exp.toString());
 					Tuple tup= evaluateExpression( evaluator, exp);
-					handleAggregateFunctions(func,hashKey,outputtuple,funcIndex,tup);
+					handleAggregateFunctions(func,inputtuple,hashKey,funcIndex,tup);
 
 					funcIndex++;
 				}
@@ -109,12 +110,11 @@ public class GroupByOperator implements Operator {
 		}
 	}
 
-	private void handleAggregateFunctions(Function func, String hashKey,
-			ArrayList<Tuple> outputtuple, int funcIndex, Tuple tup )
+	private void handleAggregateFunctions(Function func,ArrayList<Tuple> outputtuple, String hashKey, int funcIndex, Tuple tup )
 	{
 		if(func.getName().equalsIgnoreCase("sum"))
 		{
-			handleSumFunction(hashKey,outputtuple,funcIndex,tup);
+			handleSumFunction(hashKey,outputtuple, funcIndex,tup);
 		}
 
 		if(func.getName().equalsIgnoreCase("avg"))
@@ -230,23 +230,12 @@ public class GroupByOperator implements Operator {
 			Tuple sumDatum = existingTuple.get(funcIndex);
 			sumDatum = sumDatum.add(tup);
 		}
-
-
 	}
 
 	private HashMap<String, ColumnDetail> getOutputSchema() {
 
-		HashMap<String, ColumnDetail> outputSchema = new HashMap<String, ColumnDetail>();
-		int index =0;
-		for(Column c :this.groupByColumns)
-		{
-			String key = c.getWholeColumnName();
-			ColumnDetail colDet = this.inputSchema.get(key);
-			colDet.setIndex(index);
-			outputSchema.put(key, colDet);
-			index++;
-		}
-
+		copyInputSchemaToOutputSchema();
+		int index =inputSchema.keySet().size();
 		for(Function agf :this.aggregateFunctions)
 		{
 			String key = agf.toString();
@@ -268,8 +257,7 @@ public class GroupByOperator implements Operator {
 		{
 			if(expObj instanceof Column)
 			{
-				String key = ((Column) expObj).getWholeColumnName();
-				colDet = inputSchema.get(key);
+				colDet = Evaluator.getColumnDetail(outputSchema, (Column) expObj) ;
 				if(colDet!=null) return colDet;
 			}
 
@@ -284,7 +272,17 @@ public class GroupByOperator implements Operator {
 		ArrayList<Tuple> groupByColArrayList = new ArrayList<>();
 		for(Column col: columns)
 		{
-			int index = inputSchema.get(col.getWholeColumnName()).getIndex();
+			int index =0;
+			try
+			{
+			 index = Evaluator.getColumnDetail(inputSchema, col).getIndex() ;
+			}
+			catch(Exception ex)
+			{
+				System.out.println(index + col.getWholeColumnName() );
+				ex.printStackTrace();
+				throw ex;
+			}
 			groupByColArrayList.add(tuple.get(index));
 		}
 
@@ -311,6 +309,7 @@ public class GroupByOperator implements Operator {
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			
 		}
 
 		return tup;
@@ -359,6 +358,16 @@ public class GroupByOperator implements Operator {
 		}
 		return outputDataList;
 
+	}
+
+	private void copyInputSchemaToOutputSchema()
+	{
+		outputSchema = new HashMap<String, ColumnDetail>();
+
+		for(Map.Entry<String, ColumnDetail> colDetail: this.inputSchema.entrySet()){
+			outputSchema.put(colDetail.getKey(),colDetail.getValue().clone());
+
+		}
 	}
 
 
