@@ -99,8 +99,14 @@ public class JoinOperator implements Operator {
 	public void reset() {
 		// TODO Auto-generated method stub
 		outputSchema = new HashMap<String, ColumnDetail>();
-		leftSchema = new HashMap<String, ColumnDetail>(left.getOutputTupleSchema());
-		rightSchema = new HashMap<String, ColumnDetail>(right.getOutputTupleSchema());
+		try{
+			leftSchema = new HashMap<String, ColumnDetail>(left.getOutputTupleSchema());
+			rightSchema = new HashMap<String, ColumnDetail>(right.getOutputTupleSchema());
+		}
+		catch (NullPointerException n){
+			System.err.println("left: " +left);
+			System.err.println("right: " +right);
+		}
 		for (Entry<String, ColumnDetail> en : rightSchema.entrySet()){
 			String key = en.getKey();
 			ColumnDetail value = en.getValue().clone();

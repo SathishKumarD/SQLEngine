@@ -4,7 +4,6 @@
 package edu.buffalo.cse562;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 /**
  * @author Sathish
@@ -12,12 +11,17 @@ import java.util.HashMap;
  */
 public class GroupByOutput {
 	private int count;
-	private HashMap<String,ArrayList<Tuple>> outputData;
+	private ArrayList<Tuple> outputData;
 	
 	public GroupByOutput()
 	{
 		this.setCount(0);
-		this.setOutputData(new HashMap<String, ArrayList<Tuple>>());
+		this.setOutputData(new  ArrayList<Tuple>());
+	}
+	public GroupByOutput(ArrayList<Tuple> outputData)
+	{
+		this.setCount(0);
+		this.setOutputData(outputData);
 	}
 
 	public int getCount() {
@@ -28,11 +32,11 @@ public class GroupByOutput {
 		this.count = count;
 	}
 
-	public HashMap<String,ArrayList<Tuple>> getOutputData() {
+	public ArrayList<Tuple> getOutputData() {
 		return outputData;
 	}
 
-	public void setOutputData(HashMap<String,ArrayList<Tuple>> outputData) {
+	public void setOutputData(ArrayList<Tuple> outputData) {
 		this.outputData = outputData;
 	}
 

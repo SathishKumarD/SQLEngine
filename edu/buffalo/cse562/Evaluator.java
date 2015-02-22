@@ -31,33 +31,45 @@ public class Evaluator extends Eval {
 	@Override
 	public LeafValue eval(Column column) {
 
-		ColumnDetail col = tupleSchema.get(column.getWholeColumnName());
+		int colID = getIndex(tupleSchema,column);	
+		
+		return (colID==-1)?null:tuple.get(colID).val;
+	}
 
+	public static int getIndex(HashMap<String, ColumnDetail> tupleSchema, Column column)
+	{
+		ColumnDetail col = getColumnDetail(tupleSchema,column);
+		return col.getIndex();
+	}
+
+	public static ColumnDetail getColumnDetail(HashMap<String, ColumnDetail> tupleSchema, Column column)
+	{
+		ColumnDetail col = tupleSchema.get(column.getWholeColumnName());
 		if(col!=null)
 		{
-			int colID = (Integer) col.getIndex();		  
-			return tuple.get(colID).val;
+			return col;
 		}
 		else
 		{
-			// column may present without table prefix
-			for(Map.Entry<String, ColumnDetail> colDetail: this.tupleSchema.entrySet()){
+			for(Map.Entry<String, ColumnDetail> colDetail: tupleSchema.entrySet()){
 				String key = colDetail.getKey();
 				if(key.split("\\.").length>1)
 				{
 					// extract ColumnName from TableName.ColumnName
 					String columnValue = key.split("\\.")[1];
-					
+
 					// validate it with the column passed
 					if( columnValue.equalsIgnoreCase(column.getWholeColumnName()))
 					{
-						int colID = (Integer) colDetail.getValue().getIndex();		  
-						return tuple.get(colID).val;
+						return 	  colDetail.getValue();
+
 					}
 				}
 			}
-			return null;
 		}
+		return null;
 	}
+	
+	
 
 }

@@ -71,7 +71,6 @@ public class ExpressionTree {
 				current = new ExtendedProjection(current, selItems);
 			}
 		}
-		//System.out.println(current);
 		return current;
 	}
 	private Operator addScanOperator(Operator current,PlainSelect select)
@@ -110,7 +109,7 @@ public class ExpressionTree {
 	{
 
 		List<Column> groupByColumns =  getGroupByColumns(select);
-		List<Function> aggregateFunctions = getFunctionList( select);
+		List<AgrregateFunctionColumn> aggregateFunctions = getFunctionList( select);
 
 		if(groupByColumns!=null ||aggregateFunctions.size() >0 )
 		{
@@ -150,19 +149,24 @@ public class ExpressionTree {
 
 
 
-	private List<Function> getFunctionList(PlainSelect select)
+	private List<AgrregateFunctionColumn> getFunctionList(PlainSelect select)
 	{
 		List<SelectItem> selItems = (List<SelectItem>) select.getSelectItems();
-		List<Function> functionList = new ArrayList<Function>();
+		List<AgrregateFunctionColumn> functionList = new ArrayList<AgrregateFunctionColumn>();
 
 		for(SelectItem selItem:selItems )
 		{
 			if(selItem instanceof SelectExpressionItem)
 			{
+				
+				String alias = ((SelectExpressionItem)selItem).getAlias();
 				Expression expr = ((SelectExpressionItem) selItem).getExpression();
 				if(expr instanceof Function)
 				{	
-					functionList.add((Function)expr);
+					AgrregateFunctionColumn agfc = new AgrregateFunctionColumn();
+					agfc.setFunction((Function)expr);
+					agfc.setAliasName(alias);
+					functionList.add(agfc);
 				}}		
 		}
 		return functionList;
