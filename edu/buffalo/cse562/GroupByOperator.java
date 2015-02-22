@@ -304,6 +304,8 @@ public class GroupByOperator implements Operator {
 	{
 
 		ArrayList<Tuple> groupByColArrayList = new ArrayList<>();
+		if(columns==null)
+			return groupByColArrayList;
 		for(Column col: columns)
 		{
 			int index =0;
@@ -326,6 +328,10 @@ public class GroupByOperator implements Operator {
 
 	private String getHashKey(ArrayList<Tuple> groupByColumnTuple)
 	{
+		if(groupByColumnTuple == null || groupByColumnTuple.size() ==0)
+		{
+			return "1";
+		}
 		StringBuilder sb = new StringBuilder();
 		for(Tuple t:groupByColumnTuple)
 		{
