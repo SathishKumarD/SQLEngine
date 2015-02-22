@@ -24,7 +24,6 @@ public class ScanOperator implements Operator {
 	private Path dataFile;
 	private String tableName = "";
 	private String tableAlias = "";
-	private  HashMap<String, ColumnDetail> createTableSchemaMap = null;
 	private HashMap<String,ColumnDetail> operatorTableSchema = null; 
 	private HashMap<Integer, String> indexMaps = null;
 	
@@ -34,7 +33,7 @@ public class ScanOperator implements Operator {
 	ScanOperator(Table table){	
 		this.tableName = table.getName();
 		this.tableAlias = table.getAlias();		
-		this.operatorTableSchema = initialiseOperatorTableSchema(Main.tableMapping.get(this.tableName));	
+		this.operatorTableSchema = initialiseOperatorTableSchema(Main.tableMapping.get(this.tableName));
 		this.dataFile = FileSystems.getDefault().getPath(ConfigManager.getDataDir(), tableName.toLowerCase() +".dat");		
 		this.indexMaps = Main.indexTypeMaps.get(this.tableName);
 		
@@ -95,7 +94,7 @@ public class ScanOperator implements Operator {
 	//Replaces table aliases
 	private HashMap<String,ColumnDetail> initialiseOperatorTableSchema(HashMap<String,ColumnDetail>  createTableSchemaMap)
 	{
-		HashMap<String,ColumnDetail> operatorTableSchema = new HashMap<String,ColumnDetail>();		
+		HashMap<String,ColumnDetail> opT = new HashMap<String,ColumnDetail>();		
 		for(Entry<String, ColumnDetail> es : createTableSchemaMap.entrySet())
 		{
 			String nameKey = es.getKey();
@@ -108,10 +107,10 @@ public class ScanOperator implements Operator {
 					nameKey = tableAlias +"."+columnWholeTableName[1]; 
 				}
 			}
-			operatorTableSchema.put(nameKey,es.getValue().clone());
+			opT.put(nameKey,es.getValue().clone());
 		}
 		
-		return operatorTableSchema;
+		return opT;
 	}
 	
 	@Override
