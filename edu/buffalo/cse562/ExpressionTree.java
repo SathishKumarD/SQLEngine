@@ -26,7 +26,7 @@ public class ExpressionTree {
 		current = addScanOperator(current, select);
 		current = addJoinOperator(current, select);
 		current = addSelectionOperator(current, select);
-		//current = addGroupByOperator(current,select);		
+		current = addGroupByOperator(current,select);		
 		current = addSortOperator(current, select);
 		current = addExtendedProjectionOperator(current, select);
 		current = addLimitOperator(current, select);
