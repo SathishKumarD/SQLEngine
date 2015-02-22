@@ -54,7 +54,7 @@ public class Main {
 			CCJSqlParser parser = new CCJSqlParser(new FileReader(f));
 			ExpressionTree e = new ExpressionTree();
 			while ((statement = parser.Statement()) != null){
-				System.out.println(statement);
+				// System.out.println(statement);
 				if(statement instanceof Select){
 					SelectBody select = ((Select) statement).getSelectBody();
 					if (select instanceof PlainSelect){
@@ -120,7 +120,18 @@ public class Main {
 		
 		static void printTuple(ArrayList<Tuple> singleTuple) {
 			for(int i=0; i < singleTuple.size();i++){
-				System.out.print(singleTuple.get(i).toString());
+				
+				try
+				{
+				String str = (singleTuple.get(i)==null)?"":singleTuple.get(i).toString();
+				System.out.print(str);
+				}
+				catch(Exception ex)
+				{
+					ex.printStackTrace();
+					System.out.println(singleTuple.get(i));
+				}
+				
 				if(i != singleTuple.size() - 1) System.out.print("|");
 			}
 			System.out.println();

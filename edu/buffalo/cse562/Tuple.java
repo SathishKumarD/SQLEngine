@@ -16,8 +16,15 @@ public class Tuple implements Comparable<Tuple> {
 	public Tuple(LeafValue value){
 		this.val = value;
 	}
+	
+	public void Update(Tuple tuple)
+	{
+		this.val = tuple.val;
+	}
 
 	public Tuple(String type, String colItem){
+		try
+		{
 		switch(type){
 			case "int":
 			{
@@ -28,7 +35,7 @@ public class Tuple implements Comparable<Tuple> {
 			case "varchar":
 			case "char":
 			{
-				val =  new StringValue(colItem);
+				val =  new StringValue("'"+colItem+"'");
 				break;
 			}
 			case "decimal":
@@ -36,17 +43,29 @@ public class Tuple implements Comparable<Tuple> {
 				val =  new DoubleValue(colItem);  
 				break;
 			}
-			case "DateTime":
+			case "date":
 			{
-				val =  new DateValue(colItem);  
+				val =  new DateValue("'"+colItem+"'");  
 				break;
 			}
-		}		
+		}	
+		}
+		catch(Exception ex)
+		{
+			System.out.println("type: "+ type + "colItem: " + colItem);
+			ex.printStackTrace();
+		}
 	}	
 	
 	 @Override 
 	 public String toString()
 	 {
+		 if(val instanceof StringValue)
+		 {
+			 return val.toString().substring(1,val.toString().length()-1);
+		 }
+		 else
+			 
 		return val.toString();		 	 
 	 }
 	 
