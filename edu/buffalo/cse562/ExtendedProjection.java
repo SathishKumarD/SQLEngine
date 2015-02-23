@@ -39,12 +39,10 @@ public class ExtendedProjection implements Operator {
 	public ExtendedProjection(Operator input, List<SelectItem> SelectItem_List) {
 		this.input = input;
 		this.SelectItem_List = SelectItem_List;		
-		this .inputSchema = input.getOutputTupleSchema();
 
+		this .inputSchema = input.getOutputTupleSchema();
 		reset(); 
-		/*Util.printSchema(inputSchema);
-		Util.printSchema(outputSchema);
-		System.out.println(toString());*/
+
 	}
 
 	/* (non-Javadoc)

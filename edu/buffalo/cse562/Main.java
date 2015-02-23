@@ -91,9 +91,12 @@ public class Main {
 				ColumnDetail columnDetail = new ColumnDetail();
 				columnDetail.setTableName(tableName);
 				columnDetail.setColumnDefinition(colDef);
-				String columnFullName = tableName + "."+ colDef.getColumnName();
 				columnDetail.setIndex(colCount);
-				typeInfo.put(colCount, colDef.getColDataType().toString());
+				
+				String columnFullName = tableName + "."+ colDef.getColumnName();
+				
+				typeInfo.put(colCount, colDef.getColDataType().toString()); //indexMaps : {tableName:{columnIndex:columnType}}
+				
 				tableSchema.put(columnFullName, columnDetail);
 				colCount++;
 			}

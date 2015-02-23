@@ -2,17 +2,14 @@
 package edu.buffalo.cse562;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.Map.Entry;
 
 import net.sf.jsqlparser.schema.Table;
 
@@ -26,19 +23,20 @@ public class ScanOperator implements Operator {
 	private BufferedReader buffer;
 	private Path dataFile;
 	private String tableName = "";
-	private  HashMap<String, ColumnDetail> tableSchema = null;
+	private String tableAlias = "";
+	private HashMap<String,ColumnDetail> operatorTableSchema = null; 
 	private HashMap<Integer, String> indexMaps = null;
-	private String alias;
+	
 	/* (non-Javadoc)
 	 * @see edu.buffalo.cse562.Operator#readOneTuple()
 	 */	
-	ScanOperator(Table table){
-		//this.tableSource = new File (tableName);	
+	ScanOperator(Table table){	
 		this.tableName = table.getName();
-		this.alias = table.getAlias();
-		this.dataFile = FileSystems.getDefault().getPath(ConfigManager.getDataDir(), tableName.toLowerCase() +".dat");
-		this.tableSchema = Main.tableMapping.get(this.tableName);
+		this.tableAlias = table.getAlias();		
+		this.operatorTableSchema = initialiseOperatorTableSchema(Main.tableMapping.get(this.tableName));
+		this.dataFile = FileSystems.getDefault().getPath(ConfigManager.getDataDir(), tableName.toLowerCase() +".dat");		
 		this.indexMaps = Main.indexTypeMaps.get(this.tableName);
+		
 		reset();
 	}
 
@@ -58,11 +56,12 @@ public class ScanOperator implements Operator {
 
 		String col[] = line.split("\\|");	
 		ArrayList<Tuple> tuples = new ArrayList<Tuple>();
-		for(int counter = 0;counter < col.length;counter++)
+		for(int counter = 0;counter < col.length;counter++) {
 			if(indexMaps.containsKey(counter)){		
 				String type = indexMaps.get(counter);			
 				tuples.add(new Tuple(type, col[counter]));	
 			}
+		}
 		return tuples;
 	}
 
@@ -91,9 +90,31 @@ public class ScanOperator implements Operator {
 		return null;
 	}
 
-
+	// deep copies the map from static table schema object to operatorTableSchema
+	//Replaces table aliases
+	private HashMap<String,ColumnDetail> initialiseOperatorTableSchema(HashMap<String,ColumnDetail>  createTableSchemaMap)
+	{
+		HashMap<String,ColumnDetail> opT = new HashMap<String,ColumnDetail>();		
+		for(Entry<String, ColumnDetail> es : createTableSchemaMap.entrySet())
+		{
+			String nameKey = es.getKey();
+			
+			if(tableAlias != null) 
+			{
+				if(nameKey.contains("."))
+				{
+					String[] columnWholeTableName = nameKey.split("\\.");				
+					nameKey = tableAlias +"."+columnWholeTableName[1]; 
+				}
+			}
+			opT.put(nameKey,es.getValue().clone());
+		}
+		
+		return opT;
+	}
+	
 	@Override
 	public HashMap<String, ColumnDetail> getOutputTupleSchema() {
-		return this.tableSchema;
+		return this.operatorTableSchema;
 	}
 }

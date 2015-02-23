@@ -17,8 +17,7 @@ public class Util {
 	{
 		for(Map.Entry<String, ColumnDetail> colDetail: inputSchema.entrySet()){
 			
-			System.out.println(colDetail.getKey() + "   " + colDetail.getValue().getIndex() );
-		
+			System.out.println(colDetail.getKey() + "   " + colDetail.getValue().getIndex() );		
 		}
 		System.out.println("________________________________");
 		
