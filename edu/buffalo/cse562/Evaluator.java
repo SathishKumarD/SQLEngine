@@ -32,8 +32,9 @@ public class Evaluator extends Eval {
 	public LeafValue eval(Column column) {
 
 		int colID = getIndex(tupleSchema,column);	
-		
-		return (colID==-1)?null:tuple.get(colID).val;
+		LeafValue leafValue = tuple.get(colID).val;
+		Util.printTuple(tuple);
+		return (colID==-1)?null:leafValue;
 	}
 
 	public static int getIndex(HashMap<String, ColumnDetail> tupleSchema, Column column)

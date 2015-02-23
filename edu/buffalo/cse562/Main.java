@@ -27,6 +27,8 @@ public class Main {
 			System.out.println("Incomplete arguments");
 			return;
 		}
+		
+		
 
 		if (args[0].equals("--data")){
 			ConfigManager.setDataDir(args[1]);

@@ -54,6 +54,10 @@ public class Tuple implements Comparable<Tuple> {
 				val =  new DateValue("'"+colItem+"'");  
 				break;
 			}
+			default:
+			{
+				val =  new StringValue("'"+colItem+"'");
+			}
 		}	
 		}
 		catch(Exception ex)
@@ -72,7 +76,7 @@ public class Tuple implements Comparable<Tuple> {
 		 }
 		 else
 			 
-		return val.toString();		 	 
+		return (val==null)?null: val.toString();		 	 
 	 }
 	 
 	public LeafValue getValue()
@@ -109,7 +113,7 @@ public class Tuple implements Comparable<Tuple> {
 
 		if(this.val instanceof DoubleValue)
 		{
-			double doubleVal =  ((DoubleValue)this.val).getValue() / ((DoubleValue)tup.getValue()).getValue();
+			double doubleVal =  ((DoubleValue)this.val).getValue() / ((LongValue)tup.getValue()).getValue();
 			((DoubleValue) val).setValue(doubleVal);
 		}
 		

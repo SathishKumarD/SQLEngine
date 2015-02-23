@@ -63,7 +63,7 @@ public class ScanOperator implements Operator {
 		for(int counter = 0;counter < col.length;counter++) {
 			if(indexMaps.containsKey(counter)){		
 				String type = indexMaps.get(counter);			
-				tuples.add(new Tuple(type, col[counter]));	
+				tuples.add(new Tuple(type.toLowerCase(), col[counter]));	
 			}
 		}
 		return tuples;
