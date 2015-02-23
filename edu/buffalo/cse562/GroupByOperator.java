@@ -11,6 +11,7 @@ import java.util.Map;
 
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
+import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.select.AllColumns;
 
@@ -25,21 +26,21 @@ public class GroupByOperator implements Operator {
 	private ArrayList<ArrayList<Tuple>> outputDataList =null;
 	private Operator input;
 	private List<Column> groupByColumns;
-	private List<AgrregateFunctionColumn> aggregateFunctions;
+	private List<AggregateFunctionColumn> aggregateFunctions;
 
 	private HashMap<String, GroupByOutput> outputData;
 	private boolean isGroupByComputed;
 	private int rowIndex;
 
 	public GroupByOperator(Operator input, List<Column> groupByColumns,
-			List<AgrregateFunctionColumn> aggregateFunctions) {
+			List<AggregateFunctionColumn> aggregateFunctions) {
 		this.input = input;
 		this.inputSchema = input.getOutputTupleSchema();
 		this.groupByColumns = groupByColumns;
 		this.aggregateFunctions = aggregateFunctions;
 		this.outputSchema = getOutputSchema();
-		Util.printSchema(inputSchema);
-		 Util.printSchema(outputSchema);
+//		Util.printSchema(inputSchema);
+//		 Util.printSchema(outputSchema);
 		outputData = new HashMap<String, GroupByOutput>();
 		isGroupByComputed = false;
 		rowIndex =0;
@@ -98,14 +99,22 @@ public class GroupByOperator implements Operator {
 
 				int funcIndex = inputtuple.size();
 				// System.out.println(funcIndex);
-				for(AgrregateFunctionColumn funcCol:this.aggregateFunctions)
+				for(AggregateFunctionColumn funcCol:this.aggregateFunctions)
 				{
 					Function func = funcCol.getFunction();
-					Expression exp = (Expression)func.getParameters().getExpressions().get(0);
-					Tuple tup= evaluateExpression( evaluator, exp);
-					handleAggregateFunctions(func,inputtuple,hashKey,funcIndex,tup);
+					ExpressionList exps = func.getParameters();
+					Expression exp;
+					if (exps != null){
+						exp = (Expression) exps.getExpressions().get(0);
+						Tuple tup = evaluateExpression(evaluator, exp);
+						handleAggregateFunctions(func,inputtuple,hashKey,funcIndex,tup);
+						funcIndex++;
+					}
+					else{
+						handleCountFunction(hashKey,inputtuple,funcIndex);
+						funcIndex++;
+					}
 
-					funcIndex++;
 				}
 				inputtuple = input.readOneTuple();
 			}
@@ -302,7 +311,7 @@ public class GroupByOperator implements Operator {
 
 		copyInputSchemaToOutputSchema();
 		int index =inputSchema.keySet().size();
-		for(AgrregateFunctionColumn agf :this.aggregateFunctions)
+		for(AggregateFunctionColumn agf :this.aggregateFunctions)
 		{
 
 			String key = agf.getFunction().toString();
@@ -328,15 +337,18 @@ public class GroupByOperator implements Operator {
 
 		//colDet.setColumnDefinition(coldef.setColDataType(););
 		ColumnDetail colDet = null;
-
-		for( Object expObj: func.getParameters().getExpressions())
-		{
-			if(expObj instanceof Column)
+		ExpressionList exps = func.getParameters();
+		
+		if (exps != null){
+		for( Object expObj: exps.getExpressions())
 			{
-				colDet = Evaluator.getColumnDetail(outputSchema, (Column) expObj) ;
-				if(colDet!=null) return colDet;
+				if(expObj instanceof Column)
+				{
+					colDet = Evaluator.getColumnDetail(outputSchema, (Column) expObj) ;
+					if(colDet!=null) return colDet;
+				}
+	
 			}
-
 		}
 
 		return new ColumnDetail();

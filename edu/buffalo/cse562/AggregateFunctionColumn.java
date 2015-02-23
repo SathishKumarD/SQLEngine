@@ -9,7 +9,7 @@ import net.sf.jsqlparser.expression.Function;
  * @author Sathish
  *
  */
-public class AgrregateFunctionColumn {
+public class AggregateFunctionColumn {
 	
 	private Function function;
 	private String aliasName;
