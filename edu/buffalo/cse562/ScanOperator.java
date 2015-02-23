@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import net.sf.jsqlparser.schema.Table;
 
@@ -26,19 +27,22 @@ public class ScanOperator implements Operator {
 	private BufferedReader buffer;
 	private Path dataFile;
 	private String tableName = "";
-	private  HashMap<String, ColumnDetail> tableSchema = null;
+	private String tableAlias = "";
+	private  HashMap<String, ColumnDetail> createTableSchemaMap = null;
+	private HashMap<String,ColumnDetail> operatorTableSchema = null; 
 	private HashMap<Integer, String> indexMaps = null;
-	private String alias;
+	
 	/* (non-Javadoc)
 	 * @see edu.buffalo.cse562.Operator#readOneTuple()
 	 */	
-	ScanOperator(Table table){
-		//this.tableSource = new File (tableName);	
+	ScanOperator(Table table){	
 		this.tableName = table.getName();
-		this.alias = table.getAlias();
-		this.dataFile = FileSystems.getDefault().getPath(ConfigManager.getDataDir(), tableName.toLowerCase() +".dat");
-		this.tableSchema = Main.tableMapping.get(this.tableName);
+		this.tableAlias = table.getAlias();		
+		
+		this.dataFile = FileSystems.getDefault().getPath(ConfigManager.getDataDir(), tableName.toLowerCase() +".dat");		
+		this.operatorTableSchema = initialiseOperatorTableSchema(Main.tableMapping.get(this.tableName));	
 		this.indexMaps = Main.indexTypeMaps.get(this.tableName);
+		
 		reset();
 	}
 
@@ -96,9 +100,31 @@ public class ScanOperator implements Operator {
 		return null;
 	}
 
-
+	// deep copies the map from static table schema object to operatorTableSchema
+	//Replaces table aliases
+	private HashMap<String,ColumnDetail> initialiseOperatorTableSchema(HashMap<String,ColumnDetail>  createTableSchemaMap)
+	{
+		HashMap<String,ColumnDetail> operatorTableSchema = new HashMap<String,ColumnDetail>();		
+		for(Entry<String, ColumnDetail> es : createTableSchemaMap.entrySet())
+		{
+			String nameKey = es.getKey();
+			
+			if(tableAlias != null && !tableAlias.isEmpty()) 
+			{
+				if(nameKey.contains("."))
+				{
+					String[] columnWholeTableName = nameKey.split("\\.");				
+					nameKey = tableAlias +"."+columnWholeTableName[1]; 
+				}
+			}
+			operatorTableSchema.put(nameKey,es.getValue().clone());
+		}
+		
+		return operatorTableSchema;
+	}
+	
 	@Override
 	public HashMap<String, ColumnDetail> getOutputTupleSchema() {
-		return this.tableSchema;
+		return this.operatorTableSchema;
 	}
 }

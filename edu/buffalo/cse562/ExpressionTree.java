@@ -79,8 +79,8 @@ public class ExpressionTree {
 		Table table  = null;		
 		if (fi instanceof Table){
 			table = (Table) fi;
-			String tableName = (table).getWholeTableName();
-			current = new ScanOperator(tableName);			
+			//String tableName = (table).getWholeTableName(); //TODO remove
+			current = new ScanOperator(table);			
 		}
 		else if (fi instanceof SubSelect){
 			current = generateTree(((SubSelect) fi).getSelectBody());
