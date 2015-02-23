@@ -108,7 +108,10 @@ public class ExpressionTree {
 	{
 
 		List<Column> groupByColumns =  getGroupByColumns(select);
-		List<AgrregateFunctionColumn> aggregateFunctions = getFunctionList( select);
+		List<AggregateFunctionColumn> aggregateFunctions = getFunctionList( select);
+		
+//		System.out.println(groupByColumns);
+//		System.out.println(aggregateFunctions);
 
 		if(groupByColumns!=null ||aggregateFunctions.size() >0 )
 		{
@@ -148,10 +151,10 @@ public class ExpressionTree {
 
 
 
-	private List<AgrregateFunctionColumn> getFunctionList(PlainSelect select)
+	private List<AggregateFunctionColumn> getFunctionList(PlainSelect select)
 	{
 		List<SelectItem> selItems = (List<SelectItem>) select.getSelectItems();
-		List<AgrregateFunctionColumn> functionList = new ArrayList<AgrregateFunctionColumn>();
+		List<AggregateFunctionColumn> functionList = new ArrayList<AggregateFunctionColumn>();
 
 		for(SelectItem selItem:selItems )
 		{
@@ -162,7 +165,7 @@ public class ExpressionTree {
 				Expression expr = ((SelectExpressionItem) selItem).getExpression();
 				if(expr instanceof Function)
 				{	
-					AgrregateFunctionColumn agfc = new AgrregateFunctionColumn();
+					AggregateFunctionColumn agfc = new AggregateFunctionColumn();
 					agfc.setFunction((Function)expr);
 					agfc.setAliasName(alias);
 					functionList.add(agfc);
