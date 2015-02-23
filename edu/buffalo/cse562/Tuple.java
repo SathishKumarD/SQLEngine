@@ -27,6 +27,7 @@ public class Tuple implements Comparable<Tuple> {
 		{
 		switch(type){
 			case "int":
+			case "INT":
 			{
 				val =  new LongValue(colItem);
 				break;
@@ -34,16 +35,21 @@ public class Tuple implements Comparable<Tuple> {
 			case "string":
 			case "varchar":
 			case "char":
+			case "STRING":
+			case "VARCHAR":
+			case "CHAR":
 			{
 				val =  new StringValue("'"+colItem+"'");
 				break;
 			}
 			case "decimal":
+			case "DECIMAL":
 			{
 				val =  new DoubleValue(colItem);  
 				break;
 			}
 			case "date":
+			case "DATE":
 			{
 				val =  new DateValue("'"+colItem+"'");  
 				break;

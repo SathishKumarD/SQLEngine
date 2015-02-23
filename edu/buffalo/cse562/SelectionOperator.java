@@ -45,7 +45,7 @@ public class SelectionOperator implements Operator {
 			tuple = input.readOneTuple();
 			
 			if(tuple==null) return null;
-			Util.printTuple(tuple);
+			// Util.printTuple(tuple);
 			Evaluator evaluator = new Evaluator(tuple,inputSchema);
 			
 			try {

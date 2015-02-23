@@ -46,7 +46,7 @@ public class Main {
 				CCJSqlParser parser = new CCJSqlParser(new FileReader(f));
 				ExpressionTree e = new ExpressionTree();
 				while ((statement = parser.Statement()) != null){
-					//				 System.out.println(statement);
+//					System.out.println(statement);
 					if(statement instanceof Select){
 						SelectBody select = ((Select) statement).getSelectBody();
 						if (select instanceof PlainSelect){
@@ -85,11 +85,15 @@ public class Main {
 	 */
 	private static void prepareTableSchema(CreateTable createTableObj){		
 		@SuppressWarnings("unchecked")
-		String tableName = createTableObj.getTable().getWholeTableName();
+		String[] tableNames = new String[1];
+		tableNames[0] = createTableObj.getTable().getWholeTableName().toLowerCase();
+//		tableNames[1] = createTableObj.getTable().getWholeTableName().toLowerCase();
+
 		List<ColumnDefinition> cds = (List<ColumnDefinition>) createTableObj.getColumnDefinitions();
 		HashMap<String, ColumnDetail> tableSchema = new HashMap<String, ColumnDetail>();
 		HashMap<Integer, String> typeInfo = new HashMap<Integer, String>();
 		int colCount = 0;
+		for (String tableName : tableNames){
 		for(ColumnDefinition colDef : cds){
 			ColumnDetail columnDetail = new ColumnDetail();
 			columnDetail.setTableName(tableName);
@@ -98,13 +102,17 @@ public class Main {
 
 			String columnFullName = tableName + "."+ colDef.getColumnName();
 
-			typeInfo.put(colCount, colDef.getColDataType().toString()); //indexMaps : {tableName:{columnIndex:columnType}}
+			typeInfo.put(colCount, colDef.getColDataType().getDataType()); //indexMaps : {tableName:{columnIndex:columnType}}
 
 			tableSchema.put(columnFullName, columnDetail);
 			colCount++;
 		}
+
 		tableMapping.put(tableName.toLowerCase(),tableSchema);
 		indexTypeMaps.put(tableName.toLowerCase(),typeInfo);
+
+		}
+
 	}
 
 	/**	 
