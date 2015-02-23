@@ -84,14 +84,12 @@ public class Main {
 	private static void prepareTableSchema(CreateTable createTableObj){		
 		@SuppressWarnings("unchecked")
 		String[] tableNames = new String[1];
-		tableNames[0] = createTableObj.getTable().getWholeTableName().toLowerCase();
-//		tableNames[1] = createTableObj.getTable().getWholeTableName().toLowerCase();
-
+		String tableName = createTableObj.getTable().getWholeTableName().toLowerCase();
+		
 		List<ColumnDefinition> cds = (List<ColumnDefinition>) createTableObj.getColumnDefinitions();
 		HashMap<String, ColumnDetail> tableSchema = new HashMap<String, ColumnDetail>();
 		HashMap<Integer, String> typeInfo = new HashMap<Integer, String>();
 		int colCount = 0;
-		for (String tableName : tableNames){
 		for(ColumnDefinition colDef : cds){
 			ColumnDetail columnDetail = new ColumnDetail();
 			columnDetail.setTableName(tableName);
@@ -107,7 +105,6 @@ public class Main {
 		}
 		tableMapping.put(tableName,tableSchema);
 		indexTypeMaps.put(tableName,typeInfo);
-		}
 	}
 
 	/**	 
