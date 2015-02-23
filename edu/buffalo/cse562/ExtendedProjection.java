@@ -28,33 +28,36 @@ public class ExtendedProjection implements Operator {
 	Operator input;
 	List<SelectItem> SelectItem_List;
 	private  HashMap<String, ColumnDetail> inputSchema = null;
-	
+
 	// this will be given to SubQueries!
 	// the key is (currentColumnWholeName or Expressions or aliases)+"."+index to maintain uniqueness of keys since this operator may contain same column twice in its schema
 	// So splice the last two characters separated by "." in SubQuery to make new wholecolumnName. " R.A.0" -> TableAlias of subquery + "A.0" 
 	private  HashMap<String, ColumnDetail> outputSchema = new HashMap<String, ColumnDetail>(); 	
 	ArrayList<Tuple> inputTuples = null;
 	private ArrayList<Tuple> outputTuples = new ArrayList<Tuple> ();
-	
+
 	public ExtendedProjection(Operator input, List<SelectItem> SelectItem_List) {
 		this.input = input;
 		this.SelectItem_List = SelectItem_List;		
 		this .inputSchema = input.getOutputTupleSchema();
-		//Util.printSchema(inputSchema);
+
 		reset(); 
+		/*Util.printSchema(inputSchema);
+		Util.printSchema(outputSchema);
+		System.out.println(toString());*/
 	}
 
 	/* (non-Javadoc)
 	 * @see edu.buffalo.cse562.Operator#readOneTuple()
 	 */
 	@Override
- 	public ArrayList<Tuple> readOneTuple() {
+	public ArrayList<Tuple> readOneTuple() {
 		do{
 			inputTuples = input.readOneTuple(); 
 			if(inputTuples == null) return null;
-			
+
 			outputTuples.clear();
-			
+
 			for(SelectItem selectItem : SelectItem_List)	
 			{
 				if(selectItem instanceof AllColumns)
@@ -66,7 +69,7 @@ public class ExtendedProjection implements Operator {
 					//for a table name R if there exists a column key R.<> pull all the index values in hash set, preventing multiple entries of same columns.
 					// we iterate through the hash set of indexes to all add columns of R to outputTuples
 					Set<Integer> tableColumnIndex = new HashSet();
-					
+
 					String tableName = ((AllTableColumns) selectItem).getTable().getName();
 					for(Entry<String, ColumnDetail> es : inputSchema.entrySet()){
 						if(es.getKey().contains(tableName))
@@ -79,7 +82,7 @@ public class ExtendedProjection implements Operator {
 						outputTuples.add(inputTuples.get(index));
 					}				
 				}
-				
+
 				else if(selectItem instanceof SelectExpressionItem)
 				{
 					Expression expr = ((SelectExpressionItem) selectItem).getExpression();
@@ -88,8 +91,8 @@ public class ExtendedProjection implements Operator {
 						String key = expr.toString();
 						if(inputSchema.containsKey(key))
 						{
-						   int index = inputSchema.get(expr.toString()).getIndex(); //.get(column.getWholeColumnName()).getIndex();
-						   outputTuples.add(inputTuples.get(index));
+							int index = inputSchema.get(expr.toString()).getIndex(); //.get(column.getWholeColumnName()).getIndex();
+							outputTuples.add(inputTuples.get(index));
 						}					   							 
 					}
 					else 
@@ -103,10 +106,10 @@ public class ExtendedProjection implements Operator {
 						}
 					}
 				}			
-	
+
 			}	
-			
-			Util.printTuple(outputTuples);
+
+			//Util.printTuple(outputTuples);
 			return outputTuples;
 		} while(inputTuples != null);
 	}
@@ -129,7 +132,7 @@ public class ExtendedProjection implements Operator {
 						ColumnDetail colDetail = es.getValue().clone();
 						colDetail.setIndex(index);
 						outputSchema.put(oldkey, colDetail);	
-						
+
 						index++;
 					}
 				}
@@ -137,7 +140,7 @@ public class ExtendedProjection implements Operator {
 			else if (selectItem instanceof AllTableColumns) {
 				//<tableName>.*
 				String tableName = ((AllTableColumns) selectItem).getTable().getName();
-				
+
 				for(java.util.Map.Entry<String, ColumnDetail> es : inputSchema.entrySet()){
 					String oldKey = es.getKey();
 					if(oldKey.contains(tableName.concat("."))) {
@@ -145,7 +148,7 @@ public class ExtendedProjection implements Operator {
 							ColumnDetail colDetail = inputSchema.get(oldKey).clone();
 							colDetail.setIndex(index);
 							outputSchema.put(oldKey, es.getValue());
-							
+
 							index++;
 						}
 					}
@@ -154,7 +157,7 @@ public class ExtendedProjection implements Operator {
 			else if(selectItem instanceof SelectExpressionItem){				
 				//<columnName> or <columnName> AS <columnAlias> or <columnA + columnB> [AS <columnAlias>]'expression
 				String aliasName = ((SelectExpressionItem) selectItem).getAlias();
-				
+
 				//alias name is present!
 				if(aliasName != null  &&  !aliasName.isEmpty()){
 					Expression exp = ((SelectExpressionItem) selectItem).getExpression();
@@ -167,19 +170,19 @@ public class ExtendedProjection implements Operator {
 						{						
 							ColumnDetail colDetail = inputSchema.get(colName).clone();
 							colDetail.setIndex(index);												
-																											
+
 							//add additional schema for alias names as well
 							outputSchema.put(newKey, colDetail);
 						}												
-					else
+						else
 						{    //if its a expression... ex: A+B , C*D 
 							// a new column not found in previous schema example an arith expression							
 							ColumnDetail colDetail = new ColumnDetail();
 							colDetail.setIndex(index);																					
-																				
+
 							outputSchema.put(newKey, colDetail);
 						}
-						
+
 						index++;
 					}
 				}
@@ -187,7 +190,7 @@ public class ExtendedProjection implements Operator {
 					//alias name is not present!
 					Expression exp = ((SelectExpressionItem) selectItem).getExpression();
 					String colName = exp.toString();
-					
+
 					if(!outputSchema.containsKey(colName)){																						
 						// an existing column
 						if(inputSchema.containsKey(colName)){
@@ -200,22 +203,23 @@ public class ExtendedProjection implements Operator {
 							// //if its a expression... A+B , C*D 
 							ColumnDetail colDetail = new ColumnDetail();
 							colDetail.setIndex(index);														
-							
+
 							outputSchema.put(colName, colDetail);							
 						}						
-						
+
 						index++;
 					}					
 				}
-				
+
 			}					
-		}		
+		}	
+
 	}
-	 
+
 	public String toString(){
 		return "SELECT " + this.SelectItem_List.toString();
 	}
-	
+
 	public Operator peekNextOp(){
 		return this.input;
 	}

@@ -190,5 +190,26 @@ public class Tuple implements Comparable<Tuple> {
 			e.printStackTrace();
 		}
 		return 0;
-	}	 	 
+	}	
+	
+	public Tuple cloneTuple(Tuple t)
+	{
+		if( t.val instanceof StringValue)
+		{
+			return new Tuple("string",t.val.toString().substring(1,val.toString().length()-1));
+		}
+		if( t.val instanceof DoubleValue)
+		{
+			return new Tuple("decimal",t.val.toString());
+		}
+		if( t.val instanceof LongValue)
+		{
+			return new Tuple("int",t.val.toString());
+		}
+		if( t.val instanceof DateValue)
+		{
+			return new Tuple("date",t.val.toString().substring(1,val.toString().length()-1));
+		}
+		return null;
+	}
 }
