@@ -54,7 +54,6 @@ public class SelectionOperator implements Operator {
 				result = bv.getValue();
 				if(result)
 				{
-					// Util.printTuple(tuple);
 					return tuple;
 					
 				}
