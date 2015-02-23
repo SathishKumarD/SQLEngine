@@ -21,6 +21,8 @@ public class Main {
 
 	static HashMap<String, HashMap<String, ColumnDetail>> tableMapping = new HashMap<String, HashMap<String, ColumnDetail>>();
 	static HashMap<String,HashMap<Integer, String>> indexTypeMaps = new HashMap<String, HashMap<Integer, String>>();
+	
+	static int queryCount = 0;
 	public static void main(String[] args) {		
 		//the sql file starts from 3rd argument
 		if(args.length < 3){
@@ -52,7 +54,16 @@ public class Main {
 						if (select instanceof PlainSelect){
 							// 	System.err.println(select);
 							Operator op = e.generateTree(select);
+							queryCount++;
+							
+							if(queryCount <7)
+							{
 							ExecuteQuery(op);
+							}
+							else
+							{
+								System.err.println(select);
+							}
 						}
 						else if (select instanceof Union){
 							Union un = (Union) select;
