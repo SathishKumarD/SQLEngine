@@ -70,7 +70,7 @@ public class Main {
 				}
 			}
 			catch(Exception e){
-				System.out.println(statement);
+				System.err.println(statement);
 				e.printStackTrace();
 			}
 		}
