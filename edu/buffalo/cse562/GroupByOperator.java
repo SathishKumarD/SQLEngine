@@ -82,6 +82,7 @@ public class GroupByOperator implements Operator {
 		return  this.outputSchema;
 	}
 
+	
 	private void ComputeGroupBy()
 	{
 		if(!isGroupByComputed)
