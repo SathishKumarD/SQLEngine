@@ -93,12 +93,13 @@ public class GroupByOperator implements Operator {
 			{
 				gropuByCols = getGroupByColumnArrayList(inputtuple, this.groupByColumns);
 				String hashKey = getHashKey(gropuByCols);
-				Evaluator evaluator = new Evaluator(inputtuple,inputSchema);
+				
 
 				int funcIndex = inputtuple.size();
 				// System.out.println(funcIndex);
 				for(AggregateFunctionColumn funcCol:this.aggregateFunctions)
 				{
+					Evaluator evaluator = new Evaluator(inputtuple,inputSchema);
 					Function func = funcCol.getFunction();
 					ExpressionList exps = func.getParameters();
 					Expression exp;
@@ -327,7 +328,6 @@ public class GroupByOperator implements Operator {
 
 			if(agf.getAliasName()!=null && !agf.getAliasName().equalsIgnoreCase(""))
 			{
-
 				outputSchema.put(agf.getAliasName(), colDet.clone());
 			}
 
@@ -348,14 +348,11 @@ public class GroupByOperator implements Operator {
 		if (exps != null){
 			for( Object expObj: exps.getExpressions())
 			{
-
 				if(expObj instanceof Column)
 				{
 					colDet = Evaluator.getColumnDetail(outputSchema, (Column) expObj).clone() ;
 					if(colDet!=null) return colDet;
 				}
-
-
 			}
 		}
 
@@ -440,8 +437,6 @@ public class GroupByOperator implements Operator {
 		List<Integer> avg = getAvgFunctionIndices();
 		if(avg.size()>=1)
 		{
-
-
 			for(Map.Entry<String, GroupByOutput> colDetail: this.outputData.entrySet()){
 				// System.out.println("Count"+ colDetail.getValue().getCount());
 				Integer count = colDetail.getValue().getCount()/avg.size();

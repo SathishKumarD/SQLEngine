@@ -54,7 +54,7 @@ public class JoinOperator implements Operator {
 			return null;
 		}
 
-		int posCount = 0;
+		int posCount = outputTuple.size();
 		boolean returnThis = true;
 
 		for (Map.Entry<String, ColumnDetail> mp : left.getOutputTupleSchema().entrySet()){

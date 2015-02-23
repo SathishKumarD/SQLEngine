@@ -54,30 +54,24 @@ public class Main {
 
 						// queryCount++;
 
-						if(queryCount ==0)
-						{
-							System.err.println(select);
-						}
-						else
-						{
 
-							if (select instanceof PlainSelect){
-								// 	System.err.println(select);
-								Operator op = e.generateTree(select);
-								ExecuteQuery(op);
+						if (select instanceof PlainSelect){
+							// 	System.err.println(select);
+							Operator op = e.generateTree(select);
+							ExecuteQuery(op);
 
-							}
-							else if (select instanceof Union){
-								Union un = (Union) select;
-								Operator op;
-								UnionOperator uop = new UnionOperator();
-								List<PlainSelect> pselects = (List<PlainSelect>) un.getPlainSelects();
-								for (PlainSelect s : pselects){
-									uop.addOperator(e.generateTree(s));
-								}
-								ExecuteQuery(uop);
-							}
 						}
+						else if (select instanceof Union){
+							Union un = (Union) select;
+							Operator op;
+							UnionOperator uop = new UnionOperator();
+							List<PlainSelect> pselects = (List<PlainSelect>) un.getPlainSelects();
+							for (PlainSelect s : pselects){
+								uop.addOperator(e.generateTree(s));
+							}
+							ExecuteQuery(uop);
+						}
+
 					}
 					else if(statement instanceof CreateTable){
 						CreateTable createTableObj = (CreateTable) statement;								
