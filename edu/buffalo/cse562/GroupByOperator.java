@@ -39,7 +39,7 @@ public class GroupByOperator implements Operator {
 		this.groupByColumns = groupByColumns;
 		this.aggregateFunctions = aggregateFunctions;
 		this.outputSchema = getOutputSchema();
-		Util.printSchema(outputSchema);
+		//Util.printSchema(outputSchema);
 		outputData = new HashMap<String, GroupByOutput>();
 		isGroupByComputed = false;
 		rowIndex =0;
