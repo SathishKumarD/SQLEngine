@@ -49,7 +49,6 @@ public class ScanOperator implements Operator {
 	@Override
 	public ArrayList<Tuple> readOneTuple() {
 		if(buffer == null) return null;
-		int colLength = 0;	
 		String line = null;
 
 		try {
@@ -62,12 +61,9 @@ public class ScanOperator implements Operator {
 		if(line == null || line.isEmpty()) return null;
 
 		String col[] = line.split("\\|");	
-		colLength =	col.length;
-
 		ArrayList<Tuple> tuples = new ArrayList<Tuple>();
 		for(int counter = 0;counter < col.length;counter++) {
 			if(indexMaps.containsKey(counter)){		
-				@SuppressWarnings("unchecked")
 				String type = indexMaps.get(counter);			
 				tuples.add(new Tuple(type, col[counter]));	
 			}

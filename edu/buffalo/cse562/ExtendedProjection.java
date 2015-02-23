@@ -105,7 +105,9 @@ public class ExtendedProjection implements Operator {
 					}
 				}			
 	
-			}		
+			}	
+			
+			Util.printTuple(outputTuples);
 			return outputTuples;
 		} while(inputTuples != null);
 	}

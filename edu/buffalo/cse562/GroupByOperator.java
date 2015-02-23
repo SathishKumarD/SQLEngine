@@ -12,6 +12,7 @@ import java.util.Map;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.statement.select.AllColumns;
 
 /**
  * @author Sathish
@@ -188,6 +189,7 @@ public class GroupByOperator implements Operator {
 			}
 			Tuple sumDatum = existingTuple.get(funcIndex);
 			sumDatum = sumDatum.add(tup);
+			
 			// System.out.println("AVG "+funcIndex+" " +sumDatum.toString() + " "+existingTuple.get(funcIndex) + " "+  outputData.get(hashKey).getOutputData().get(funcIndex) );
 		}
 
@@ -286,7 +288,6 @@ public class GroupByOperator implements Operator {
 				outputSchema.put(agf.getAliasName(), colDet.clone());
 			}
 			
-			
 			index++;
 		}
 		
@@ -299,6 +300,7 @@ public class GroupByOperator implements Operator {
 
 		//colDet.setColumnDefinition(coldef.setColDataType(););
 		ColumnDetail colDet = null;
+		
 		for( Object expObj: func.getParameters().getExpressions())
 		{
 			if(expObj instanceof Column)
@@ -331,13 +333,7 @@ public class GroupByOperator implements Operator {
 			{
 				
 				String errorMesage = Util.getSchemaAsString(inputSchema) + "\r\n col: " +col.getWholeColumnName() ; 
-				ex.printStackTrace();
-				try {
-					throw new MyException(errorMesage);
-				} catch (MyException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				System.out.println(errorMesage);
 			}
 			groupByColArrayList.add(tuple.get(index));
 		}
