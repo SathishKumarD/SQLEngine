@@ -60,7 +60,6 @@ public class SortOperator implements Operator {
 		int nextIndex = outputRowsOrder.get(counterForOutputTuple);
 		outputTuple =  fullRelation.get(nextIndex);
 		counterForOutputTuple++;
-		
 		return outputTuple;			
 	}	
 	
@@ -119,37 +118,6 @@ public class SortOperator implements Operator {
 		}
 	}
 	
-	/*public void prepareSortedColumns(List<Integer> orderByElemIndexList, int  currIndex, List<Integer> rowNumberList){
-		//base case for recursion
-		if(currIndex == orderByElemIndex.size()) {
-			outputRowOrder.addAll(rowNumberList);
-			return;
-		}
-		
-		TreeMap<Tuple, List<Integer>> orderByTreeMap = new TreeMap<Tuple, List<Integer>>();
-		
-		int orderByElemColumnIndex = orderByElemIndexList.get(currIndex);
-		
-		for(Integer rowNum : rowNumberList){
-			ArrayList<Tuple> row = fullRelation.get(rowNum);
-			
-			if(orderByTreeMap.containsKey(row.get(orderByElemColumnIndex))) {
-				List<Integer> groupOrder = orderByTreeMap.get(row.get(orderByElemColumnIndex));
-				
-				groupOrder.add(rowNum);
-				orderByTreeMap.put(row.get(orderByElemColumnIndex), groupOrder);				
-			}				
-			else {
-				List<Integer> groupOrder = new ArrayList<Integer>(); groupOrder.add(rowNum);
-				orderByTreeMap.put(row.get(orderByElemColumnIndex), groupOrder);
-			}			
-		}
-		
-		for(Entry<Tuple,List<Integer>> es : orderByTreeMap.entrySet()){
-			prepareSortedColumns(orderByElemIndexList,currIndex+1, es.getValue());  //recursion call
-		}
-	}	*/		
-
 	/* (non-Javadoc)
 	 * @see edu.buffalo.cse562.Operator#reset()
 	 */
@@ -172,7 +140,7 @@ public class SortOperator implements Operator {
 			else
 			{
 					for(Entry<String,ColumnDetail> es : inputSchema.entrySet())
-					{
+					{						
 						if(es.getKey().contains("."))
 						{
 						  String[] colNameWithTableName = es.getKey().split("\\."); //<tableName>.<colName>
@@ -181,7 +149,15 @@ public class SortOperator implements Operator {
 							{
 								orderByElemIndex.add(es.getValue().getIndex());
 							}
-						}				
+						}
+						else
+						{  // orderby col is a alias name of a computed aggregate column from query. 
+							//select id,sum(orders) AS TOTAL from order group by id order by TOTAL
+							if(es.getKey().equalsIgnoreCase(orderByElementNameStr))
+							{
+								orderByElemIndex.add(es.getValue().getIndex());
+							}
+						}
 					}
 			}
 		}
