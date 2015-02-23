@@ -166,8 +166,10 @@ public class GroupByOperator implements Operator {
 			}
 			Tuple sumDatum = existingTuple.get(funcIndex);
 			;
+			// System.out.println(funcIndex);
+			
 			sumDatum = sumDatum.add(tup);
-			// System.out.println("SUM "+funcIndex+" " +sumDatum.toString() + " "+existingTuple.get(funcIndex) + " "+  outputData.get(hashKey).getOutputData().get(funcIndex) );
+		 
 		}
 
 
@@ -413,7 +415,7 @@ public class GroupByOperator implements Operator {
 			if(colDetail.getKey().toLowerCase().contains("avg("))
 			{
 				int index = colDetail.getValue().getIndex();
-				//	System.out.println("index "+index);
+				// System.out.println("index "+index +" "+ colDetail.getKey());
 				avgIndices.add(index);
 			}
 		}
@@ -433,9 +435,11 @@ public class GroupByOperator implements Operator {
 				//System.out.println(count);
 				for(Integer avgIndex :avg)
 				{
+					// System.out.println(avgIndex);
 					Tuple sum = colDetail.getValue().getOutputData().get(avgIndex);
-					//System.out.println(sum.toString()+" "+count + ": "+avgIndex );
+					System.out.println(sum.toString()+" "+count + ": "+avgIndex );
 					sum = sum.divideBy(new Tuple("int",count.toString()));
+					System.out.println(sum.toString()+" "+count + ": "+avgIndex );
 					//System.out.println(colDetail.getValue().getOutputData().get(avgIndex));
 				}
 

@@ -177,7 +177,7 @@ public class SortOperator implements Operator {
 						{
 						  String[] colNameWithTableName = es.getKey().split("\\."); //<tableName>.<colName>
 							
-							if(colNameWithTableName[1] == orderByElementNameStr)
+							if(colNameWithTableName[1].equalsIgnoreCase(orderByElementNameStr))
 							{
 								orderByElemIndex.add(es.getValue().getIndex());
 							}
