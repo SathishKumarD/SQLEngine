@@ -13,7 +13,7 @@ import java.util.Map;
  */
 public class Util {
 
-	public static boolean DEBUG = true;
+	public static boolean DEBUG = false;
 
 	public static void printSchema(HashMap<String, ColumnDetail> inputSchema)
 	{
