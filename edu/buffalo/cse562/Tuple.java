@@ -208,7 +208,7 @@ public class Tuple implements Comparable<Tuple> {
 		}
 		if( t.val instanceof DateValue)
 		{
-			return new Tuple("date",t.val.toString().substring(1,val.toString().length()-1));
+			return new Tuple("date",t.val.toString());
 		}
 		return null;
 	}
