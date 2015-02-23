@@ -31,10 +31,10 @@ public class ScanOperator implements Operator {
 	 * @see edu.buffalo.cse562.Operator#readOneTuple()
 	 */	
 	ScanOperator(Table table){	
-		this.tableName = table.getName();
+		this.tableName = table.getName().toLowerCase();
 		this.tableAlias = table.getAlias();		
 		this.operatorTableSchema = this.initialiseOperatorTableSchema(Main.tableMapping.get(this.tableName));
-		this.dataFile = FileSystems.getDefault().getPath(ConfigManager.getDataDir(), tableName.toLowerCase() +".dat");		
+		this.dataFile = FileSystems.getDefault().getPath(ConfigManager.getDataDir(), tableName +".dat");		
 		this.indexMaps = Main.indexTypeMaps.get(this.tableName);		
 		reset();
 	}

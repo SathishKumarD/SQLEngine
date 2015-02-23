@@ -423,7 +423,7 @@ public class GroupByOperator implements Operator {
 					Tuple sum = colDetail.getValue().getOutputData().get(avgIndex);
 					//System.out.println(sum.toString()+" "+count + ": "+avgIndex );
 					sum = sum.divideBy(new Tuple("int",count.toString()));
-					System.out.println(colDetail.getValue().getOutputData().get(avgIndex));
+				// 	System.out.println(colDetail.getValue().getOutputData().get(avgIndex));
 				}
 
 			}
