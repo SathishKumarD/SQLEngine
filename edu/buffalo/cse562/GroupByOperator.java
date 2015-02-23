@@ -164,12 +164,12 @@ public class GroupByOperator implements Operator {
 			{
 				existingTuple.add(tup);
 			}
-			Tuple sumDatum = existingTuple.get(funcIndex);
-			;
-			// System.out.println(funcIndex);
-			
-			sumDatum = sumDatum.add(tup);
-		 
+			else
+			{
+				Tuple sumDatum = existingTuple.get(funcIndex);
+				sumDatum = sumDatum.add(tup);
+			}
+			//Util.printTuple(existingTuple);
 		}
 
 
@@ -200,9 +200,11 @@ public class GroupByOperator implements Operator {
 			{
 				existingTuple.add(tup);
 			}
-			Tuple sumDatum = existingTuple.get(funcIndex);
-			sumDatum = sumDatum.add(tup);
-
+			else
+			{
+				Tuple sumDatum = existingTuple.get(funcIndex);
+				sumDatum = sumDatum.add(tup);
+			}
 			// System.out.println("AVG "+funcIndex+" " +sumDatum.toString() + " "+existingTuple.get(funcIndex) + " "+  outputData.get(hashKey).getOutputData().get(funcIndex) );
 		}
 
@@ -226,9 +228,12 @@ public class GroupByOperator implements Operator {
 			{
 				existingTuple.add(tup);
 			}
-			Tuple existingDatum = existingTuple.get(funcIndex);
-			existingDatum = (tup.isLessThan(existingDatum))?tup:existingDatum;
-			existingTuple.get(funcIndex).Update(existingDatum);
+			else
+			{
+				Tuple existingDatum = existingTuple.get(funcIndex);
+				existingDatum = (tup.isLessThan(existingDatum))?tup:existingDatum;
+				existingTuple.get(funcIndex).Update(existingDatum);
+			}
 		}
 
 
@@ -250,10 +255,12 @@ public class GroupByOperator implements Operator {
 
 				existingTuple.add(tup);
 			}
-			Tuple datum = existingTuple.get(funcIndex);
-			datum = (tup.isGreaterThan(datum))?tup:datum;
-			existingTuple.get(funcIndex).Update(datum);
-
+			else
+			{
+				Tuple datum = existingTuple.get(funcIndex);
+				datum = (tup.isGreaterThan(datum))?tup:datum;
+				existingTuple.get(funcIndex).Update(datum);
+			}
 			//Util.printTuple(existingTuple);
 			//Util.printTuple(outputData.get(hashKey).getOutputData());
 		}
@@ -283,8 +290,11 @@ public class GroupByOperator implements Operator {
 				{
 					existingTuple.add(tup);
 				}
-				Tuple sumDatum = existingTuple.get(funcIndex);
-				sumDatum = sumDatum.add(tup);
+				else
+				{
+					Tuple sumDatum = existingTuple.get(funcIndex);
+					sumDatum = sumDatum.add(tup);
+				}
 				//System.out.println(hashKey);
 				//Util.printTuple(outputData.get(hashKey).getOutputData());
 				//System.out.println();
@@ -332,9 +342,9 @@ public class GroupByOperator implements Operator {
 		//colDet.setColumnDefinition(coldef.setColDataType(););
 		ColumnDetail colDet = null;
 		ExpressionList exps = func.getParameters();
-		
+
 		if (exps != null){
-		for( Object expObj: exps.getExpressions())
+			for( Object expObj: exps.getExpressions())
 			{
 
 				if(expObj instanceof Column)
@@ -342,7 +352,7 @@ public class GroupByOperator implements Operator {
 					colDet = Evaluator.getColumnDetail(outputSchema, (Column) expObj).clone() ;
 					if(colDet!=null) return colDet;
 				}
-	
+
 
 			}
 		}
@@ -437,9 +447,7 @@ public class GroupByOperator implements Operator {
 				{
 					// System.out.println(avgIndex);
 					Tuple sum = colDetail.getValue().getOutputData().get(avgIndex);
-					System.out.println(sum.toString()+" "+count + ": "+avgIndex );
 					sum = sum.divideBy(new Tuple("int",count.toString()));
-					System.out.println(sum.toString()+" "+count + ": "+avgIndex );
 					//System.out.println(colDetail.getValue().getOutputData().get(avgIndex));
 				}
 
