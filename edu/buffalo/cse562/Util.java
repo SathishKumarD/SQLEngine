@@ -13,7 +13,7 @@ import java.util.Map;
  */
 public class Util {
 
-	public static boolean DEBUG = true;
+	public static boolean DEBUG = false;
 
 	public static void printSchema(HashMap<String, ColumnDetail> inputSchema)
 	{
@@ -21,7 +21,7 @@ public class Util {
 		{
 			for(Map.Entry<String, ColumnDetail> colDetail: inputSchema.entrySet()){
 
-				System.out.println(colDetail.getKey() + "   " + colDetail.getValue().getIndex() );		
+				System.out.println(colDetail.getKey() + "   " + colDetail.getValue().getIndex() + "  " + colDetail.getValue().getColumnDefinition().getColDataType());		
 			}
 			System.out.println("________________________________");
 		}

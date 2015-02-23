@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 
 import net.sf.jsqlparser.expression.BooleanValue;
 import net.sf.jsqlparser.expression.Expression;
@@ -41,6 +42,7 @@ public class JoinOperator implements Operator {
 	@Override
 	public ArrayList<Tuple> readOneTuple() {
 		// TODO Auto-generated method stub
+		TreeMap<Integer, Tuple> outputMap = new TreeMap<Integer, Tuple>();
 		ArrayList<Tuple> outputTuple = new ArrayList<Tuple>();
 		rightTuple = right.readOneTuple();		
 
@@ -54,24 +56,11 @@ public class JoinOperator implements Operator {
 			return null;
 		}
 
-		int posCount = outputTuple.size();
 		boolean returnThis = true;
-
-		for (Map.Entry<String, ColumnDetail> mp : left.getOutputTupleSchema().entrySet()){
-			int index = mp.getValue().getIndex();
-			Tuple value = leftTuple.get(index);
-			outputTuple.add(value);
-		    outputSchema.get(mp.getKey()).setIndex(posCount);
-		    posCount += 1;
-		}
-
-		for (Map.Entry<String, ColumnDetail> mp : right.getOutputTupleSchema().entrySet()){
-			int index = mp.getValue().getIndex();
-			Tuple value = rightTuple.get(index);
-			outputTuple.add(value);
-		    outputSchema.get(mp.getKey()).setIndex(posCount);
-		    posCount += 1;
-		}
+		outputMap = populateTuple(outputMap, left.getOutputTupleSchema(), leftTuple);
+		outputMap = populateTuple(outputMap, right.getOutputTupleSchema(), rightTuple);
+		
+		outputTuple = treeMapToList(outputMap);
 			
 		if (this.expr != null){
 			Evaluator evaluator = new Evaluator(outputTuple, outputSchema);
@@ -101,14 +90,21 @@ public class JoinOperator implements Operator {
 		outputSchema = new HashMap<String, ColumnDetail>();
 		leftSchema = new HashMap<String, ColumnDetail>(left.getOutputTupleSchema());
 		rightSchema = new HashMap<String, ColumnDetail>(right.getOutputTupleSchema());
+		int offset = 0;
 		for (Entry<String, ColumnDetail> en : rightSchema.entrySet()){
 			String key = en.getKey();
 			ColumnDetail value = en.getValue().clone();
+			int index = value.getIndex();
+			if (index > offset){
+				offset = index;
+			}
 			outputSchema.put(key, value);
 		}
 		for (Entry<String, ColumnDetail> en : leftSchema.entrySet()){
 			String key = en.getKey();
 			ColumnDetail value = en.getValue().clone();
+			int index = value.getIndex();
+			value.setIndex(index + offset + 1);
 			outputSchema.put(key, value);
 		}
 		this.leftTuple = left.readOneTuple();
@@ -128,6 +124,25 @@ public class JoinOperator implements Operator {
 	public HashMap<String, ColumnDetail> getOutputTupleSchema() {
 		// TODO Auto-generated method stub
 		return this.outputSchema;
+	}
+	
+	private ArrayList<Tuple> treeMapToList(TreeMap<Integer, Tuple> in){
+		ArrayList<Tuple> res = new ArrayList<Tuple>();
+		for (Tuple t : in.values()){
+			res.add(t);
+		}
+		return res;
+	}
+	
+	private TreeMap<Integer, Tuple> populateTuple(TreeMap<Integer, Tuple> current, 
+			HashMap<String, ColumnDetail> schema, ArrayList<Tuple> thisTuple){
+		for (Map.Entry<String, ColumnDetail> mp : schema.entrySet()){
+			int index = mp.getValue().getIndex();
+			Tuple value = thisTuple.get(index);
+			int outdex = outputSchema.get(mp.getKey()).getIndex();
+			current.put(outdex, value);
+		}
+		return current;
 	}
 	
 }
