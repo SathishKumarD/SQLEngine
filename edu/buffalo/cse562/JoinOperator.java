@@ -35,6 +35,8 @@ public class JoinOperator implements Operator {
 		this.left = left;
 		this.right = right;
 		this.expr = expr;
+		String str = null;
+		str.toCharArray();
 		this.reset();
 	}
 	

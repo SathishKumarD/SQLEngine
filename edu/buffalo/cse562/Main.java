@@ -58,7 +58,14 @@ public class Main {
 						if (select instanceof PlainSelect){
 							// 	System.err.println(select);
 							Operator op = e.generateTree(select);
+							try
+							{
 							ExecuteQuery(op);
+							}
+							catch(Exception ex)
+							{
+								System.err.println(select);
+							}
 
 						}
 						else if (select instanceof Union){
