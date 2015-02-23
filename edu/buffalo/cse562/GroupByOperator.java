@@ -38,8 +38,8 @@ public class GroupByOperator implements Operator {
 		this.groupByColumns = groupByColumns;
 		this.aggregateFunctions = aggregateFunctions;
 		this.outputSchema = getOutputSchema();
-		//Util.printSchema(inputSchema);
-		// Util.printSchema(outputSchema);
+		Util.printSchema(inputSchema);
+		 Util.printSchema(outputSchema);
 		outputData = new HashMap<String, GroupByOutput>();
 		isGroupByComputed = false;
 		rowIndex =0;
@@ -153,6 +153,7 @@ public class GroupByOperator implements Operator {
 		{
 
 			ArrayList<Tuple> existingTuple = outputData.get(hashKey).getOutputData();
+			
 			if(funcIndex ==existingTuple.size() )
 			{
 				existingTuple.add(tup);
@@ -160,7 +161,8 @@ public class GroupByOperator implements Operator {
 			Tuple sumDatum = existingTuple.get(funcIndex);
 			;
 			sumDatum = sumDatum.add(tup);
-			// System.out.println("SUM "+funcIndex+" " +sumDatum.toString() + " "+existingTuple.get(funcIndex) + " "+  outputData.get(hashKey).getOutputData().get(funcIndex) );
+			// Util.printTuple(existingTuple);
+			//  System.out.println("SUM "+funcIndex+" " +sumDatum.toString() + " "+existingTuple.get(funcIndex) + " "+  outputData.get(hashKey).getOutputData().get(funcIndex) );
 		}
 
 
@@ -220,6 +222,10 @@ public class GroupByOperator implements Operator {
 			Tuple existingDatum = existingTuple.get(funcIndex);
 			existingDatum = (tup.isLessThan(existingDatum))?tup:existingDatum;
 			existingTuple.get(funcIndex).Update(existingDatum);
+			
+			 //Util.printTuple(existingTuple);
+			 // System.out.println("MIN "+funcIndex+" " +existingTuple.toString() + " "+existingTuple.get(funcIndex) + " "+  outputData.get(hashKey).getOutputData().get(funcIndex) );
+
 		}
 
 
