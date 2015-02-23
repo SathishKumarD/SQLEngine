@@ -52,9 +52,9 @@ public class Main {
 					if(statement instanceof Select){
 						SelectBody select = ((Select) statement).getSelectBody();
 
-						queryCount++;
+						// queryCount++;
 
-						if(queryCount >6)
+						if(queryCount ==0)
 						{
 							System.err.println(select);
 						}
