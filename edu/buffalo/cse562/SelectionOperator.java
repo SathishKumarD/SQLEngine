@@ -28,7 +28,7 @@ public class SelectionOperator implements Operator {
 		this.input = input;
 		this.exp = exp;
 		this.inputSchema = input.getOutputTupleSchema();
-		
+		// test comment
 	}
 	
 	public ArrayList<Tuple> readOneTuple() {
