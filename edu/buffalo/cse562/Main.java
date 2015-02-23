@@ -27,6 +27,8 @@ public class Main {
 			System.out.println("Incomplete arguments");
 			return;
 		}
+		
+		
 
 		if (args[0].equals("--data")){
 			ConfigManager.setDataDir(args[1]);
@@ -101,8 +103,8 @@ public class Main {
 			tableSchema.put(columnFullName, columnDetail);
 			colCount++;
 		}
-		tableMapping.put(tableName,tableSchema);
-		indexTypeMaps.put(tableName,typeInfo);
+		tableMapping.put(tableName.toLowerCase(),tableSchema);
+		indexTypeMaps.put(tableName.toLowerCase(),typeInfo);
 	}
 
 	/**	 

@@ -28,6 +28,7 @@ public class SelectionOperator implements Operator {
 		this.input = input;
 		this.exp = exp;
 		this.inputSchema = input.getOutputTupleSchema();
+		Util.printSchema(inputSchema);
 		// test comment
 	}
 	
@@ -42,7 +43,9 @@ public class SelectionOperator implements Operator {
 		do
 		{
 			tuple = input.readOneTuple();
+			
 			if(tuple==null) return null;
+			Util.printTuple(tuple);
 			Evaluator evaluator = new Evaluator(tuple,inputSchema);
 			
 			try {
