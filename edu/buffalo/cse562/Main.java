@@ -21,7 +21,7 @@ public class Main {
 
 	static HashMap<String, HashMap<String, ColumnDetail>> tableMapping = new HashMap<String, HashMap<String, ColumnDetail>>();
 	static HashMap<String,HashMap<Integer, String>> indexTypeMaps = new HashMap<String, HashMap<Integer, String>>();
-	
+
 	static int queryCount = 0;
 	public static void main(String[] args) {		
 		//the sql file starts from 3rd argument
@@ -29,8 +29,8 @@ public class Main {
 			System.out.println("Incomplete arguments");
 			return;
 		}
-		
-		
+
+
 
 		if (args[0].equals("--data")){
 			ConfigManager.setDataDir(args[1]);
@@ -48,33 +48,36 @@ public class Main {
 				CCJSqlParser parser = new CCJSqlParser(new FileReader(f));
 				ExpressionTree e = new ExpressionTree();
 				while ((statement = parser.Statement()) != null){
-//					System.out.println(statement);
+					//					System.out.println(statement);
 					if(statement instanceof Select){
 						SelectBody select = ((Select) statement).getSelectBody();
-						if (select instanceof PlainSelect){
-							// 	System.err.println(select);
-							Operator op = e.generateTree(select);
-							queryCount++;
-							
-							if(queryCount <7)
-							{
-							ExecuteQuery(op);
+
+						queryCount++;
+
+						if(queryCount >6)
+						{
+							System.err.println(select);
+						}
+						else
+						{
+
+							if (select instanceof PlainSelect){
+								// 	System.err.println(select);
+								Operator op = e.generateTree(select);
+								ExecuteQuery(op);
+
 							}
-							else
-							{
-								System.err.println(select);
+							else if (select instanceof Union){
+								Union un = (Union) select;
+								Operator op;
+								UnionOperator uop = new UnionOperator();
+								List<PlainSelect> pselects = (List<PlainSelect>) un.getPlainSelects();
+								for (PlainSelect s : pselects){
+									uop.addOperator(e.generateTree(s));
+								}
+								ExecuteQuery(uop);
 							}
 						}
-						else if (select instanceof Union){
-							Union un = (Union) select;
-							Operator op;
-							UnionOperator uop = new UnionOperator();
-							List<PlainSelect> pselects = (List<PlainSelect>) un.getPlainSelects();
-							for (PlainSelect s : pselects){
-								uop.addOperator(e.generateTree(s));
-							}
-							ExecuteQuery(uop);
-						}								
 					}
 					else if(statement instanceof CreateTable){
 						CreateTable createTableObj = (CreateTable) statement;								
@@ -98,7 +101,7 @@ public class Main {
 		@SuppressWarnings("unchecked")
 		String[] tableNames = new String[1];
 		String tableName = createTableObj.getTable().getWholeTableName().toLowerCase();
-		
+
 		List<ColumnDefinition> cds = (List<ColumnDefinition>) createTableObj.getColumnDefinitions();
 		HashMap<String, ColumnDetail> tableSchema = new HashMap<String, ColumnDetail>();
 		HashMap<Integer, String> typeInfo = new HashMap<Integer, String>();
