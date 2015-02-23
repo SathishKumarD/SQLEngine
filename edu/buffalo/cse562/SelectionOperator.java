@@ -27,6 +27,7 @@ public class SelectionOperator implements Operator {
 	public SelectionOperator(Operator input, Expression exp){
 		this.input = input;
 		this.exp = exp;
+		this.inputSchema = input.getOutputTupleSchema();
 		
 	}
 	
