@@ -38,8 +38,8 @@ public class GroupByOperator implements Operator {
 		this.groupByColumns = groupByColumns;
 		this.aggregateFunctions = aggregateFunctions;
 		this.outputSchema = getOutputSchema();
-		Util.printSchema(inputSchema);
-		 Util.printSchema(outputSchema);
+		//Util.printSchema(inputSchema);
+		// Util.printSchema(outputSchema);
 		outputData = new HashMap<String, GroupByOutput>();
 		isGroupByComputed = false;
 		rowIndex =0;
@@ -82,7 +82,6 @@ public class GroupByOperator implements Operator {
 		return  this.outputSchema;
 	}
 
-	
 	private void ComputeGroupBy()
 	{
 		if(!isGroupByComputed)
@@ -153,7 +152,6 @@ public class GroupByOperator implements Operator {
 		{
 
 			ArrayList<Tuple> existingTuple = outputData.get(hashKey).getOutputData();
-			
 			if(funcIndex ==existingTuple.size() )
 			{
 				existingTuple.add(tup);
@@ -161,8 +159,7 @@ public class GroupByOperator implements Operator {
 			Tuple sumDatum = existingTuple.get(funcIndex);
 			;
 			sumDatum = sumDatum.add(tup);
-			// Util.printTuple(existingTuple);
-			//  System.out.println("SUM "+funcIndex+" " +sumDatum.toString() + " "+existingTuple.get(funcIndex) + " "+  outputData.get(hashKey).getOutputData().get(funcIndex) );
+			// System.out.println("SUM "+funcIndex+" " +sumDatum.toString() + " "+existingTuple.get(funcIndex) + " "+  outputData.get(hashKey).getOutputData().get(funcIndex) );
 		}
 
 
@@ -222,10 +219,6 @@ public class GroupByOperator implements Operator {
 			Tuple existingDatum = existingTuple.get(funcIndex);
 			existingDatum = (tup.isLessThan(existingDatum))?tup:existingDatum;
 			existingTuple.get(funcIndex).Update(existingDatum);
-			
-			 //Util.printTuple(existingTuple);
-			 // System.out.println("MIN "+funcIndex+" " +existingTuple.toString() + " "+existingTuple.get(funcIndex) + " "+  outputData.get(hashKey).getOutputData().get(funcIndex) );
-
 		}
 
 
@@ -333,7 +326,7 @@ public class GroupByOperator implements Operator {
 		{
 			if(expObj instanceof Column)
 			{
-				colDet = Evaluator.getColumnDetail(outputSchema, (Column) expObj) ;
+				colDet = Evaluator.getColumnDetail(outputSchema, (Column) expObj).clone() ;
 				if(colDet!=null) return colDet;
 			}
 
@@ -430,7 +423,7 @@ public class GroupByOperator implements Operator {
 					Tuple sum = colDetail.getValue().getOutputData().get(avgIndex);
 					//System.out.println(sum.toString()+" "+count + ": "+avgIndex );
 					sum = sum.divideBy(new Tuple("int",count.toString()));
-				// 	System.out.println(colDetail.getValue().getOutputData().get(avgIndex));
+					System.out.println(colDetail.getValue().getOutputData().get(avgIndex));
 				}
 
 			}

@@ -33,7 +33,7 @@ public class Evaluator extends Eval {
 
 		int colID = getIndex(tupleSchema,column);	
 		LeafValue leafValue = tuple.get(colID).val;
-		Util.printTuple(tuple);
+		// Util.printTuple(tuple);
 		return (colID==-1)?null:leafValue;
 	}
 

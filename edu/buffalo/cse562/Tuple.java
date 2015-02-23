@@ -13,6 +13,11 @@ public class Tuple implements Comparable<Tuple> {
 	public LeafValue val ;
 	
 	//in extended projection while evaluating expressions, we dont get type
+	
+	public Tuple()
+	{
+		
+	}
 	public Tuple(LeafValue value){
 		this.val = value;
 	}
