@@ -58,6 +58,7 @@ public class Main {
 						if (select instanceof PlainSelect){
 							// 	System.err.println(select);
 							Operator op = e.generateTree(select);
+							
 							try
 							{
 							ExecuteQuery(op);
@@ -65,6 +66,7 @@ public class Main {
 							catch(Exception ex)
 							{
 								System.err.println(select);
+								ex.printStackTrace();
 							}
 
 						}
@@ -150,17 +152,47 @@ public class Main {
 		}
 		System.out.println();
 	}	
+	
+	static String getTupleAsString(ArrayList<Tuple> singleTuple) {
+		
+		StringBuilder sb = new  StringBuilder();
+		for(int i=0; i < singleTuple.size();i++){
+
+			try
+			{
+				String tupleStr = (singleTuple.get(i)==null)?"":singleTuple.get(i).toString();
+				sb.append(tupleStr);
+				//System.out.print(str);
+			}
+			catch(Exception ex)
+			{
+				ex.printStackTrace();
+				System.out.println(singleTuple.get(i));
+			}
+
+			if(i != singleTuple.size() - 1) sb.append("|");
+		}
+		sb.append("\n");
+		return sb.toString();
+		// System.out.println();
+	}	
 
 	static void ExecuteQuery(Operator op)
 	{
 		ArrayList<Tuple> dt=null;
+		StringBuilder sb = new StringBuilder();
 		do
 		{
 			dt = op.readOneTuple();
-			if(dt !=null) printTuple(dt);
+			if(dt !=null)
+			{
+				///printTuple(dt);
+				sb.append(getTupleAsString(dt));
+			}
 
 		}while(dt!=null);
-
+		
+		System.out.print(sb.toString());
 	}	
 
 }

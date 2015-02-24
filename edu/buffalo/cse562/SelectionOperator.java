@@ -84,6 +84,11 @@ public class SelectionOperator implements Operator {
 
 	}
 	
+	public Expression getSelectExpression()
+	{
+		return this.exp;
+	}
+	
 	public String toString(){
 		
 		return "EVALUATE Select - "+ this.exp;

@@ -109,9 +109,6 @@ public class ExpressionTree {
 
 		List<Column> groupByColumns =  getGroupByColumns(select);
 		List<AggregateFunctionColumn> aggregateFunctions = getFunctionList( select);
-		
-//		System.out.println(groupByColumns);
-//		System.out.println(aggregateFunctions);
 
 		if(groupByColumns!=null ||aggregateFunctions.size() >0 )
 		{

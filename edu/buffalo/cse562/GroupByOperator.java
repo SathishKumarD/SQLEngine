@@ -43,8 +43,7 @@ public class GroupByOperator implements Operator {
 		outputData = new HashMap<String, GroupByOutput>();
 		isGroupByComputed = false;
 		rowIndex =0;
-		//System.out.println(toString());
-		// TODO Auto-generated constructor stub
+		
 	}
 
 
