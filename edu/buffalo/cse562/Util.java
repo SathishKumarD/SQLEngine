@@ -3,6 +3,7 @@
  */
 package edu.buffalo.cse562;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -61,6 +62,24 @@ public class Util {
 			}
 			System.out.println();
 		}
+	}
+	public static void printToStream(ArrayList<Tuple> singleTuple, PrintWriter printStream) {
+		for(int i=0; i < singleTuple.size();i++){
+
+			try
+			{
+				String str = (singleTuple.get(i)==null)?"":singleTuple.get(i).toString();
+				printStream.print(str);
+			}
+			catch(Exception ex)
+			{
+				ex.printStackTrace();
+				printStream.println(singleTuple.get(i));
+			}
+
+			if(i != singleTuple.size() - 1) System.out.print("|");
+		}
+		printStream.println();
 	}	
 
 }
