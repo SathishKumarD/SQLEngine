@@ -36,7 +36,7 @@ public class ExpressionTree {
 	private Operator addSortOperator(Operator current, PlainSelect select){
 		List<OrderByElement> OrderByElements  = (List<OrderByElement>)select.getOrderByElements();		
 		if(OrderByElements != null && OrderByElements.size() > 0){
-			current = new ExternalSortOperator(current, OrderByElements);
+			current = new SortOperator(current, OrderByElements);
 		}
 		
 		return current;
@@ -89,7 +89,8 @@ public class ExpressionTree {
 		return current;
 	}
 	public Operator buildJoins(Operator current, Join j){
-		FromItem fr = j.getRightItem();		
+		FromItem fr = j.getRightItem();
+		
 		if (fr instanceof Table){
 			current = new JoinOperator(current, new ScanOperator(((Table) fr)), j.getOnExpression());
 		}	
@@ -109,6 +110,9 @@ public class ExpressionTree {
 
 		List<Column> groupByColumns =  getGroupByColumns(select);
 		List<AggregateFunctionColumn> aggregateFunctions = getFunctionList( select);
+		
+//		System.out.println(groupByColumns);
+//		System.out.println(aggregateFunctions);
 
 		if(groupByColumns!=null ||aggregateFunctions.size() >0 )
 		{
@@ -145,8 +149,6 @@ public class ExpressionTree {
 		}
 		return groupByColumns;
 	}
-
-
 
 	private List<AggregateFunctionColumn> getFunctionList(PlainSelect select)
 	{

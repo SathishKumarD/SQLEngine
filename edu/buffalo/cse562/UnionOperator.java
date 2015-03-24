@@ -32,13 +32,7 @@ public class UnionOperator implements Operator {
 		// TODO Auto-generated method stub
 		this.tuplesSeen = new HashSet<String>();
 	}
-
-	@Override
-	public Operator peekNextOp() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
+	
 	@Override
 	public HashMap<String, ColumnDetail> getOutputTupleSchema() {
 		// TODO Auto-generated method stub
@@ -52,5 +46,27 @@ public class UnionOperator implements Operator {
 	
 	public void addOperator(Operator op) {
 		this.operators.add(op);		
+	}
+
+	@Override
+	public Operator getParent() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void setParent(Operator parent) {
+		//null		
+	}
+	
+	@Override
+	public Operator getChildOp() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public void setChildOp(Operator child)
+	{
+		//null
 	}
 }

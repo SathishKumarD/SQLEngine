@@ -1,22 +1,16 @@
-/**
- * 
- */
 package edu.buffalo.cse562;
+
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.TreeMap;
+import java.util.Map.Entry;
 
 import net.sf.jsqlparser.expression.BooleanValue;
 import net.sf.jsqlparser.expression.Expression;
 
-/**
- * @author Sathish
- *
- */
-public class JoinOperator implements Operator {
+public class HashJoinOperator implements Operator {
 	/* (non-Javadoc)
 	 * @see edu.buffalo.cse562.Operator#readOneTuple()
 	 */
@@ -28,17 +22,16 @@ public class JoinOperator implements Operator {
 	private HashMap<String, ColumnDetail> rightSchema;
 	private Expression expr = null;
 	private ArrayList<Tuple> leftTuple;
-	private ArrayList<Tuple> rightTuple;	
+	private ArrayList<Tuple> rightTuple;
 	private Operator parentOperator = null;
-	
 
-	public JoinOperator(Operator left, Operator right, Expression expr){
+	public HashJoinOperator(Operator left, Operator right, Expression expr){
 		setChildOp(left);
 		
 		setRightOp(right);
 		
 		this.expr = expr;
-	//	this.reset();
+		//this.reset();
 	}
 	
 	@Override
@@ -116,7 +109,11 @@ public class JoinOperator implements Operator {
 	}
 	
 	public String toString(){
-		StringBuilder b = new StringBuilder("JOIN WITH \n");
+		StringBuilder b = new StringBuilder("HASH JOIN \n");
+		
+		b.append('\t'+"ON "+this.expr.toString() + '\n');
+		b.append('\t'+"WITH"+'\n');
+					
 		Operator childOfRightBranch = this.right;
 		
 		while(childOfRightBranch != null)

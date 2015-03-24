@@ -21,6 +21,7 @@ public class SortOperator implements Operator {
 	List<ArrayList<Tuple>> fullRelation = new ArrayList<ArrayList<Tuple>>();
 	boolean isFirstTime;
 	int counterForOutputTuple;
+	private Operator parentOperator = null;
 	
 	List<Integer> outputRowsOrder = new ArrayList<Integer>();
 	
@@ -167,15 +168,29 @@ public class SortOperator implements Operator {
 	public String toString(){
 		return " ORDER BY " + orderByElements.toString();		
 	}
+	
 	@Override
-	public Operator peekNextOp() {
-		// TODO Auto-generated method stub
+	public Operator getChildOp() {
 		return input;
+	}
+	
+	public void setChildOp(Operator child)
+	{
+		this.input = child;
+	}
+	
+	@Override
+	public Operator getParent() {
+		return this.parentOperator;
 	}
 
 	@Override
+	public void setParent(Operator parent) {
+		this.parentOperator = parent;		
+	}
+		
+	@Override
 	public HashMap<String, ColumnDetail> getOutputTupleSchema() {
-		// TODO Auto-generated method stub
 		return inputSchema;
 	}
 
