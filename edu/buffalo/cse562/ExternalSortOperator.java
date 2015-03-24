@@ -7,6 +7,8 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -16,6 +18,8 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
 
+import net.sf.jsqlparser.statement.select.OrderByElement;
+
 public class ExternalSortOperator implements Operator {
 	Operator child;
 	File swapDir;
@@ -23,20 +27,24 @@ public class ExternalSortOperator implements Operator {
 	Comparator<ArrayList<Tuple>> comp;
 	int bufferLength;
 	HashMap<String, ColumnDetail> outputSchema;
-	private static final int BUFFER_SIZE = 100;
+	private static final int BUFFER_SIZE = 3000;
 	TreeMap<Integer, String> typeMap;
 	List<ArrayList<Tuple>> workingSet;
 
 	
-	public ExternalSortOperator(Operator child, String swap, String field) {
+	public ExternalSortOperator(Operator child, List<OrderByElement> OrderByElements) {
 		// TODO Auto-generated constructor stub
-		this.child = child;
-		this.sortField = field;
-		swapDir = new File(swap, UUID.randomUUID().toString());
+		System.err.println(" Total Memory available is " + Runtime.getRuntime().totalMemory()/1000000 + "MB");
+		swapDir = new File(ConfigManager.getSwapDir(), UUID.randomUUID().toString());
 		if (!swapDir.exists()){
 			swapDir.mkdir();
 		}
 		this.outputSchema = child.getOutputTupleSchema();
+		
+		String field = getFullField(OrderByElements.get(0).toString());
+		this.child = child;
+		this.sortField = field;
+		
 		this.comp = new TupleComparator(this.outputSchema.get(field).getIndex());
 		this.bufferLength = Math.floorDiv(BUFFER_SIZE, this.getOutputTupleSchema().size());
 		this.typeMap = new TreeMap<Integer, String>();
@@ -61,15 +69,10 @@ public class ExternalSortOperator implements Operator {
 				currentFileHandler = getFileHandle(index++, nPass);
 			}
 		}
-		
 		// Recursive merging
-		for (int j = index; j > 0; j /= 2){
-			nPass++;
-			for (int i = 0; i < j; i += 2){
-				currentFileHandler = mergeRuns(nPass, i, i+1);
-			}
-		}
 		
+		
+		//##########	
 		//Finally, return tuples from sorted file
 		try {
 			MiniScan finalOutput = new MiniScan(currentFileHandler, typeMap);
@@ -80,15 +83,34 @@ public class ExternalSortOperator implements Operator {
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}				
 		return null;
 	}
 	
-	private File mergeRuns(int nPass, int ind1, int ind2){		
-		File fname1 = getFileHandle(ind1, nPass);
-		File fname2 = getFileHandle(ind2, nPass);
-		File currentFileHandler = getFileHandle(ind1, nPass++);
-
+	private void mergeRecursive(int nPass, int start, int end){
+		if (end == start){
+			// The End
+			
+		}
+		int midPoint = ((start + end))/2;
+		if ((end - start) == 1){
+			File fname1 = getFileHandle(start, nPass);
+			File fname2 = getFileHandle(end, nPass);
+			File outputHandler = getFileHandle(midPoint, nPass + 1) ;
+//			System.out.println("Merging " + fname1);
+//			System.out.println("AND " + fname2);
+			mergeOnce(fname1, fname2, outputHandler);
+		}
+		else{ 
+			mergeRecursive(nPass, start, midPoint);
+			mergeRecursive(nPass, midPoint+1, end);
+		}
+	}
+	
+	private void mergeOnce(File fname1, File fname2, File currentFileHandler){
 		try {
 			MiniScan left = new MiniScan(fname1, typeMap);
 			MiniScan right = new MiniScan(fname2, typeMap);
@@ -98,37 +120,39 @@ public class ExternalSortOperator implements Operator {
 			//Merge procedure
 			while (!(leftTup == null) && !(rightTup == null)){
 				if (this.comp.compare(leftTup, rightTup) < 0){
+//					System.out.println("adding left" + leftTup);
 					addToSet(leftTup, false, currentFileHandler);
-					leftTup = left.readTuple();
+					leftTup = left.readTuple(); 
 				}
 				else{
-					addToSet(leftTup, false, currentFileHandler);
-					leftTup = left.readTuple();
+//					System.out.println("adding right" + rightTup);
+					addToSet(rightTup, false, currentFileHandler);
+					rightTup = right.readTuple();
 				}
 			}
 			
 			//dump remainder into the working set and flush
-			if (leftTup != null){
+			while (leftTup != null){
+//				System.out.println("flushing left");
 				addToSet(leftTup, false, currentFileHandler);
-				while ((leftTup = left.readTuple()) != null){
-					addToSet(leftTup, false, currentFileHandler);
-				}
+				leftTup = left.readTuple();
+//				System.out.println(leftTup);
 			}
-			else if (rightTup != null){
+			while (rightTup != null){
+				System.out.println("flushing right");
 				addToSet(rightTup, false, currentFileHandler);
-				while ((rightTup = right.readTuple()) != null){
-					addToSet(rightTup, false, currentFileHandler);
-				}
+				rightTup = right.readTuple();
 			}
+			
 			writeToDisk(workingSet, currentFileHandler);
 			System.gc();
-			return currentFileHandler;
-
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
-		return null;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
 	}
 	
 	private boolean addToSet(ArrayList<Tuple> toAdd, boolean sort, File currentFileHandle){
@@ -144,9 +168,11 @@ public class ExternalSortOperator implements Operator {
 			if (sort){
 				Collections.sort(workingSet, this.comp);
 			}
+//			System.err.println(" Collecting garbage with " 
+//					+(Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())/1000000 +"MB currently used");
 			writeToDisk(workingSet, currentFileHandle);
 			workingSet = new ArrayList<ArrayList<Tuple>>(this.bufferLength);
-			workingSet.add(toAdd);
+			workingSet.add(toAdd);	
 			System.gc();
 			return true;
 		}
@@ -192,11 +218,8 @@ public class ExternalSortOperator implements Operator {
 	}
 	
 	private File getFileHandle(int index, int nPass){
-		File writeDir = new File(this.swapDir, Integer.toString(nPass));
-		if (!writeDir.exists()){
-			writeDir.mkdirs();
-		}
-		writeDir = new File(writeDir, Integer.toString(index));
+		String fname = nPass+"-"+index;
+		File writeDir = new File(this.swapDir, fname);
 		
 		if (!writeDir.exists()){
 			try {
@@ -207,6 +230,16 @@ public class ExternalSortOperator implements Operator {
 			}
 		}
 		return writeDir;
+	}
+	
+	private String getFullField(String input){
+		for (Map.Entry<String, ColumnDetail> entry : this.outputSchema.entrySet()){
+			ColumnDetail col = entry.getValue();
+			if (col.getColumnDefinition().getColumnName().equals(input)){
+				return entry.getKey();
+			}
+		}
+		return null;
 	}
 	
 	private class TupleComparator implements Comparator<ArrayList<Tuple>>{
@@ -223,13 +256,15 @@ public class ExternalSortOperator implements Operator {
 		}
 	}
 	
+	
 	private class MiniScan{
 		BufferedReader br;
 		String line;
 		TreeMap<Integer, String> typeMap;
 
-		public MiniScan(File filename, TreeMap<Integer, String> typeMap) throws FileNotFoundException{
-			this.br = new BufferedReader(new FileReader(filename));
+		public MiniScan(File filename, TreeMap<Integer, String> typeMap) throws IOException{
+			Charset charset = Charset.forName("US-ASCII");
+			this.br = Files.newBufferedReader(filename.toPath(), charset);
 			this.typeMap = typeMap;
 		}
 		
@@ -247,6 +282,13 @@ public class ExternalSortOperator implements Operator {
 				if ((line = br.readLine())!= null){
 					return parseLine(line);
 				}
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			try {
+				this.br.close();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

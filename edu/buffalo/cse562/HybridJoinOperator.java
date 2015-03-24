@@ -1,23 +1,12 @@
-/**
- * 
- */
 package edu.buffalo.cse562;
-import java.sql.SQLException;
+
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Map.Entry;
-import java.util.TreeMap;
 
-import net.sf.jsqlparser.expression.BooleanValue;
 import net.sf.jsqlparser.expression.Expression;
 
-/**
- * @author Sathish
- *
- */
-public class JoinOperator implements Operator {
-
+public class HybridJoinOperator<T> implements Operator{
 	/* (non-Javadoc)
 	 * @see edu.buffalo.cse562.Operator#readOneTuple()
 	 */
@@ -30,10 +19,22 @@ public class JoinOperator implements Operator {
 	private HashMap<String, ColumnDetail> rightSchema;
 	private ArrayList<Tuple> leftTuple;
 	private ArrayList<Tuple> rightTuple;
+	private Expression expr;
+	private int leftIndex;
+	private int rightIndex;
+	private HashMap<String, ArrayList<Tuple>> joinHash;
+	boolean hashed = false;
 
-	public JoinOperator(Operator left, Operator right, Expression expr){
+	public HybridJoinOperator(Operator left, Operator right, Expression expr){
 		this.left = left;
-		this.right = right;		
+		this.right = right;	
+		this.expr = expr;
+		joinHash = new HashMap<String, ArrayList<Tuple>>();
+		
+		//TODO: get the objects of the expression and find the corresponding indexes in each tuple
+		leftIndex = left.getOutputTupleSchema().get("SOME COLUMN NAME").getIndex();
+		rightIndex = right.getOutputTupleSchema().get("SOME COLUMN NAME").getIndex();
+		
 		generateOutputSchema();
 	}
 	
@@ -41,20 +42,29 @@ public class JoinOperator implements Operator {
 	public ArrayList<Tuple> readOneTuple() {
 		// TODO Auto-generated method stub
 //		leftTuple = left.readOneTuple();
-		rightTuple = right.readOneTuple();		
-
-		if (rightTuple == null){
-			right.reset();
-			rightTuple = right.readOneTuple();
-			this.reset();
+		
+		if (!hashed){
+			rightTuple = right.readOneTuple();		
+	
+			while(rightTuple != null){
+				joinHash.put(rightTuple.get(rightIndex).toString(), rightTuple);
+				rightTuple = right.readOneTuple();
+			}
+			hashed = true;
 		}
 		
-		if (leftTuple == null){
-			return null;
+		leftTuple = left.readOneTuple();
+		if (leftTuple != null){
+			ArrayList<Tuple> hashedRight = joinHash.get(leftTuple.get(leftIndex));
+			if (hashedRight != null){
+				leftTuple.addAll(hashedRight);
+				return leftTuple;
+			}
+			else{
+				return readOneTuple();
+			}
 		}
-
-		leftTuple.addAll(rightTuple);
-		return leftTuple;
+		return null;
 	}
 
 	/* (non-Javadoc)
@@ -104,5 +114,4 @@ public class JoinOperator implements Operator {
 			outputSchema.put(key, value);
 		}
 	}
-	
 }

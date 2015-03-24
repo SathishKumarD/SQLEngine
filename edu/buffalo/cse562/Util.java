@@ -64,22 +64,12 @@ public class Util {
 		}
 	}
 	public static void printToStream(ArrayList<Tuple> singleTuple, PrintWriter printStream) {
+		StringBuilder b = new StringBuilder();
 		for(int i=0; i < singleTuple.size();i++){
-
-			try
-			{
-				String str = (singleTuple.get(i)==null)?"":singleTuple.get(i).toString();
-				printStream.print(str);
-			}
-			catch(Exception ex)
-			{
-				ex.printStackTrace();
-				printStream.println(singleTuple.get(i));
-			}
-
-			if(i != singleTuple.size() - 1) System.out.print("|");
+			b.append(singleTuple.get(i));
+			b.append("|");
 		}
-		printStream.println();
+		printStream.println(b);
 	}	
 
 }

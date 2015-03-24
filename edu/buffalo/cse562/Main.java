@@ -35,10 +35,17 @@ public class Main {
 		if (args[0].equals("--data")){
 			ConfigManager.setDataDir(args[1]);
 		}
+		
+		int sqlIndex = 2;
+		
+		if (args[2].equals("--swap")){
+			ConfigManager.setSwapDir(args[3]);
+			sqlIndex = 4;
+		}
 
 		ArrayList<File> queryFiles = new ArrayList<File>();
 
-		for(int i=2; i < args.length; i++){	
+		for(int i=sqlIndex; i < args.length; i++){	
 			queryFiles.add(new File(args[i]));
 		}
 		Statement statement =null;						
