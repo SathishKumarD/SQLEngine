@@ -20,7 +20,7 @@ import java.util.UUID;
 
 import net.sf.jsqlparser.statement.select.OrderByElement;
 
-public class ExternalSortOperator implements Operator {
+public abstract class ExternalSortOperator implements Operator {
 	Operator child;
 	File swapDir;
 	String sortField;
@@ -187,12 +187,6 @@ public class ExternalSortOperator implements Operator {
 	public void reset() {
 		// TODO Auto-generated method stub
 
-	}
-
-	@Override
-	public Operator peekNextOp() {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	@Override

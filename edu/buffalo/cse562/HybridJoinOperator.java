@@ -6,7 +6,7 @@ import java.util.Map.Entry;
 
 import net.sf.jsqlparser.expression.Expression;
 
-public class HybridJoinOperator<T> implements Operator{
+public abstract class HybridJoinOperator<T> implements Operator{
 	/* (non-Javadoc)
 	 * @see edu.buffalo.cse562.Operator#readOneTuple()
 	 */

@@ -60,10 +60,9 @@ public class Evaluator extends Eval {
 					String columnValue = key.split("\\.")[1];
 
 					// validate it with the column passed
-					if( columnValue.equalsIgnoreCase(column.getWholeColumnName()))
+					if( columnValue.equalsIgnoreCase(column.getWholeColumnName()) || columnValue.equalsIgnoreCase(column.getColumnName()))
 					{
-						return 	  colDetail.getValue();
-
+						return 	 colDetail.getValue();
 					}
 				}
 			}
@@ -72,5 +71,4 @@ public class Evaluator extends Eval {
 	}
 	
 	
-
 }
