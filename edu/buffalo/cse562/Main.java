@@ -79,8 +79,10 @@ public class Main {
 							System.out.println("______________________________________");
 							System.out.println("	Optimized Execution Plan's Result");
 							System.out.println("______________________________________");
-							ExecuteQuery(op);							
-						
+							
+							//NOTE: Complete Hash Join and Sort To execute the optimized tree
+							// Check n print the output schema of CrossProduct/ HashJoins and all operators in the tree before running on data  
+							//ExecuteQuery(op);													
 							}
 							catch(Exception ex)
 							{
@@ -89,7 +91,6 @@ public class Main {
 								System.out.println(ex.getMessage());
 								ex.printStackTrace();
 							}
-
 						}
 						else if (select instanceof Union){
 							Union un = (Union) select;

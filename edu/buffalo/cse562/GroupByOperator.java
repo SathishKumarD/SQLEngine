@@ -477,7 +477,7 @@ public class GroupByOperator implements Operator {
 	}
 	
 	public String toString(){
-		return "GROUP BY " ;
+		return "GROUP BY " + groupByColumns.toString();
 	}
 
 	private ArrayList<Tuple> clone(ArrayList<Tuple> tuple)
@@ -508,4 +508,9 @@ public class GroupByOperator implements Operator {
 		this.parentOperator = parent;		
 	}
 	
+	//TODO to sathish : check if u should include aggregate columns in the output of this method getGroupByColumns()
+	public List<Column> getGroupByColumns()
+	{
+		return this.groupByColumns;		
+	}
 }

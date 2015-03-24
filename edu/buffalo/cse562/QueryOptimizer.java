@@ -12,6 +12,7 @@ import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.statement.select.OrderByElement;
 
 public class QueryOptimizer {
 
@@ -23,7 +24,7 @@ public class QueryOptimizer {
 	public QueryOptimizer(Operator current)
 	{
 		current = pushSelection(current);
-		current = replaceAllCrossProducts(current);		
+		current = replaceOperators(current);		
 	}	
 	
 	public Operator pushSelection(Operator current)
@@ -38,7 +39,6 @@ public class QueryOptimizer {
 				
 				if(op_modifiedTree != null){
 					currOperator = op_modifiedTree;
-					//parentOperator.setChildOp(currOperator);
 				}
 			}	
 				parentOperator = currOperator;
@@ -60,8 +60,13 @@ public class QueryOptimizer {
 		return currOperator;
 	}
 	
-	
-	public Operator replaceAllCrossProducts(Operator current)
+	/***
+	 * Replaces Selection sitting on CrossProducts With Hash Joins
+	 * Replaces Group By WIth GroupBy on top of External Sort 
+	 * @param root of the unoptimized expression tree
+	 * @return root of the new Expression Tree
+	 */
+	public Operator replaceOperators(Operator current)
 	{
 		Operator currOperator = current;
 		Operator parentOperator = current;		
@@ -73,11 +78,16 @@ public class QueryOptimizer {
 				
 				if(op_modifiedTree != null){
 					currOperator = op_modifiedTree;
-					//parentOperator.setChildOp(currOperator);
 				}
-			}	
-				parentOperator = currOperator;
-				currOperator = parentOperator.getChildOp();
+			}
+			
+			if(currOperator instanceof GroupByOperator)
+			{
+				replaceGroupBy((GroupByOperator)currOperator);				
+			}			
+			
+			parentOperator = currOperator;
+			currOperator = parentOperator.getChildOp();
 		}
 		while(currOperator != null);
 		
@@ -86,8 +96,8 @@ public class QueryOptimizer {
 		return root;
 	}	
 			
-	//iteratively keep sending the selection down to pattern match cross products sitting below
-	//until select conditions are empty or untill the laast child in the tree
+	//iteratively keep sending the input selection down to pattern match cross products sitting below
+	//until select conditions are empty or until the last child in the tree
 	private Operator patternMatchSelectionOnCrossProduct(SelectionOperator selectionOperator)
 	{
 		Operator oldSelectOp = selectionOperator;				
@@ -352,6 +362,24 @@ public class QueryOptimizer {
 	  }
 	  
 	  return ret;
+	}
+	
+	//to be changed to external sort! : TODO to keno
+	private void replaceGroupBy(GroupByOperator groupByOp)
+	{
+		List<Column> grpByExpressionsList = groupByOp.getGroupByColumns();
+		List<OrderByElement> orderByElements = new ArrayList<OrderByElement>();
+		
+		for(Expression exp : grpByExpressionsList)
+		{
+			OrderByElement orderByElem = new OrderByElement();
+			orderByElem.setExpression(exp);
+			
+			orderByElements.add(orderByElem);		
+		}
+		SortOperator externalSortOp = new SortOperator(groupByOp.getChildOp(), orderByElements);
+		
+		groupByOp.setChildOp(externalSortOp);		
 	}
 	
 }
