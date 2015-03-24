@@ -89,26 +89,26 @@ public abstract class ExternalSortOperator implements Operator {
 		}				
 		return null;
 	}
-	
-	private void mergeRecursive(int nPass, int start, int end){
-		if (end == start){
-			// The End
-			
-		}
-		int midPoint = ((start + end))/2;
-		if ((end - start) == 1){
-			File fname1 = getFileHandle(start, nPass);
-			File fname2 = getFileHandle(end, nPass);
-			File outputHandler = getFileHandle(midPoint, nPass + 1) ;
-//			System.out.println("Merging " + fname1);
-//			System.out.println("AND " + fname2);
-			mergeOnce(fname1, fname2, outputHandler);
-		}
-		else{ 
-			mergeRecursive(nPass, start, midPoint);
-			mergeRecursive(nPass, midPoint+1, end);
-		}
-	}
+//	
+//	private void mergeRecursive(int nPass, int start, int end){
+//		if (end == start){
+//			// The End
+//			
+//		}
+//		int midPoint = ((start + end))/2;
+//		if ((end - start) == 1){
+//			File fname1 = getFileHandle(start, nPass);
+//			File fname2 = getFileHandle(end, nPass);
+//			File outputHandler = getFileHandle(midPoint, nPass + 1) ;
+////			System.out.println("Merging " + fname1);
+////			System.out.println("AND " + fname2);
+//			mergeOnce(fname1, fname2, outputHandler);
+//		}
+//		else{ 
+//			mergeRecursive(nPass, start, midPoint);
+//			mergeRecursive(nPass, midPoint+1, end);
+//		}
+//	}
 	
 	private void mergeOnce(File fname1, File fname2, File currentFileHandler){
 		try {

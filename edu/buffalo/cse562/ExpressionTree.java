@@ -92,7 +92,7 @@ public class ExpressionTree {
 		FromItem fr = j.getRightItem();
 		
 		if (fr instanceof Table){
-			current = new JoinOperator(current, new ScanOperator(((Table) fr)), j.getOnExpression());
+			current = new CrossProductOperator(current, new ScanOperator(((Table) fr)), j.getOnExpression());
 		}	
 		return current;
 	}

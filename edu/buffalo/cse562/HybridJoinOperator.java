@@ -32,7 +32,6 @@ public abstract class HybridJoinOperator<T> implements Operator{
 		 */
 		this.left = left;
 		this.right = right;	
-		this.expr = expr;
 		joinHash = new HashMap<String, ArrayList<Tuple>>();		
 		//TODO: get the objects of the expression and find the corresponding indexes in each tuple
 		leftIndex = left.getOutputTupleSchema().get(columnLeft).getIndex();

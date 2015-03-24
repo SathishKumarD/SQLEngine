@@ -16,7 +16,7 @@ import net.sf.jsqlparser.expression.Expression;
  * @author Sathish
  *
  */
-public class JoinOperator implements Operator {
+public class CrossProductOperator implements Operator {
 	/* (non-Javadoc)
 	 * @see edu.buffalo.cse562.Operator#readOneTuple()
 	 */
@@ -32,7 +32,7 @@ public class JoinOperator implements Operator {
 	private Operator parentOperator = null;
 	
 
-	public JoinOperator(Operator left, Operator right, Expression expr){
+	public CrossProductOperator(Operator left, Operator right, Expression expr){
 		setChildOp(left);
 		
 		setRightOp(right);

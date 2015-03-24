@@ -66,11 +66,11 @@ public class Main {
 							System.out.println("	Old Execution Plan");
 							System.out.println("______________________________________");
 							printPlan(op);
-							System.out.println("______________________________________");
-							System.out.println("	Old Execution Plan's Result");
-							System.out.println("______________________________________");
-							ExecuteQuery(op);							
-							System.out.println("______________________________________");
+//							System.out.println("______________________________________");
+//							System.out.println("	Old Execution Plan's Result");
+//							System.out.println("______________________________________");
+//							ExecuteQuery(op);							
+//							System.out.println("______________________________________");
 								
 							System.out.println("	Optimized Execution Plan");
 							System.out.println("______________________________________");
@@ -80,9 +80,7 @@ public class Main {
 							System.out.println("	Optimized Execution Plan's Result");
 							System.out.println("______________________________________");
 							
-							//NOTE: Complete Hash Join and Sort To execute the optimized tree
-							// Check n print the output schema of CrossProduct/ HashJoins and all operators in the tree before running on data  
-							//ExecuteQuery(op);													
+//							ExecuteQuery(op);													
 							}
 							catch(Exception ex)
 							{

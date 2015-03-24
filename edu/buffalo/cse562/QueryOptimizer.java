@@ -127,9 +127,9 @@ public class QueryOptimizer {
 		Operator op = selectionOperator;
 
 		do{
-			if(op.getChildOp() instanceof JoinOperator)
+			if(op.getChildOp() instanceof CrossProductOperator)
 			{
-				JoinOperator joinOp = (JoinOperator) op.getChildOp();
+				CrossProductOperator joinOp = (CrossProductOperator) op.getChildOp();
 				
 				List<Expression> newSelLeftExpr_List = new LinkedList<Expression>(); 
 				List<Expression> newSelRightExpr_List = new LinkedList<Expression>(); 
@@ -172,7 +172,7 @@ public class QueryOptimizer {
 	}
 
 	
-	private void populateNewSelectionList(List<Expression> newSelLeftExpr_List, List<Expression> newSelRightExpr_List, List<Expression> selectionExprList, JoinOperator joinOp)
+	private void populateNewSelectionList(List<Expression> newSelLeftExpr_List, List<Expression> newSelRightExpr_List, List<Expression> selectionExprList, CrossProductOperator joinOp)
 	{		
 		for(Iterator<Expression> itr =  selectionExprList.iterator(); itr.hasNext();)
 		{
@@ -182,7 +182,7 @@ public class QueryOptimizer {
 		}
 	}
 	
-	private boolean checkIfExpressionIsPushable(Expression expr, JoinOperator joinOp, List<Expression> newSelLeftExpr_List, List<Expression> newSelRightExpr_List)
+	private boolean checkIfExpressionIsPushable(Expression expr, CrossProductOperator joinOp, List<Expression> newSelLeftExpr_List, List<Expression> newSelRightExpr_List)
 	{
 		boolean isExistsInLeft = false;
 		boolean isExistsInRight = false;
@@ -254,9 +254,9 @@ public class QueryOptimizer {
 		
 		do
 		{			
-			if(childOperator instanceof JoinOperator)
+			if(childOperator instanceof CrossProductOperator)
 			{
-				JoinOperator joinOp = (JoinOperator)childOperator;						
+				CrossProductOperator crossPOperator = (CrossProductOperator)childOperator;						
 										
 				for(Iterator<Expression> itr =  exprList.iterator(); itr.hasNext();)
 				{
@@ -265,10 +265,16 @@ public class QueryOptimizer {
 					if(expr instanceof EqualsTo)
 					{
 						EqualsTo equalsExpr = (EqualsTo)expr;
-						if(expressionMatchesJoinOp(equalsExpr, joinOp))
+						 System.out.println("Left "+equalsExpr.getLeftExpression());
+						 System.out.println("Right "+equalsExpr.getRightExpression());
+						 
+						if(expressionMatchesJoinOp(equalsExpr, crossPOperator))
 						{							
-							HashJoinOperator hashjoinOp = (new HashJoinOperator(joinOp.getLeftOperator(), joinOp.getRightOperator(), equalsExpr));
+							HashJoinOperator hashjoinOp = (new HashJoinOperator(crossPOperator.getLeftOperator(), 
+									crossPOperator.getRightOperator(), equalsExpr));
 							// removes the equalTo expression before passing on to Selection Operator!
+
+
 							 itr.remove();
 							 childOperator.getParent().setChildOp(hashjoinOp);	
 							 break;
@@ -298,10 +304,10 @@ public class QueryOptimizer {
 	/***
 	 *  checks if expression macthes with a join operator
 	 */
-	private Boolean expressionMatchesJoinOp(EqualsTo equalsExpression, JoinOperator joinOp)
+	private Boolean expressionMatchesJoinOp(EqualsTo equalsExpression, CrossProductOperator crossPop)
 	{		
-		HashMap<String, ColumnDetail> leftSchema = (joinOp.getLeftOperator()).getOutputTupleSchema();
-		HashMap<String, ColumnDetail> rightSchema = (joinOp.getRightOperator()).getOutputTupleSchema();
+		HashMap<String, ColumnDetail> leftSchema = (crossPop.getLeftOperator()).getOutputTupleSchema();
+		HashMap<String, ColumnDetail> rightSchema = (crossPop.getRightOperator()).getOutputTupleSchema();
 		
 		Expression left =  ((EqualsTo) equalsExpression).getLeftExpression();
 		Expression right =  ((EqualsTo) equalsExpression).getRightExpression();
