@@ -30,11 +30,12 @@ public class ExternalSortOperator implements Operator {
 	private static final int BUFFER_SIZE = 3000;
 	TreeMap<Integer, String> typeMap;
 	List<ArrayList<Tuple>> workingSet;
+	boolean sorted = false;
+	MiniScan outputStream;
 
 	
 	public ExternalSortOperator(Operator child, List<OrderByElement> OrderByElements) {
 		// TODO Auto-generated constructor stub
-		System.err.println(" Total Memory available is " + Runtime.getRuntime().totalMemory()/1000000 + "MB");
 		swapDir = new File(ConfigManager.getSwapDir(), UUID.randomUUID().toString());
 		if (!swapDir.exists()){
 			swapDir.mkdir();
@@ -61,91 +62,90 @@ public class ExternalSortOperator implements Operator {
 		ArrayList<Tuple> currentTuple;
 		
 		// First run; sorts input tuples in batches, and writes to separate files on disk
-		int index = 0;
-		int nPass = 0;
-		File currentFileHandler = getFileHandle(index, nPass);
-		while((currentTuple = child.readOneTuple())!= null){
-			if (addToSet(currentTuple, true, currentFileHandler)){
-				currentFileHandler = getFileHandle(index++, nPass);
+		
+		if (!sorted){
+			int index = 0;
+			int nPass = 0;
+			File currentFileHandler = getFileHandle(index, nPass);
+			while((currentTuple = child.readOneTuple())!= null){
+				if (addToSet(currentTuple, true, currentFileHandler)){
+					index = index + 1;
+					currentFileHandler = getFileHandle(index, nPass);
+				}
 			}
+			index = index + 1;
+			currentFileHandler = getFileHandle(index, nPass);
+			flushWorkingSet(currentFileHandler, true);
+			System.out.println("Working set now " +workingSet.size());
+			
+			int size = (int) Math.pow(2, Math.ceil(Math.log(index)/Math.log(2)));
+			
+			// Merging
+			File fName1;
+			File fName2;
+			for (int s = size; s > 0; s /= 2){
+				int lcIndex = 0;
+				for (int i = 0; i < s; i += 2){
+					fName1 = getFileHandle(i, nPass);
+					fName2 = getFileHandle(i+1, nPass);
+					currentFileHandler = getFileHandle(lcIndex++, nPass + 1) ;
+					mergeOnce(fName1, fName2, currentFileHandler);
+				}
+				nPass = nPass + 1;
+			}
+			try {
+				outputStream = new MiniScan(currentFileHandler, typeMap);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			sorted = true;
 		}
-		// Recursive merging
 		
 		
 		//##########	
 		//Finally, return tuples from sorted file
-		try {
-			MiniScan finalOutput = new MiniScan(currentFileHandler, typeMap);
-			while((currentTuple = finalOutput.readTuple())!= null){
-				return currentTuple;
-			}		
-			
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}				
+		currentTuple = outputStream.readTuple();	
+		if (currentTuple != null){
+			return currentTuple;
+		}
+		
 		return null;
 	}
 	
-	private void mergeRecursive(int nPass, int start, int end){
-		if (end == start){
-			// The End
-			
-		}
-		int midPoint = ((start + end))/2;
-		if ((end - start) == 1){
-			File fname1 = getFileHandle(start, nPass);
-			File fname2 = getFileHandle(end, nPass);
-			File outputHandler = getFileHandle(midPoint, nPass + 1) ;
-//			System.out.println("Merging " + fname1);
-//			System.out.println("AND " + fname2);
-			mergeOnce(fname1, fname2, outputHandler);
-		}
-		else{ 
-			mergeRecursive(nPass, start, midPoint);
-			mergeRecursive(nPass, midPoint+1, end);
-		}
-	}
-	
-	private void mergeOnce(File fname1, File fname2, File currentFileHandler){
+	private void mergeOnce(File ifName1, File ifName2, File ofName){
 		try {
-			MiniScan left = new MiniScan(fname1, typeMap);
-			MiniScan right = new MiniScan(fname2, typeMap);
+			MiniScan left = new MiniScan(ifName1, typeMap);
+			MiniScan right = new MiniScan(ifName2, typeMap);
 			ArrayList<Tuple> leftTup = left.readTuple();
 			ArrayList<Tuple> rightTup = right.readTuple();
 			
 			//Merge procedure
 			while (!(leftTup == null) && !(rightTup == null)){
 				if (this.comp.compare(leftTup, rightTup) < 0){
-//					System.out.println("adding left" + leftTup);
-					addToSet(leftTup, false, currentFileHandler);
+					addToSet(leftTup, false, ofName);
 					leftTup = left.readTuple(); 
 				}
 				else{
-//					System.out.println("adding right" + rightTup);
-					addToSet(rightTup, false, currentFileHandler);
+					addToSet(rightTup, false, ofName);
 					rightTup = right.readTuple();
 				}
 			}
 			
-			//dump remainder into the working set and flush
+			int lcnt = 0;
 			while (leftTup != null){
-//				System.out.println("flushing left");
-				addToSet(leftTup, false, currentFileHandler);
+				addToSet(leftTup, false, ofName);
 				leftTup = left.readTuple();
-//				System.out.println(leftTup);
+				lcnt++;
 			}
+			int rcnt = 0;
+
 			while (rightTup != null){
-				System.out.println("flushing right");
-				addToSet(rightTup, false, currentFileHandler);
+				addToSet(rightTup, false, ofName);
 				rightTup = right.readTuple();
-			}
-			
-			writeToDisk(workingSet, currentFileHandler);
-			System.gc();
+				rcnt++;
+			}			
+			flushWorkingSet(ofName, false);			
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -165,19 +165,24 @@ public class ExternalSortOperator implements Operator {
 			return false;
 		}
 		else{
-			if (sort){
-				Collections.sort(workingSet, this.comp);
-			}
 //			System.err.println(" Collecting garbage with " 
 //					+(Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())/1000000 +"MB currently used");
-			writeToDisk(workingSet, currentFileHandle);
-			workingSet = new ArrayList<ArrayList<Tuple>>(this.bufferLength);
+			flushWorkingSet(currentFileHandle, sort);
 			workingSet.add(toAdd);	
-			System.gc();
 			return true;
 		}
 	}
-
+	
+	private boolean flushWorkingSet(File currFileHandle, boolean sorted){
+		if (sorted){
+			Collections.sort(workingSet, this.comp);
+		}
+		writeToDisk(workingSet, currFileHandle);
+		System.gc();
+		workingSet = new ArrayList<ArrayList<Tuple>>(this.bufferLength);
+		return true;
+	}
+	
 	@Override
 	public void reset() {
 		// TODO Auto-generated method stub
