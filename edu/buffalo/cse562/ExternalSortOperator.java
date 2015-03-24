@@ -3,7 +3,6 @@ package edu.buffalo.cse562;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -32,6 +31,7 @@ public abstract class ExternalSortOperator implements Operator {
 	List<ArrayList<Tuple>> workingSet;
 	boolean sorted = false;
 	MiniScan outputStream;
+	boolean ascending;
 
 	
 	public ExternalSortOperator(Operator child, List<OrderByElement> OrderByElements) {
@@ -43,10 +43,13 @@ public abstract class ExternalSortOperator implements Operator {
 		this.outputSchema = child.getOutputTupleSchema();
 		
 		String field = getFullField(OrderByElements.get(0).toString());
+		ascending = OrderByElements.get(0).isAsc();
 		this.child = child;
 		this.sortField = field;
 		
 		this.comp = new TupleComparator(this.outputSchema.get(field).getIndex());
+		
+		//Number of string objects, not number of tuples
 		this.bufferLength = Math.floorDiv(BUFFER_SIZE, this.getOutputTupleSchema().size());
 		this.typeMap = new TreeMap<Integer, String>();
 		this.workingSet = new ArrayList<ArrayList<Tuple>>(this.bufferLength);
@@ -132,18 +135,15 @@ public abstract class ExternalSortOperator implements Operator {
 				}
 			}
 			
-			int lcnt = 0;
+			//flush what's left to disk
 			while (leftTup != null){
 				addToSet(leftTup, false, ofName);
 				leftTup = left.readTuple();
-				lcnt++;
 			}
-			int rcnt = 0;
 
 			while (rightTup != null){
 				addToSet(rightTup, false, ofName);
 				rightTup = right.readTuple();
-				rcnt++;
 			}			
 			flushWorkingSet(ofName, false);			
 		} catch (FileNotFoundException e) {
@@ -199,7 +199,7 @@ public abstract class ExternalSortOperator implements Operator {
 		PrintWriter pw;	
 		
 		try {			
-			//append to file; useful for merging, and ensures that there is never a filenotfound exception
+			//append to file; useful for merging, and ensures that there is never a fileNotFound exception
 			pw = new PrintWriter(new FileWriter(writeDir, true));
 			for(ArrayList<Tuple> t : out){
 				Util.printToStream(t, pw);
@@ -295,6 +295,5 @@ public abstract class ExternalSortOperator implements Operator {
 			return null;			
 		}
 	}
-	
 
 }

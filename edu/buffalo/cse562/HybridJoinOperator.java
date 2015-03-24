@@ -25,15 +25,18 @@ public abstract class HybridJoinOperator<T> implements Operator{
 	private HashMap<String, ArrayList<Tuple>> joinHash;
 	boolean hashed = false;
 
-	public HybridJoinOperator(Operator left, Operator right, Expression expr){
+	public HybridJoinOperator(Operator left, Operator right, String columnLeft, String columnRight){
+		/* Since only equijoins are supported, this operator only requires
+		 * the operators to be joined and the corresponding columns for each 
+		 * operator
+		 */
 		this.left = left;
 		this.right = right;	
 		this.expr = expr;
-		joinHash = new HashMap<String, ArrayList<Tuple>>();
-		
+		joinHash = new HashMap<String, ArrayList<Tuple>>();		
 		//TODO: get the objects of the expression and find the corresponding indexes in each tuple
-		leftIndex = left.getOutputTupleSchema().get("SOME COLUMN NAME").getIndex();
-		rightIndex = right.getOutputTupleSchema().get("SOME COLUMN NAME").getIndex();
+		leftIndex = left.getOutputTupleSchema().get(columnLeft).getIndex();
+		rightIndex = right.getOutputTupleSchema().get(columnRight).getIndex();
 		
 		generateOutputSchema();
 	}

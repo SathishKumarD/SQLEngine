@@ -77,9 +77,9 @@ public class Main {
 							new QueryOptimizer(op);	
 							printPlan(op);
 							System.out.println("______________________________________");
-							//System.out.println("	Optimized Execution Plan's Result");
-							//System.out.println("______________________________________");
-							//ExecuteQuery(op);							
+							System.out.println("	Optimized Execution Plan's Result");
+							System.out.println("______________________________________");
+							ExecuteQuery(op);							
 						
 							}
 							catch(Exception ex)
