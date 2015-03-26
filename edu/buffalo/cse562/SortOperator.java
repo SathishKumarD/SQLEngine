@@ -7,12 +7,13 @@ import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 
+import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.statement.select.OrderByElement;
 
 //Groups By 
 public class SortOperator implements Operator {	
 	List<OrderByElement> orderByElements;	
-	List<Integer> orderByElemIndex = new ArrayList<Integer>();
+	List<Integer> orderByElemIndex = null;
 	
 	Operator input;
 	HashMap<String,ColumnDetail> inputSchema;
@@ -21,6 +22,7 @@ public class SortOperator implements Operator {
 	List<ArrayList<Tuple>> fullRelation = new ArrayList<ArrayList<Tuple>>();
 	boolean isFirstTime;
 	int counterForOutputTuple;
+	private Operator parentOperator = null;
 	
 	List<Integer> outputRowsOrder = new ArrayList<Integer>();
 	
@@ -28,7 +30,7 @@ public class SortOperator implements Operator {
 		this.orderByElements = orderByElements;
 		this.input = input;
 		reset();			
-	}
+	}	
 
 	/* (non-Javadoc)s
 	 * @see edu.buffalo.cse562.Operator#readOneTuple()
@@ -74,7 +76,7 @@ public class SortOperator implements Operator {
 		return list;
 	}
 	
-	//Input is Origial Row Indexes [1,2...nth Row]. List<Integer> rowNumberList
+	//Input is Original Row Indexes [1,2...nth Row]. List<Integer> rowNumberList
 	//The output is a sorted Row Indexes based on Order By elements [33, 55 ,9 , 5...etc] based on order by expressions asc.
 	// The output is saved inside List<Integers> outputRowOrder.
 
@@ -127,6 +129,8 @@ public class SortOperator implements Operator {
 		counterForOutputTuple = 0;
 		inputSchema =  input.getOutputTupleSchema();
 		
+		orderByElemIndex = new ArrayList<Integer>();
+		
 		String orderByElementNameStr = "";
 		// get the column index for orderByElements and store it in instance variable orderByElemIndex.
 		for(OrderByElement orderByElement : orderByElements)
@@ -167,16 +171,41 @@ public class SortOperator implements Operator {
 	public String toString(){
 		return " ORDER BY " + orderByElements.toString();		
 	}
+	
 	@Override
-	public Operator peekNextOp() {
-		// TODO Auto-generated method stub
+	public Operator getChildOp() {
 		return input;
+	}
+	
+	public void setChildOp(Operator child)
+	{
+		this.input = child;
+		input.setParent(this);
+		reset();
+	}
+	
+	@Override
+	public Operator getParent() {
+		return this.parentOperator;
 	}
 
 	@Override
+	public void setParent(Operator parent) {
+		this.parentOperator = parent;		
+	}
+		
+	@Override
 	public HashMap<String, ColumnDetail> getOutputTupleSchema() {
-		// TODO Auto-generated method stub
 		return inputSchema;
 	}
 
+	public List<OrderByElement> setOrderByExpression()
+	{
+		return this.orderByElements;
+	}
+
+	public void setOrderByExpression(List<OrderByElement> orderByElements)
+	{
+		this.orderByElements = orderByElements;
+	}
 }

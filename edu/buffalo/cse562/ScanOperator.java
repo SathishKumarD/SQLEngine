@@ -27,6 +27,8 @@ public class ScanOperator implements Operator {
 	private HashMap<String,ColumnDetail> operatorTableSchema = null; 
 	private HashMap<Integer, String> indexMaps = null;
 	
+	private Operator parentOperator = null;
+	
 	/* (non-Javadoc)
 	 * @see edu.buffalo.cse562.Operator#readOneTuple()
 	 */	
@@ -85,7 +87,7 @@ public class ScanOperator implements Operator {
 	public void reset() {
 		// TODO Auto-generated method stub
 		try {
-			Charset charset = Charset.forName("US-ASCII");
+			Charset charset = Charset.forName("US-ASCII");			
 			this.buffer = Files.newBufferedReader(dataFile, charset);
 		} 
 		catch (IOException e) {
@@ -99,11 +101,15 @@ public class ScanOperator implements Operator {
 	}
 
 	@Override
-	public Operator peekNextOp() {
+	public Operator getChildOp() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
+	public void setChildOp(Operator child) {		
+		//null		
+	}
+	
 	// deep copies the map from static table schema object to operatorTableSchema
 	//Replaces table aliases
 	private HashMap<String,ColumnDetail> initialiseOperatorTableSchema(HashMap<String,ColumnDetail>  createTableSchemaMap)
@@ -127,8 +133,25 @@ public class ScanOperator implements Operator {
 		return opT;
 	}
 	
+	public String getTableName()
+	{
+		return this.tableName;
+	}
+	
 	@Override
 	public HashMap<String, ColumnDetail> getOutputTupleSchema() {
 		return this.operatorTableSchema;
+	}
+
+	@Override
+	public Operator getParent() {
+		
+		return parentOperator;
+	}
+
+	@Override
+	public void setParent(Operator parent) {
+		this.parentOperator = parent;
+		
 	}
 }

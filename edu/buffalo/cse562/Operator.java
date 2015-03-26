@@ -19,6 +19,12 @@ public interface Operator {
 	public ArrayList<Tuple> readOneTuple();
 	
 	/**
+	 * Returns the output tuple schema the implementer may produce
+	 * @return
+	 */
+	public HashMap<String,ColumnDetail> getOutputTupleSchema();
+	
+	/**
 	 * resets the iterator to the initial item
 	 */
 	public void reset();
@@ -27,11 +33,23 @@ public interface Operator {
 	 * Returns its child operator
 	 * @return
 	 */
-	public Operator peekNextOp();
+	public Operator getChildOp();
+		
+	/***
+	 * Sets the child Operator 
+	 */
+	public void setChildOp(Operator child);
 	
 	/**
-	 * Returns the output tuple schema the implementer may produce
-	 * @return
+	 * Gets the parent Operator
+	 * @param parent
 	 */
-	public HashMap<String,ColumnDetail> getOutputTupleSchema();
+	public Operator getParent();
+	
+	/**
+	 * Sets the parent Operator
+	 * @param parent
+	 */
+	public void setParent(Operator parent);
+
 }

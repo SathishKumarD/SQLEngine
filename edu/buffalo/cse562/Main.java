@@ -30,15 +30,20 @@ public class Main {
 			return;
 		}
 
-
-
+//TODO shiva testing
 		if (args[0].equals("--data")){
 			ConfigManager.setDataDir(args[1]);
+		}
+		int sqlIndex = 2;
+		
+		if (args[2].equals("--swap")){
+			ConfigManager.setSwapDir(args[3]);
+			sqlIndex = 4;
 		}
 
 		ArrayList<File> queryFiles = new ArrayList<File>();
 
-		for(int i=2; i < args.length; i++){	
+		for(int i=sqlIndex; i < args.length; i++){	
 			queryFiles.add(new File(args[i]));
 		}
 		Statement statement =null;						
@@ -52,23 +57,38 @@ public class Main {
 					if(statement instanceof Select){
 						SelectBody select = ((Select) statement).getSelectBody();
 
-						// queryCount++;
-
-
 						if (select instanceof PlainSelect){
 							// 	System.err.println(select);
 							Operator op = e.generateTree(select);
-							
 							try
 							{
-							ExecuteQuery(op);
+							System.out.println("______________________________________");
+							System.out.println("	Old Execution Plan");
+							System.out.println("______________________________________");
+							printPlan(op);
+							System.out.println("______________________________________");
+							System.out.println("	Old Execution Plan's Result");
+							System.out.println("______________________________________");
+							ExecuteQuery(op);							
+							System.out.println("______________________________________");
+								
+							System.out.println("	Optimized Execution Plan");
+							System.out.println("______________________________________");
+							new QueryOptimizer(op);	
+							printPlan(op);
+							System.out.println("______________________________________");
+							System.out.println("	Optimized Execution Plan's Result");
+							System.out.println("______________________________________");
+							
+//							ExecuteQuery(op);													
 							}
 							catch(Exception ex)
 							{
-								System.err.println(select);
+								System.err.println("ERROR MSG");
+							    System.err.println(select);
+								System.out.println(ex.getMessage());
 								ex.printStackTrace();
 							}
-
 						}
 						else if (select instanceof Union){
 							Union un = (Union) select;
@@ -186,13 +206,22 @@ public class Main {
 			dt = op.readOneTuple();
 			if(dt !=null)
 			{
-				///printTuple(dt);
-				sb.append(getTupleAsString(dt));
+				//printTuple(dt);
+				sb.append(getTupleAsString(dt)); 
 			}
 
 		}while(dt!=null);
 		
-		System.out.print(sb.toString());
+		System.out.print(sb.toString());			
+	}	
+	
+	static void printPlan(Operator op)
+	{
+		while(op!=null)
+		{
+			System.out.println(op.toString());
+			op = op.getChildOp();
+		}
 	}	
 
 }

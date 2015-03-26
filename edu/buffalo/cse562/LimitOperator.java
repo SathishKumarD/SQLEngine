@@ -17,6 +17,8 @@ public class LimitOperator implements Operator {
 	private Limit limit;
 	private long counter;
 	private Operator source;
+	
+	private Operator parentOperator = null;
 
 	/* (non-Javadoc)
 	 * @see edu.buffalo.cse562.Operator#readOneTuple()
@@ -44,21 +46,18 @@ public class LimitOperator implements Operator {
 	 */
 	@Override
 	public void reset() {
-		// TODO Auto-generated method stub
 
 	}
 
 
 	@Override
-	public Operator peekNextOp() {
-		// TODO Auto-generated method stub
+	public Operator getChildOp() {
 		return null;
 	}
 
 
 	@Override
 	public HashMap<String, ColumnDetail> getOutputTupleSchema() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 	
@@ -66,6 +65,22 @@ public class LimitOperator implements Operator {
 		this.limit = limitObj;
 		this.counter = 0;
 		this.source = input;
+	}
+	
+	public void setChildOp(Operator child) {		
+		this.source = child;
+		this.source.setParent(this);	
+		reset();		
+	}
+	
+	@Override
+	public Operator getParent() {
+		return this.parentOperator;
+	}
+
+	@Override
+	public void setParent(Operator parent) {
+		this.parentOperator = parent;		
 	}
 
 }

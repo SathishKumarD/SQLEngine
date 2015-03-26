@@ -24,7 +24,6 @@ import net.sf.jsqlparser.statement.select.SelectItem;
  *
  */
 public class ExtendedProjection implements Operator {
-
 	Operator input;
 	List<SelectItem> SelectItem_List;
 	private  HashMap<String, ColumnDetail> inputSchema = null;
@@ -35,14 +34,11 @@ public class ExtendedProjection implements Operator {
 	private  HashMap<String, ColumnDetail> outputSchema = new HashMap<String, ColumnDetail>(); 	
 	ArrayList<Tuple> inputTuples = null;
 	private ArrayList<Tuple> outputTuples = new ArrayList<Tuple> ();
+	private Operator parentOperator = null;
 
-	public ExtendedProjection(Operator input, List<SelectItem> SelectItem_List) {
-		this.input = input;
-		this.SelectItem_List = SelectItem_List;		
-
-		this .inputSchema = input.getOutputTupleSchema();
-		reset(); 
-
+	public ExtendedProjection(Operator input, List<SelectItem> SelectItem_List) {					
+		setChildOp(input);					
+		setProjectionExpressions(SelectItem_List);	
 	}
 
 	/* (non-Javadoc)
@@ -66,7 +62,7 @@ public class ExtendedProjection implements Operator {
 				{	 // R.*
 					//for a table name R if there exists a column key R.<> pull all the index values in hash set, preventing multiple entries of same columns.
 					// we iterate through the hash set of indexes to all add columns of R to outputTuples
-					Set<Integer> tableColumnIndex = new HashSet();
+					Set<Integer> tableColumnIndex = new HashSet<Integer>();
 
 					String tableName = ((AllTableColumns) selectItem).getTable().getName();
 					for(Entry<String, ColumnDetail> es : inputSchema.entrySet()){
@@ -112,12 +108,8 @@ public class ExtendedProjection implements Operator {
 		} while(inputTuples != null);
 	}
 
-	/* (non-Javadoc)
-	 * @see edu.buffalo.cse562.Operator#reset()
-	 */
-	//sets the outputTupleSchema
-	@Override
-	public void reset() {
+	private void setOutputSchema()
+	{
 		int index = 0;
 		for(SelectItem selectItem : SelectItem_List)		
 		{
@@ -211,19 +203,49 @@ public class ExtendedProjection implements Operator {
 
 			}					
 		}	
-
+	}
+	/* (non-Javadoc)
+	 * @see edu.buffalo.cse562.Operator#reset()
+	 */
+	//sets the outputTupleSchema
+	@Override
+	public void reset() {
+		this.inputSchema = input.getOutputTupleSchema();			
 	}
 
 	public String toString(){
 		return "SELECT " + this.SelectItem_List.toString();
 	}
 
-	public Operator peekNextOp(){
+	public Operator getChildOp(){
 		return this.input;
 	}
+	
+	public void setProjectionExpressions(List<SelectItem> SelectItem_List) {		
+		this.SelectItem_List = SelectItem_List;
+		setOutputSchema();
+	}
 
+	
 	@Override
 	public HashMap<String, ColumnDetail> getOutputTupleSchema() {
 		return outputSchema;
 	}
+
+	public void setChildOp(Operator child) {		
+		this.input = child;		
+		input.setParent(this);	
+		reset();
+	}
+
+	@Override
+	public Operator getParent() {
+		return this.parentOperator;
+	}
+
+	@Override
+	public void setParent(Operator parent) {
+		this.parentOperator = parent;		
+	}
+	
 }

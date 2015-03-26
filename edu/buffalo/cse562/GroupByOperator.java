@@ -31,11 +31,14 @@ public class GroupByOperator implements Operator {
 	private HashMap<String, GroupByOutput> outputData;
 	private boolean isGroupByComputed;
 	private int rowIndex;
+	
+	private Operator parentOperator = null;
 
 	public GroupByOperator(Operator input, List<Column> groupByColumns,
 			List<AggregateFunctionColumn> aggregateFunctions) {
-		this.input = input;
-		this.inputSchema = input.getOutputTupleSchema();
+		
+		setChildOp(input);
+		
 		this.groupByColumns = groupByColumns;
 		this.aggregateFunctions = aggregateFunctions;
 		this.outputSchema = getOutputSchema();
@@ -43,7 +46,6 @@ public class GroupByOperator implements Operator {
 		outputData = new HashMap<String, GroupByOutput>();
 		isGroupByComputed = false;
 		rowIndex =0;
-		
 	}
 
 
@@ -65,12 +67,12 @@ public class GroupByOperator implements Operator {
 
 	@Override
 	public void reset() {
-		// TODO Auto-generated method stub
+		this.inputSchema = input.getOutputTupleSchema();
 
 	}
 
 	@Override
-	public Operator peekNextOp() {
+	public Operator getChildOp() {
 		// TODO Auto-generated method stub
 		return this.input;
 	}
@@ -80,7 +82,7 @@ public class GroupByOperator implements Operator {
 		// TODO Auto-generated method stub
 		return  this.outputSchema;
 	}
-
+	
 	private void ComputeGroupBy()
 	{
 		if(!isGroupByComputed)
@@ -254,7 +256,6 @@ public class GroupByOperator implements Operator {
 			ArrayList<Tuple> existingTuple = outputData.get(hashKey).getOutputData();
 			if(funcIndex ==existingTuple.size() )
 			{
-
 				existingTuple.add(tup);
 			}
 			else
@@ -360,10 +361,9 @@ public class GroupByOperator implements Operator {
 
 	private ArrayList<Tuple> getGroupByColumnArrayList(ArrayList<Tuple> tuple, List<Column> columns )
 	{
-
 		ArrayList<Tuple> groupByColArrayList = new ArrayList<>();
 
-		if(columns==null||columns.size() ==0 )
+		if(columns==null||columns.size() == 0)
 			return groupByColArrayList; 
 
 		for(Column col: columns)
@@ -409,7 +409,6 @@ public class GroupByOperator implements Operator {
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-
 		}
 
 		return tup;
@@ -476,8 +475,9 @@ public class GroupByOperator implements Operator {
 
 		}
 	}
+	
 	public String toString(){
-		return "GROUP BY " ;
+		return "GROUP BY " + groupByColumns.toString();
 	}
 
 	private ArrayList<Tuple> clone(ArrayList<Tuple> tuple)
@@ -486,9 +486,31 @@ public class GroupByOperator implements Operator {
 
 		for( Tuple t: tuple)
 		{
-
 			clonedTuple.add(t.cloneTuple(t));
 		}
 		return clonedTuple;
+	}
+	
+	public void setChildOp(Operator child) {		
+		this.input = child;	
+		input.setParent(this);
+		
+		reset();
+	}
+
+	@Override
+	public Operator getParent() {
+		return this.parentOperator;
+	}
+
+	@Override
+	public void setParent(Operator parent) {
+		this.parentOperator = parent;		
+	}
+	
+	//TODO to sathish : check if u should include aggregate columns in the output of this method getGroupByColumns()
+	public List<Column> getGroupByColumns()
+	{
+		return this.groupByColumns;		
 	}
 }

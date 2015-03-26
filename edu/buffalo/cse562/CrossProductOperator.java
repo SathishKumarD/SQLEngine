@@ -16,12 +16,10 @@ import net.sf.jsqlparser.expression.Expression;
  * @author Sathish
  *
  */
-public class JoinOperator implements Operator {
-
+public class CrossProductOperator implements Operator {
 	/* (non-Javadoc)
 	 * @see edu.buffalo.cse562.Operator#readOneTuple()
 	 */
-	
 	//TODO: Create setters and getters
 	private Operator left;
 	private Operator right;
@@ -30,17 +28,23 @@ public class JoinOperator implements Operator {
 	private HashMap<String, ColumnDetail> rightSchema;
 	private Expression expr = null;
 	private ArrayList<Tuple> leftTuple;
-	private ArrayList<Tuple> rightTuple;
+	private ArrayList<Tuple> rightTuple;	
+	private Operator parentOperator = null;
+	
 
-	public JoinOperator(Operator left, Operator right, Expression expr){
-		this.left = left;
-		this.right = right;
+	public CrossProductOperator(Operator left, Operator right, Expression expr){
+		setChildOp(left);
+		
+		setRightOp(right);
+		
 		this.expr = expr;
-		this.reset();
+	//	this.reset();
 	}
 	
 	@Override
-	public ArrayList<Tuple> readOneTuple() {
+	public ArrayList<Tuple> readOneTuple() {		
+		if(this.leftTuple == null) this.leftTuple = left.readOneTuple(); //shiva
+		
 		// TODO Auto-generated method stub
 		TreeMap<Integer, Tuple> outputMap = new TreeMap<Integer, Tuple>();
 		ArrayList<Tuple> outputTuple = new ArrayList<Tuple>();
@@ -50,6 +54,8 @@ public class JoinOperator implements Operator {
 			right.reset();
 			rightTuple = right.readOneTuple();
 			this.reset();
+			
+			this.leftTuple = left.readOneTuple();//shiva
 		}
 		
 		if (leftTuple == null){
@@ -107,16 +113,22 @@ public class JoinOperator implements Operator {
 			value.setIndex(index + offset + 1);
 			outputSchema.put(key, value);
 		}
-		this.leftTuple = left.readOneTuple();
 	}
 	
 	public String toString(){
 		StringBuilder b = new StringBuilder("JOIN WITH \n");
-		b.append('\t' +this.right.toString() + '\n');
+		Operator childOfRightBranch = this.right;
+		
+		while(childOfRightBranch != null)
+		{
+			b.append('\t' +childOfRightBranch.toString() + '\n');
+			childOfRightBranch = childOfRightBranch.getChildOp();
+		}
+		
 		return b.toString();
 	}
 	
-	public Operator peekNextOp(){
+	public Operator getChildOp(){
 		return this.left;
 	}
 
@@ -143,6 +155,39 @@ public class JoinOperator implements Operator {
 			current.put(outdex, value);
 		}
 		return current;
+	}
+	
+	public void setChildOp(Operator child) {		
+		this.left = child;		
+		left.setParent(this);
+		if(this.right != null) this.reset();
+		
+	}
+	
+	public void setRightOp(Operator child){
+		this.right = child;
+		right.setParent(this);
+		if(this.left != null) this.reset();
+	}
+	
+	public Operator getLeftOperator()
+	{
+		return left;
+	}
+	
+	public Operator getRightOperator()
+	{
+		return right;
+	}
+
+	@Override
+	public Operator getParent() {
+		return this.parentOperator;
+	}
+
+	@Override
+	public void setParent(Operator parent) {
+		this.parentOperator = parent;		
 	}
 	
 }
