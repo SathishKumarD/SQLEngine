@@ -50,7 +50,7 @@ public class ScanOperator implements Operator {
 		// tbl to dat
 		
 		
-		this.dataFile = FileSystems.getDefault().getPath(ConfigManager.getDataDir(), tableName.toLowerCase() +".tbl");		
+		this.dataFile = FileSystems.getDefault().getPath(ConfigManager.getDataDir(), tableName.toLowerCase() +".dat");		
 		
 		reset();
 	}
