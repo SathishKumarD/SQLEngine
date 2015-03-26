@@ -34,7 +34,7 @@ public class ExternalSortOperator implements Operator {
 	boolean ascending;
 	ArrayList<Tuple> lastFlushed;
 	List<OrderByElement> orderByElements;
-	
+
 	public ExternalSortOperator(Operator child, List<OrderByElement> orderByElements) {
 		// TODO Auto-generated constructor stub
 		swapDir = new File(ConfigManager.getSwapDir(), UUID.randomUUID().toString());
@@ -43,20 +43,23 @@ public class ExternalSortOperator implements Operator {
 		}
 		this.outputSchema = child.getOutputTupleSchema();
 		this.sortFields = new LinkedHashMap<Integer, Boolean>(orderByElements.size());
-//		System.out.println(child);			
+		//		System.out.println(child);			
 
 		for (OrderByElement ob : orderByElements){
-//			String fullFieldName = getFullField(ob.getExpression().toString());
+			//			String fullFieldName = getFullField(ob.getExpression().toString());
 			System.out.println(ob);
 			//int index = this.outputSchema.get(ob.getExpression().toString()).getIndex();
-			int index = Evaluator.getColumnDetail(this.outputSchema,ob.getExpression().toString()).getIndex();
+
+			int index = Evaluator.getColumnDetail(child.getOutputTupleSchema(),ob.getExpression().toString().toLowerCase()).getIndex();
 			sortFields.put(index, ob.isAsc());
+
+
 		}
 		this.orderByElements = orderByElements;
 		this.child = child;
-		
+
 		this.comp = new TupleComparator(sortFields);
-		
+
 		//Number of string objects, not number of tuples
 		this.bufferLength = Math.floorDiv(BUFFER_SIZE, this.getOutputTupleSchema().size());
 		this.typeMap = new TreeMap<Integer, String>();		
@@ -69,27 +72,27 @@ public class ExternalSortOperator implements Operator {
 	public ArrayList<Tuple> readOneTuple() {
 		// TODO Auto-generated method stub
 		ArrayList<Tuple> currentTuple;
-		
+
 		// First run; sorts input tuples in batches, and writes to separate files on disk
-		
+
 		if (!sorted){
 			long start = new Date().getTime();
 			twoWaySort();
 			sorted = true;
 			System.out.println("==== Sorted in " + ((float) (new Date().getTime() - start)/ 1000) + "s");
 		}
-		
-		
+
+
 		//##########	
 		//Finally, return tuples from sorted file
 		currentTuple = outputStream.readTuple();	
 		if (currentTuple != null){
 			return currentTuple;
 		}
-		
+
 		return null;
 	}
-	
+
 	private void twoWaySort(){
 		ArrayList<Tuple> currentTuple;
 		this.workingSet = new ArrayList<ArrayList<Tuple>>(this.bufferLength);
@@ -109,7 +112,7 @@ public class ExternalSortOperator implements Operator {
 		mergeFull(currentFileHandler, index, nPass);
 
 	}
-	
+
 	private void mergeFull(File currentFileHandler, int size, int nPass){		
 		//This can be changed to a different base for N-way sort; Merge method also has to be changed
 		size = (int) Math.pow(2, Math.ceil(Math.log(size)/Math.log(2)));
@@ -139,7 +142,7 @@ public class ExternalSortOperator implements Operator {
 			MiniScan right = new MiniScan(ifName2, typeMap);
 			ArrayList<Tuple> leftTup = left.readTuple();
 			ArrayList<Tuple> rightTup = right.readTuple();
-			
+
 			//Merge procedure
 			while (!(leftTup == null) && !(rightTup == null)){
 				if (this.comp.compare(leftTup, rightTup) > 0){
@@ -151,7 +154,7 @@ public class ExternalSortOperator implements Operator {
 					rightTup = right.readTuple();
 				}
 			}
-			
+
 			//flush what's left to disk
 			while (leftTup != null){
 				addToSet(leftTup, false, ofName);
@@ -171,7 +174,7 @@ public class ExternalSortOperator implements Operator {
 			e.printStackTrace();
 		} 
 	}
-	
+
 	private boolean addToSet(ArrayList<Tuple> toAdd, boolean sort, File currentFileHandle){
 		/* adds a tuple to the working set and also returns a flag indicating
 		 * whether or not the working set was flushed (this is particularly useful for updating
@@ -189,7 +192,7 @@ public class ExternalSortOperator implements Operator {
 			return true;
 		}
 	}
-	
+
 	private boolean flushWorkingSet(File currFileHandle, boolean sorted){
 		if (sorted){
 			Collections.sort(workingSet, this.comp);
@@ -197,14 +200,14 @@ public class ExternalSortOperator implements Operator {
 		writeToDisk(workingSet, currFileHandle);
 		System.gc();
 		System.out.println("Memory used: " + 
-					((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())/1000000) + "MB");
+				((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())/1000000) + "MB");
 		workingSet = new ArrayList<ArrayList<Tuple>>(this.bufferLength);
 		return true;
 	}
 
 	private boolean writeToDisk(List<ArrayList<Tuple>> out, File writeDir){
 		PrintWriter pw;	
-		
+
 		try {			
 			//append to file; useful for merging, and ensures that there is never a fileNotFound exception
 			pw = new PrintWriter(new FileWriter(writeDir, true));
@@ -222,11 +225,11 @@ public class ExternalSortOperator implements Operator {
 		}
 		return false;
 	}
-	
+
 	//TODO make the buffered writer a singleton object
 	private boolean writeOneToDisk(ArrayList<Tuple> out, File writeDir){
 		PrintWriter pw;	
-		
+
 		try {			
 			//append to file; useful for merging, and ensures that there is never a fileNotFound exception
 			pw = new PrintWriter(new BufferedWriter(new FileWriter(writeDir, true)));
@@ -242,11 +245,11 @@ public class ExternalSortOperator implements Operator {
 		}
 		return false;
 	}
-	
+
 	private File getFileHandle(int index, int nPass){
 		String fname = nPass+"-"+index;
 		File writeDir = new File(this.swapDir, fname);
-		
+
 		if (!writeDir.exists()){
 			try {
 				writeDir.createNewFile();
@@ -257,14 +260,14 @@ public class ExternalSortOperator implements Operator {
 		}
 		return writeDir;
 	}
-	
+
 	private void replacementSort(){
 		ArrayList<Tuple> currentTuple = child.readOneTuple();
 		int nRun = 1;
 		this.workingSet = new LinkedList<ArrayList<Tuple>>();
 		int flushed = 0;		
 		lastFlushed = currentTuple;
-		
+
 		//for subsequent runs
 		while (currentTuple != null){
 			if (this.comp.compare(currentTuple, lastFlushed) >= 0){
@@ -272,11 +275,11 @@ public class ExternalSortOperator implements Operator {
 				writeOneToDisk(currentTuple, getFileHandle(0, nRun));
 				lastFlushed = currentTuple;
 			}
-			
+
 			else{
 				workingSet.add(currentTuple);
 			}
-			
+
 			if (workingSet.size() - 1 > this.bufferLength){
 				nRun = nRun + 1;
 				Collections.sort(workingSet, this.comp);			
@@ -286,21 +289,21 @@ public class ExternalSortOperator implements Operator {
 			}
 			currentTuple = child.readOneTuple();
 		}
-		
+
 		mergeFull(getFileHandle(0, nRun), nRun, 0);
-		
+
 	}
-	
+
 	private int appendToOutput(List<ArrayList<Tuple>> workingSet, int nRun){
 		int nFlushed = 0;
 		for (int i = 0; i < workingSet.size(); i++){
 			ArrayList<Tuple> tup = workingSet.get(i);
-//			System.out.println("Comparing " + lastFlushed + " and " +tup);
+			//			System.out.println("Comparing " + lastFlushed + " and " +tup);
 			if (lastFlushed == null){
 				lastFlushed = tup;
 			}
 			if (this.comp.compare(lastFlushed, tup) <= 0){
-//				System.out.println("YES!!");
+				//				System.out.println("YES!!");
 				lastFlushed = tup;
 				writeOneToDisk(tup, getFileHandle(0, nRun));
 				workingSet.remove(i);
@@ -313,7 +316,7 @@ public class ExternalSortOperator implements Operator {
 	@Override
 	public void reset() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -321,7 +324,7 @@ public class ExternalSortOperator implements Operator {
 		// TODO Auto-generated method stub
 		return child.getOutputTupleSchema();
 	}	
-	
+
 
 	public Comparator<ArrayList<Tuple>> getComp() {
 		return comp;
@@ -348,9 +351,9 @@ public class ExternalSortOperator implements Operator {
 	@Override
 	public void setParent(Operator parent) {
 		// TODO Auto-generated method stub
-		
+
 	}
-	
+
 	public String toString(){
 		return "External Sort on  " + orderByElements ;
 	}

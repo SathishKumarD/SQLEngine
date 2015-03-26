@@ -11,7 +11,7 @@ import java.util.Map;
 
 public class Util {
 
-	public static boolean DEBUG = false;
+	public static boolean DEBUG = true;
 
 	public static void printSchema(HashMap<String, ColumnDetail> inputSchema)
 	{
