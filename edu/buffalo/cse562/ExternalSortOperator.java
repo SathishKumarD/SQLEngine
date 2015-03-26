@@ -30,12 +30,14 @@ public class ExternalSortOperator implements Operator {
 	Comparator<ArrayList<Tuple>> comp;
 	int bufferLength;
 	HashMap<String, ColumnDetail> outputSchema;
-	private static final int BUFFER_SIZE = 1000;
+	private static final int BUFFER_SIZE = 5000;
 	TreeMap<Integer, String> typeMap;
 	List<ArrayList<Tuple>> workingSet;
 	boolean sorted = false;
 	MiniScan outputStream;
 	boolean ascending;
+	ArrayList<Tuple> lastFlushed;
+
 
 	
 	public ExternalSortOperator(Operator child, List<OrderByElement> orderByElements) {
@@ -49,8 +51,8 @@ public class ExternalSortOperator implements Operator {
 		
 		for (OrderByElement ob : orderByElements){
 //			String fullFieldName = getFullField(ob.getExpression().toString());
+			System.out.println(this.outputSchema);			
 			System.out.println(ob);
-			System.out.println(this.outputSchema);
 			int index = this.outputSchema.get(ob.getExpression().toString()).getIndex();
 			sortFields.put(index, ob.isAsc());
 		}
@@ -78,7 +80,7 @@ public class ExternalSortOperator implements Operator {
 			long start = new Date().getTime();
 			twoWaySort();
 			sorted = true;
-			System.out.println("==== Sorted in " + ((new Date().getTime() - start)/ 1000) + "s");
+			System.out.println("==== Sorted in " + ((float) (new Date().getTime() - start)/ 1000) + "s");
 		}
 		
 		
@@ -108,10 +110,13 @@ public class ExternalSortOperator implements Operator {
 		currentFileHandler = getFileHandle(index, nPass);
 		flushWorkingSet(currentFileHandler, true);
 		System.out.println("Working set now " +workingSet.size());
-		
+		mergeFull(currentFileHandler, index, nPass);
+
+	}
+	
+	private void mergeFull(File currentFileHandler, int size, int nPass){		
 		//This can be changed to a different base for N-way sort; Merge method also has to be changed
-		int size = (int) Math.pow(2, Math.ceil(Math.log(index)/Math.log(2)));
-		
+		size = (int) Math.pow(2, Math.ceil(Math.log(size)/Math.log(2)));
 		// Merging
 		File fName1;
 		File fName2;
@@ -132,7 +137,6 @@ public class ExternalSortOperator implements Operator {
 			e.printStackTrace();
 		}
 	}
-	
 	private void mergeOnce(File ifName1, File ifName2, File ofName){
 		try {
 			MiniScan left = new MiniScan(ifName1, typeMap);
@@ -260,41 +264,56 @@ public class ExternalSortOperator implements Operator {
 	
 	private void replacementSort(){
 		ArrayList<Tuple> currentTuple = child.readOneTuple();
-		int nRun = 100;
+		int nRun = 1;
 		this.workingSet = new LinkedList<ArrayList<Tuple>>();
+		int flushed = 0;		
+		lastFlushed = currentTuple;
 		
-		writeOneToDisk(currentTuple, getFileHandle(nRun, nRun));
-		ArrayList<Tuple> lastFlushed = currentTuple;
-
 		//for subsequent runs
 		while (currentTuple != null){
-			workingSet.add(currentTuple);
-			Collections.sort(workingSet, this.comp);			
-			//May not be necessary, as both reference the same object
-			lastFlushed = appendToOutput(workingSet, lastFlushed, nRun);
+			if (this.comp.compare(currentTuple, lastFlushed) >= 0){
+				System.out.println("Inserting one!");
+				writeOneToDisk(currentTuple, getFileHandle(0, nRun));
+				lastFlushed = currentTuple;
+			}
+			
+			else{
+				workingSet.add(currentTuple);
+			}
 			
 			if (workingSet.size() - 1 > this.bufferLength){
-//				nRun = nRun + 1;
-				lastFlushed = appendToOutput(workingSet, workingSet.get(0), nRun);
+				nRun = nRun + 1;
+				Collections.sort(workingSet, this.comp);			
+				System.out.println("Flushing working set " +workingSet.size());
+				flushed = appendToOutput(workingSet, nRun);
+				System.out.println("Flushed " +flushed+ " tuples");
 			}
 			currentTuple = child.readOneTuple();
 		}
+		
+		mergeFull(getFileHandle(0, nRun), nRun, 0);
+		
 	}
 	
-	private ArrayList<Tuple> appendToOutput(List<ArrayList<Tuple>> workingSet, ArrayList<Tuple> lastFlushed, int nRun){
+	private int appendToOutput(List<ArrayList<Tuple>> workingSet, int nRun){
 		int nFlushed = 0;
 		for (int i = 0; i < workingSet.size(); i++){
 			ArrayList<Tuple> tup = workingSet.get(i);
-			if (this.comp.compare(lastFlushed, tup) >= 0){
+//			System.out.println("Comparing " + lastFlushed + " and " +tup);
+			if (lastFlushed == null){
 				lastFlushed = tup;
-				writeOneToDisk(tup, getFileHandle(nRun, nRun));
+			}
+			if (this.comp.compare(lastFlushed, tup) <= 0){
+//				System.out.println("YES!!");
+				lastFlushed = tup;
+				writeOneToDisk(tup, getFileHandle(0, nRun));
 				workingSet.remove(i);
 				nFlushed = nFlushed + 1;
 			}
 		}
-		return lastFlushed;
+		return nFlushed;
 	}
-	
+
 	@Override
 	public void reset() {
 		// TODO Auto-generated method stub
