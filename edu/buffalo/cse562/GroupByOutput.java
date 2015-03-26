@@ -39,5 +39,19 @@ public class GroupByOutput {
 	public void setOutputData(ArrayList<Tuple> outputData) {
 		this.outputData = outputData;
 	}
+	
+	public GroupByOutput clone()
+	{
+		GroupByOutput gp = new GroupByOutput();
+		gp.count = this.count;
+		gp.outputData = new  ArrayList<Tuple>();
+		
+		for(Tuple tp: this.outputData)
+		{
+			gp.outputData.add(tp.cloneTuple(tp));
+		}
+		
+		return gp;
+	}
 
 }

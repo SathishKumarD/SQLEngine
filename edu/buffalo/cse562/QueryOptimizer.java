@@ -81,9 +81,9 @@ public class QueryOptimizer {
 				}
 			}
 			
-			if(currOperator instanceof GroupByOperator)
+			if(currOperator instanceof GroupByOperator2)
 			{
-				replaceGroupBy((GroupByOperator)currOperator);				
+				replaceGroupBy((GroupByOperator2)currOperator);				
 			}			
 			
 			parentOperator = currOperator;
@@ -369,7 +369,7 @@ public class QueryOptimizer {
 	}
 	
 	//to be changed to external sort! : TODO to keno
-	private void replaceGroupBy(GroupByOperator groupByOp)
+	private void replaceGroupBy(GroupByOperator2 groupByOp)
 	{
 		List<Column> grpByExpressionsList = groupByOp.getGroupByColumns();
 		List<OrderByElement> orderByElements = new ArrayList<OrderByElement>();
@@ -383,7 +383,9 @@ public class QueryOptimizer {
 		}
 		SortOperator externalSortOp = new SortOperator(groupByOp.getChildOp(), orderByElements);
 		
-		groupByOp.setChildOp(externalSortOp);		
+		System.out.println("settng child");
+		groupByOp.setChildOp(externalSortOp);	
+		System.out.println("child set ");
 	}
 	
 }
