@@ -28,13 +28,13 @@ public class JoinOperator implements Operator {
 		//Test left, then right
 		ColumnDetail cd = left.getOutputTupleSchema().get(fields[0].trim());
 		if (cd == null){
-			cd = left.getOutputTupleSchema().get(fields[1].trim());
+			cd = Evaluator.getColumnDetail(left.getOutputTupleSchema(), fields[1].trim().toLowerCase());
 			leftIndex = cd.getIndex();
-			rightIndex = right.getOutputTupleSchema().get(fields[0].trim()).getIndex();
+			rightIndex =  Evaluator.getColumnDetail(right.getOutputTupleSchema(),fields[0].trim().toLowerCase()).getIndex();
 		}
 		
 		else{
-			rightIndex = right.getOutputTupleSchema().get(fields[1].trim()).getIndex();
+			rightIndex = Evaluator.getColumnDetail(right.getOutputTupleSchema(), fields[1].trim()).getIndex();
 		}		
 		
 		generateOutputSchema();
