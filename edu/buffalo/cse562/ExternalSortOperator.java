@@ -30,7 +30,7 @@ public class ExternalSortOperator implements Operator {
 	Comparator<ArrayList<Tuple>> comp;
 	int bufferLength;
 	HashMap<String, ColumnDetail> outputSchema;
-	private static final int BUFFER_SIZE = 5000;
+	private static final int BUFFER_SIZE = 10000;
 	TreeMap<Integer, String> typeMap;
 	List<ArrayList<Tuple>> workingSet;
 	boolean sorted = false;
@@ -48,11 +48,10 @@ public class ExternalSortOperator implements Operator {
 		}
 		this.outputSchema = child.getOutputTupleSchema();
 		this.sortFields = new LinkedHashMap<Integer, Boolean>(orderByElements.size());
-		
+//		System.out.println(child);			
+
 		for (OrderByElement ob : orderByElements){
 //			String fullFieldName = getFullField(ob.getExpression().toString());
-			System.out.println(this.outputSchema);			
-			System.out.println(ob);
 			int index = this.outputSchema.get(ob.getExpression().toString()).getIndex();
 			sortFields.put(index, ob.isAsc());
 		}
@@ -186,8 +185,8 @@ public class ExternalSortOperator implements Operator {
 			return false;
 		}
 		else{
-//			System.err.println(" Collecting garbage with " 
-//					+(Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())/1000000 +"MB currently used");
+			System.err.println(" Collecting garbage with " 
+					+(Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())/1000000 +"MB currently used");
 			flushWorkingSet(currentFileHandle, sort);
 			workingSet.add(toAdd);	
 			return true;
