@@ -81,9 +81,9 @@ public class QueryOptimizer {
 				}
 			}
 			
-			if(currOperator instanceof GroupByOperator2)
+			if(currOperator instanceof GroupByOperator)
 			{
-				replaceGroupBy((GroupByOperator2)currOperator);				
+				replaceGroupBy((GroupByOperator)currOperator);				
 			}			
 			
 			parentOperator = currOperator;
@@ -265,12 +265,10 @@ public class QueryOptimizer {
 					if(expr instanceof EqualsTo)
 					{
 						EqualsTo equalsExpr = (EqualsTo)expr;
-						// System.out.println("Left "+equalsExpr.getLeftExpression());
-						// System.out.println("Right "+equalsExpr.getRightExpression());
-						 
+
 						if(expressionMatchesJoinOp(equalsExpr, crossPOperator))
 						{							
-							HashJoinOperator hashjoinOp = (new HashJoinOperator(crossPOperator.getLeftOperator(), 
+							HybridJoinOperator hashjoinOp = (new HybridJoinOperator(crossPOperator.getLeftOperator(), 
 									crossPOperator.getRightOperator(), equalsExpr));
 							// removes the equalTo expression before passing on to Selection Operator!
 
@@ -371,7 +369,7 @@ public class QueryOptimizer {
 	}
 	
 	//to be changed to external sort! : TODO to keno
-	private void replaceGroupBy(GroupByOperator2 groupByOp)
+	private void replaceGroupBy(GroupByOperator groupByOp)
 	{
 		List<Column> grpByExpressionsList = groupByOp.getGroupByColumns();
 		List<OrderByElement> orderByElements = new ArrayList<OrderByElement>();

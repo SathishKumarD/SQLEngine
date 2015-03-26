@@ -62,25 +62,27 @@ public class Main {
 							Operator op = e.generateTree(select);
 							try
 							{
-								System.out.println("______________________________________");
-								System.out.println("	Old Execution Plan");
-								System.out.println("______________________________________");
-								printPlan(op);
-								//System.out.println("______________________________________");
-								//System.out.println("	Old Execution Plan's Result");
-								//System.out.println("______________________________________");
-								// ExecuteQuery(op);							
-								System.out.println("______________________________________");
 
-								System.out.println("	Optimized Execution Plan");
-								System.out.println("______________________________________");
-								new QueryOptimizer(op);	
-								printPlan(op);
-								System.out.println("______________________________________");
-								System.out.println("	Optimized Execution Plan's Result");
-								System.out.println("______________________________________");
+							System.out.println("______________________________________");
+							System.out.println("	Old Execution Plan");
+							System.out.println("______________________________________");
+							printPlan(op);
+							System.out.println("______________________________________");
+							System.out.println("	Old Execution Plan's Result");
+							System.out.println("______________________________________");
+//							ExecuteQuery(op);							
+							System.out.println("______________________________________");
+								
+							System.out.println("	Optimized Execution Plan");
+							System.out.println("______________________________________");
+							new QueryOptimizer(op);	
+							printPlan(op);
+							System.out.println("______________________________________");
+							System.out.println("	Optimized Execution Plan's Result");
+							System.out.println("______________________________________");
+							
+							ExecuteQuery(op);													
 
-								ExecuteQuery(op);													
 							}
 							catch(Exception ex)
 							{

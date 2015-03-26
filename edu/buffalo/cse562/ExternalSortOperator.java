@@ -1,14 +1,11 @@
 package edu.buffalo.cse562;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -17,7 +14,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
 
@@ -30,12 +26,13 @@ public class ExternalSortOperator implements Operator {
 	Comparator<ArrayList<Tuple>> comp;
 	int bufferLength;
 	HashMap<String, ColumnDetail> outputSchema;
-	private static final int BUFFER_SIZE = 1000;
+	private static final int BUFFER_SIZE = 5000;
 	TreeMap<Integer, String> typeMap;
 	List<ArrayList<Tuple>> workingSet;
 	boolean sorted = false;
 	MiniScan outputStream;
 	boolean ascending;
+	ArrayList<Tuple> lastFlushed;
 	List<OrderByElement> orderByElements;
 	
 	public ExternalSortOperator(Operator child, List<OrderByElement> orderByElements) {
@@ -46,11 +43,11 @@ public class ExternalSortOperator implements Operator {
 		}
 		this.outputSchema = child.getOutputTupleSchema();
 		this.sortFields = new LinkedHashMap<Integer, Boolean>(orderByElements.size());
-		
+//		System.out.println(child);			
+
 		for (OrderByElement ob : orderByElements){
 //			String fullFieldName = getFullField(ob.getExpression().toString());
 			System.out.println(ob);
-			//System.out.println(this.outputSchema);
 			int index = this.outputSchema.get(ob.getExpression().toString()).getIndex();
 			sortFields.put(index, ob.isAsc());
 		}
@@ -78,7 +75,7 @@ public class ExternalSortOperator implements Operator {
 			long start = new Date().getTime();
 			twoWaySort();
 			sorted = true;
-			System.out.println("==== Sorted in " + ((new Date().getTime() - start)/ 1000) + "s");
+			System.out.println("==== Sorted in " + ((float) (new Date().getTime() - start)/ 1000) + "s");
 		}
 		
 		
@@ -108,10 +105,13 @@ public class ExternalSortOperator implements Operator {
 		currentFileHandler = getFileHandle(index, nPass);
 		flushWorkingSet(currentFileHandler, true);
 		System.out.println("Working set now " +workingSet.size());
-		
+		mergeFull(currentFileHandler, index, nPass);
+
+	}
+	
+	private void mergeFull(File currentFileHandler, int size, int nPass){		
 		//This can be changed to a different base for N-way sort; Merge method also has to be changed
-		int size = (int) Math.pow(2, Math.ceil(Math.log(index)/Math.log(2)));
-		
+		size = (int) Math.pow(2, Math.ceil(Math.log(size)/Math.log(2)));
 		// Merging
 		File fName1;
 		File fName2;
@@ -132,7 +132,6 @@ public class ExternalSortOperator implements Operator {
 			e.printStackTrace();
 		}
 	}
-	
 	private void mergeOnce(File ifName1, File ifName2, File ofName){
 		try {
 			MiniScan left = new MiniScan(ifName1, typeMap);
@@ -182,8 +181,8 @@ public class ExternalSortOperator implements Operator {
 			return false;
 		}
 		else{
-//			System.err.println(" Collecting garbage with " 
-//					+(Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())/1000000 +"MB currently used");
+			System.err.println(" Collecting garbage with " 
+					+(Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())/1000000 +"MB currently used");
 			flushWorkingSet(currentFileHandle, sort);
 			workingSet.add(toAdd);	
 			return true;
@@ -260,132 +259,73 @@ public class ExternalSortOperator implements Operator {
 	
 	private void replacementSort(){
 		ArrayList<Tuple> currentTuple = child.readOneTuple();
-		int nRun = 100;
+		int nRun = 1;
 		this.workingSet = new LinkedList<ArrayList<Tuple>>();
+		int flushed = 0;		
+		lastFlushed = currentTuple;
 		
-		writeOneToDisk(currentTuple, getFileHandle(nRun, nRun));
-		ArrayList<Tuple> lastFlushed = currentTuple;
-
 		//for subsequent runs
 		while (currentTuple != null){
-			workingSet.add(currentTuple);
-			Collections.sort(workingSet, this.comp);			
-			//May not be necessary, as both reference the same object
-			lastFlushed = appendToOutput(workingSet, lastFlushed, nRun);
+			if (this.comp.compare(currentTuple, lastFlushed) >= 0){
+				System.out.println("Inserting one!");
+				writeOneToDisk(currentTuple, getFileHandle(0, nRun));
+				lastFlushed = currentTuple;
+			}
+			
+			else{
+				workingSet.add(currentTuple);
+			}
 			
 			if (workingSet.size() - 1 > this.bufferLength){
-//				nRun = nRun + 1;
-				lastFlushed = appendToOutput(workingSet, workingSet.get(0), nRun);
+				nRun = nRun + 1;
+				Collections.sort(workingSet, this.comp);			
+				System.out.println("Flushing working set " +workingSet.size());
+				flushed = appendToOutput(workingSet, nRun);
+				System.out.println("Flushed " +flushed+ " tuples");
 			}
 			currentTuple = child.readOneTuple();
 		}
+		
+		mergeFull(getFileHandle(0, nRun), nRun, 0);
+		
 	}
 	
-	private ArrayList<Tuple> appendToOutput(List<ArrayList<Tuple>> workingSet, ArrayList<Tuple> lastFlushed, int nRun){
+	private int appendToOutput(List<ArrayList<Tuple>> workingSet, int nRun){
 		int nFlushed = 0;
 		for (int i = 0; i < workingSet.size(); i++){
 			ArrayList<Tuple> tup = workingSet.get(i);
-			if (this.comp.compare(lastFlushed, tup) >= 0){
+//			System.out.println("Comparing " + lastFlushed + " and " +tup);
+			if (lastFlushed == null){
 				lastFlushed = tup;
-				writeOneToDisk(tup, getFileHandle(nRun, nRun));
+			}
+			if (this.comp.compare(lastFlushed, tup) <= 0){
+//				System.out.println("YES!!");
+				lastFlushed = tup;
+				writeOneToDisk(tup, getFileHandle(0, nRun));
 				workingSet.remove(i);
 				nFlushed = nFlushed + 1;
 			}
 		}
-		return lastFlushed;
+		return nFlushed;
 	}
-	
+
 	@Override
 	public void reset() {
 		// TODO Auto-generated method stub
-
+		
 	}
 
 	@Override
 	public HashMap<String, ColumnDetail> getOutputTupleSchema() {
 		// TODO Auto-generated method stub
 		return child.getOutputTupleSchema();
-	}
+	}	
 	
-	private class TupleComparator implements Comparator<ArrayList<Tuple>>{
-		LinkedHashMap<Integer, Boolean> sortFields;
-		public TupleComparator(LinkedHashMap<Integer, Boolean> sortFields){
-			this.sortFields = sortFields;
-		}
 
-		@Override
-		public int compare(ArrayList<Tuple> o1,
-				ArrayList<Tuple> o2) {
-			// TODO Auto-generated method stub
-			int diff = 0;
-			for (Map.Entry<Integer, Boolean> mp : sortFields.entrySet()){
-				if (mp.getValue()){
-					diff = o1.get(mp.getKey()).compareTo(o2.get(mp.getKey()));
-				}
-				else {
-					diff = o2.get(mp.getKey()).compareTo(o1.get(mp.getKey()));
-				}
-				
-				if (diff != 0){
-					return diff;
-				}
-			}
-			return diff;
-		}
-	}
-	
-	
-	private class MiniScan{
-		BufferedReader br;
-		String line;
-		TreeMap<Integer, String> typeMap;
-
-		public MiniScan(File filename, TreeMap<Integer, String> typeMap) throws IOException{
-			Charset charset = Charset.forName("US-ASCII");
-			this.br = Files.newBufferedReader(filename.toPath(), charset);
-			this.typeMap = typeMap;
-		}
-		
-		private ArrayList<Tuple> parseLine(String raw){
-			String col[] = line.split("\\|");	
-			ArrayList<Tuple> tuples = new ArrayList<Tuple>();
-			for(Map.Entry<Integer, String> entry : typeMap.entrySet()) {
-				tuples.add(new Tuple(entry.getValue(), col[entry.getKey()]));	
-			}
-			return tuples;
-		}
-		
-		public ArrayList<Tuple> readTuple(){
-			try {
-				if ((line = br.readLine())!= null){
-					return parseLine(line);
-				}
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
-			try {
-				this.br.close();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			return null;			
-		}
+	public Comparator<ArrayList<Tuple>> getComp() {
+		return comp;
 	}
 
-	private class ReturnObject{
-		int flushed;
-		ArrayList<Tuple> lastFlushed;
-		
-		public ReturnObject(int flushed, ArrayList<Tuple> lastFlushed) {
-			// TODO Auto-generated constructor stub
-			this.flushed = flushed;
-			this.lastFlushed = lastFlushed;
-		}
-	}
-	
 	@Override
 	public Operator getChildOp() {
 		// TODO Auto-generated method stub
