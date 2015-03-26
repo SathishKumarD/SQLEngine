@@ -20,7 +20,7 @@ import net.sf.jsqlparser.statement.select.AllColumns;
  *
  */
 
-/*
+
 public class GroupByOperator implements Operator {
 
 	private  HashMap<String, ColumnDetail> inputSchema = null;
@@ -516,4 +516,4 @@ public class GroupByOperator implements Operator {
 		return this.groupByColumns;		
 	}
 }
-*/
+

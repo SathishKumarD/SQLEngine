@@ -1,14 +1,11 @@
 package edu.buffalo.cse562;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -17,7 +14,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
 
@@ -30,7 +26,7 @@ public class ExternalSortOperator implements Operator {
 	Comparator<ArrayList<Tuple>> comp;
 	int bufferLength;
 	HashMap<String, ColumnDetail> outputSchema;
-	private static final int BUFFER_SIZE = 10000;
+	private static final int BUFFER_SIZE = 5000;
 	TreeMap<Integer, String> typeMap;
 	List<ArrayList<Tuple>> workingSet;
 	boolean sorted = false;
@@ -51,6 +47,7 @@ public class ExternalSortOperator implements Operator {
 
 		for (OrderByElement ob : orderByElements){
 //			String fullFieldName = getFullField(ob.getExpression().toString());
+			System.out.println(ob);
 			int index = this.outputSchema.get(ob.getExpression().toString()).getIndex();
 			sortFields.put(index, ob.isAsc());
 		}
@@ -315,94 +312,20 @@ public class ExternalSortOperator implements Operator {
 	@Override
 	public void reset() {
 		// TODO Auto-generated method stub
-
+		
 	}
 
 	@Override
 	public HashMap<String, ColumnDetail> getOutputTupleSchema() {
 		// TODO Auto-generated method stub
 		return child.getOutputTupleSchema();
-	}
+	}	
 	
-	private class TupleComparator implements Comparator<ArrayList<Tuple>>{
-		LinkedHashMap<Integer, Boolean> sortFields;
-		public TupleComparator(LinkedHashMap<Integer, Boolean> sortFields){
-			this.sortFields = sortFields;
-		}
 
-		@Override
-		public int compare(ArrayList<Tuple> o1,
-				ArrayList<Tuple> o2) {
-			// TODO Auto-generated method stub
-			int diff = 0;
-			for (Map.Entry<Integer, Boolean> mp : sortFields.entrySet()){
-				if (mp.getValue()){
-					diff = o1.get(mp.getKey()).compareTo(o2.get(mp.getKey()));
-				}
-				else {
-					diff = o2.get(mp.getKey()).compareTo(o1.get(mp.getKey()));
-				}
-				
-				if (diff != 0){
-					return diff;
-				}
-			}
-			return diff;
-		}
-	}
-	
-	
-	private class MiniScan{
-		BufferedReader br;
-		String line;
-		TreeMap<Integer, String> typeMap;
-
-		public MiniScan(File filename, TreeMap<Integer, String> typeMap) throws IOException{
-			Charset charset = Charset.forName("US-ASCII");
-			this.br = Files.newBufferedReader(filename.toPath(), charset);
-			this.typeMap = typeMap;
-		}
-		
-		private ArrayList<Tuple> parseLine(String raw){
-			String col[] = line.split("\\|");	
-			ArrayList<Tuple> tuples = new ArrayList<Tuple>();
-			for(Map.Entry<Integer, String> entry : typeMap.entrySet()) {
-				tuples.add(new Tuple(entry.getValue(), col[entry.getKey()]));	
-			}
-			return tuples;
-		}
-		
-		public ArrayList<Tuple> readTuple(){
-			try {
-				if ((line = br.readLine())!= null){
-					return parseLine(line);
-				}
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
-			try {
-				this.br.close();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			return null;			
-		}
+	public Comparator<ArrayList<Tuple>> getComp() {
+		return comp;
 	}
 
-	private class ReturnObject{
-		int flushed;
-		ArrayList<Tuple> lastFlushed;
-		
-		public ReturnObject(int flushed, ArrayList<Tuple> lastFlushed) {
-			// TODO Auto-generated constructor stub
-			this.flushed = flushed;
-			this.lastFlushed = lastFlushed;
-		}
-	}
-	
 	@Override
 	public Operator getChildOp() {
 		// TODO Auto-generated method stub
