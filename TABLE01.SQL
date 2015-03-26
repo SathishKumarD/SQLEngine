@@ -55,4 +55,3 @@ orders.orderdate, orders.shippriority
  ORDER BY revenue DESC, orders.orderdate;
 
 
-

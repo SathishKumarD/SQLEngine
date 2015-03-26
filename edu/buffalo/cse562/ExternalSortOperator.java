@@ -37,8 +37,7 @@ public class ExternalSortOperator implements Operator {
 	MiniScan outputStream;
 	boolean ascending;
 	ArrayList<Tuple> lastFlushed;
-
-
+	List<OrderByElement> orderByElements;
 	
 	public ExternalSortOperator(Operator child, List<OrderByElement> orderByElements) {
 		// TODO Auto-generated constructor stub
@@ -55,7 +54,7 @@ public class ExternalSortOperator implements Operator {
 			int index = this.outputSchema.get(ob.getExpression().toString()).getIndex();
 			sortFields.put(index, ob.isAsc());
 		}
-		
+		this.orderByElements = orderByElements;
 		this.child = child;
 		
 		this.comp = new TupleComparator(sortFields);
@@ -426,6 +425,10 @@ public class ExternalSortOperator implements Operator {
 	public void setParent(Operator parent) {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	public String toString(){
+		return "External Sort on  " + orderByElements ;
 	}
 
 }

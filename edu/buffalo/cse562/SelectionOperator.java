@@ -128,7 +128,7 @@ public class SelectionOperator implements Operator {
 	
 	public String toString(){
 		
-		return "EVALUATE Select - "+ this.exp;
+		return " Selection Operator:  "+ this.exp;
 	}
 	
 	public Operator getChildOp(){

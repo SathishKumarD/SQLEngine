@@ -13,41 +13,37 @@ import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.statement.create.table.ColDataType;
+import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 import net.sf.jsqlparser.statement.select.AllColumns;
 
 /**
  * @author Sathish
  *
  */
-
-/*
-public class GroupByOperator implements Operator {
+public class GroupByOperator2 implements Operator {
 
 	private  HashMap<String, ColumnDetail> inputSchema = null;
 	private  HashMap<String, ColumnDetail> outputSchema = null;
-	private ArrayList<ArrayList<Tuple>> outputDataList =null;
+	private   GroupByOutput groupbyOutput =null;
 	private Operator input;
 	private List<Column> groupByColumns;
 	private List<AggregateFunctionColumn> aggregateFunctions;
 
 	private HashMap<String, GroupByOutput> outputData;
-	private boolean isGroupByComputed;
-	private int rowIndex;
-	
 	private Operator parentOperator = null;
 
-	public GroupByOperator(Operator input, List<Column> groupByColumns,
+	
+
+	public GroupByOperator2(Operator input, List<Column> groupByColumns,
 			List<AggregateFunctionColumn> aggregateFunctions) {
-		
 		setChildOp(input);
-		
 		this.groupByColumns = groupByColumns;
 		this.aggregateFunctions = aggregateFunctions;
 		this.outputSchema = getOutputSchema();
-		//Util.printSchema(outputSchema);
+		Util.printSchema(outputSchema);
 		outputData = new HashMap<String, GroupByOutput>();
-		isGroupByComputed = false;
-		rowIndex =0;
+
 	}
 
 
@@ -55,16 +51,49 @@ public class GroupByOperator implements Operator {
 	@Override
 	public ArrayList<Tuple> readOneTuple() {
 
-		ComputeGroupBy();
-		ArrayList<Tuple> tuple =null;
-		if(outputDataList.size()>rowIndex)
-		{
-			tuple = outputDataList.get(rowIndex);
-			Util.printTuple(tuple);
-		}
-		rowIndex ++;
+		ArrayList<Tuple> inputtuple = input.readOneTuple();
+		inputtuple = clone(inputtuple);
+		ArrayList<Tuple> gropuByCols = null;
+		boolean isNew = true;
+		String previousValue = "";
 
-		return tuple;
+		while(inputtuple!=null)
+		{
+			gropuByCols = getGroupByColumnArrayList(inputtuple, this.groupByColumns);
+
+			String currentValue  = getHashKey(gropuByCols);
+			isNew = !currentValue.equalsIgnoreCase(previousValue);
+
+			int funcIndex = inputtuple.size();
+			// System.out.println(funcIndex);
+			for(AggregateFunctionColumn funcCol:this.aggregateFunctions)
+			{
+				Evaluator evaluator = new Evaluator(inputtuple,inputSchema);
+				Function func = funcCol.getFunction();
+				ExpressionList exps = func.getParameters();
+				Expression exp;
+				if (exps != null){
+					exp = (Expression) exps.getExpressions().get(0);
+					Tuple tup = evaluateExpression(evaluator, exp);
+					handleAggregateFunctions(func,inputtuple,isNew,funcIndex,tup);
+					funcIndex++;
+				}
+				else{
+					handleCountFunction(isNew,inputtuple,funcIndex);
+					funcIndex++;
+				}
+
+			}
+
+			if(isNew && previousValue!="" )
+			{
+				ComputeAverage();
+				return groupbyOutput.getOutputData();
+			}
+			previousValue = currentValue;
+			inputtuple = input.readOneTuple();
+		}
+		return null;
 	}
 
 	@Override
@@ -73,98 +102,57 @@ public class GroupByOperator implements Operator {
 
 	}
 
-	@Override
-	public Operator getChildOp() {
-		// TODO Auto-generated method stub
-		return this.input;
-	}
 
 	@Override
 	public HashMap<String, ColumnDetail> getOutputTupleSchema() {
 		// TODO Auto-generated method stub
-		return  this.outputSchema;
-	}
-	
-	private void ComputeGroupBy()
-	{
-		if(!isGroupByComputed)
+
+		if(this.outputSchema == null)
 		{
-			ArrayList<Tuple> inputtuple = input.readOneTuple();
-			inputtuple = clone(inputtuple);
-			ArrayList<Tuple> gropuByCols = null;
-			while(inputtuple!=null)
-			{
-				gropuByCols = getGroupByColumnArrayList(inputtuple, this.groupByColumns);
-				String hashKey = getHashKey(gropuByCols);
-				
-
-				int funcIndex = inputtuple.size();
-				// System.out.println(funcIndex);
-				for(AggregateFunctionColumn funcCol:this.aggregateFunctions)
-				{
-					Evaluator evaluator = new Evaluator(inputtuple,inputSchema);
-					Function func = funcCol.getFunction();
-					ExpressionList exps = func.getParameters();
-					Expression exp;
-					if (exps != null){
-						exp = (Expression) exps.getExpressions().get(0);
-						Tuple tup = evaluateExpression(evaluator, exp);
-						handleAggregateFunctions(func,inputtuple,hashKey,funcIndex,tup);
-						funcIndex++;
-					}
-					else{
-						handleCountFunction(hashKey,inputtuple,funcIndex);
-						funcIndex++;
-					}
-
-				}
-				inputtuple = input.readOneTuple();
-			}
-			
-			 ComputeAverage();
-			outputDataList = getArrayListFromHashMap(this.outputData);
-			isGroupByComputed = true;
+			return getOutputSchema();
 		}
+		return this.outputSchema ;
 	}
 
-	private void handleAggregateFunctions(Function func,ArrayList<Tuple> outputtuple, String hashKey, int funcIndex, Tuple tup )
+
+	private void handleAggregateFunctions(Function func,ArrayList<Tuple> outputtuple, boolean isNew, int funcIndex, Tuple tup )
 	{
 		if(func.getName().equalsIgnoreCase("sum"))
 		{
-			handleSumFunction(hashKey,outputtuple, funcIndex,tup);
+			handleSumFunction(isNew,outputtuple,funcIndex, tup);
 		}
 
 		if(func.getName().equalsIgnoreCase("avg"))
 		{
-			handleAvgFunction(hashKey,outputtuple,funcIndex,tup);
+			handleAvgFunction(isNew,outputtuple,funcIndex,tup);
 		}
 		if(func.getName().equalsIgnoreCase("min"))
 		{
-			handleMinFunction(hashKey,outputtuple,funcIndex,tup);
+			handleMinFunction(isNew,outputtuple,funcIndex,tup);
 		}
 		if(func.getName().equalsIgnoreCase("max"))
 		{
-			handleMaxFunction(hashKey,outputtuple,funcIndex,tup);
+			handleMaxFunction(isNew,outputtuple,funcIndex,tup);
 		}
 		if(func.getName().equalsIgnoreCase("count"))
 		{
-			handleCountFunction(hashKey,outputtuple,funcIndex);
+			handleCountFunction(isNew,outputtuple,funcIndex);
 		}
 
 	}
 
-	private void handleSumFunction( String hashKey,ArrayList<Tuple> outputtuple,int funcIndex ,Tuple tup)
+	private void handleSumFunction( boolean isNew,  ArrayList<Tuple> outputtuple,int funcIndex,Tuple tup)
 	{
 
-		if(outputData.get(hashKey) == null)
+		if(isNew)
 		{
 			outputtuple.add(tup.cloneTuple(tup));
-			outputData.put(hashKey,new GroupByOutput( clone(outputtuple)));
+			groupbyOutput =new GroupByOutput( clone(outputtuple));
 		}
 		else
 		{
 
-			ArrayList<Tuple> existingTuple = outputData.get(hashKey).getOutputData();
+			ArrayList<Tuple> existingTuple = groupbyOutput.getOutputData();
 			if(funcIndex ==existingTuple.size() )
 			{
 				existingTuple.add(tup.cloneTuple(tup));
@@ -174,14 +162,13 @@ public class GroupByOperator implements Operator {
 				Tuple sumDatum = existingTuple.get(funcIndex);
 				sumDatum = sumDatum.add(tup.cloneTuple(tup));
 			}
-			//Util.printTuple(existingTuple);
 		}
 
 
 	}
 
 
-	private void handleAvgFunction( String hashKey,
+	private void handleAvgFunction( boolean isNew,
 			ArrayList<Tuple> outputtuple, int funcIndex, Tuple tup) {
 
 		// average is nothing but sum divided by count
@@ -190,16 +177,16 @@ public class GroupByOperator implements Operator {
 		// if there are two AVG functions, count will be incremented twice for each tuple
 		// it's handled in ComputeAverage function 
 
-		if(outputData.get(hashKey) == null)
+		if(isNew)
 		{
 			outputtuple.add(tup.cloneTuple(tup));
-			outputData.put(hashKey, new GroupByOutput( clone(outputtuple)));
+			groupbyOutput =new GroupByOutput( clone(outputtuple));
 		}
 		else
 		{
 
-			
-			ArrayList<Tuple> existingTuple = outputData.get(hashKey).getOutputData();
+
+			ArrayList<Tuple> existingTuple = groupbyOutput.getOutputData();
 
 			if(funcIndex ==existingTuple.size() )
 			{
@@ -212,22 +199,23 @@ public class GroupByOperator implements Operator {
 			}
 			// System.out.println("AVG "+funcIndex+" " +sumDatum.toString() + " "+existingTuple.get(funcIndex) + " "+  outputData.get(hashKey).getOutputData().get(funcIndex) );
 		}
-		outputData.get(hashKey).setCount(outputData.get(hashKey).getCount()+1);
+
+		groupbyOutput.setCount(groupbyOutput.getCount()+1);
 
 	}
 
 
-	private void handleMinFunction( String hashKey,
+	private void handleMinFunction( boolean isNew,
 			ArrayList<Tuple> outputtuple, int funcIndex, Tuple tup) {
 
-		if(outputData.get(hashKey) == null)
+		if(isNew)
 		{
-			outputtuple.add(tup);
-			outputData.put(hashKey, new GroupByOutput( clone(outputtuple)));
+			outputtuple.add(tup.cloneTuple(tup));
+			groupbyOutput =new GroupByOutput( clone(outputtuple));
 		}
 		else
 		{
-			ArrayList<Tuple> existingTuple = outputData.get(hashKey).getOutputData();
+			ArrayList<Tuple> existingTuple = groupbyOutput.getOutputData();
 
 
 			if(funcIndex ==existingTuple.size() )
@@ -245,19 +233,20 @@ public class GroupByOperator implements Operator {
 
 	}
 
-	private void handleMaxFunction( String hashKey,
+	private void handleMaxFunction( boolean isNew,
 			ArrayList<Tuple> outputtuple, int funcIndex, Tuple tup) {
 
-		if(outputData.get(hashKey) == null)
+		if(isNew)
 		{
-			outputtuple.add(tup);
-			outputData.put(hashKey, new GroupByOutput( clone(outputtuple)));
+			outputtuple.add(tup.cloneTuple(tup));
+			groupbyOutput =new GroupByOutput( clone(outputtuple));
 		}
 		else
 		{
-			ArrayList<Tuple> existingTuple = outputData.get(hashKey).getOutputData();
+			ArrayList<Tuple> existingTuple = groupbyOutput.getOutputData();
 			if(funcIndex ==existingTuple.size() )
 			{
+
 				existingTuple.add(tup);
 			}
 			else
@@ -272,25 +261,21 @@ public class GroupByOperator implements Operator {
 
 	}
 
-	private void handleCountFunction( String hashKey,
+	private void handleCountFunction( boolean isNew,
 			ArrayList<Tuple> outputtuple, int funcIndex) {
 
 
 		Tuple tup = new Tuple("int","1");
-		if(outputData.get(hashKey) == null)
+		if(isNew)
 		{
-			outputtuple.add(tup);
-			outputData.put(hashKey, new GroupByOutput( clone(outputtuple)));
-
-			//System.out.println(hashKey);
-			//Util.printTuple(outputData.get(hashKey).getOutputData());
-			//System.out.println();
+			outputtuple.add(tup.cloneTuple(tup));
+			groupbyOutput =new GroupByOutput( clone(outputtuple));
 		}
 		else
 		{
 			try
 			{
-				ArrayList<Tuple> existingTuple = outputData.get(hashKey).getOutputData();
+				ArrayList<Tuple> existingTuple = groupbyOutput.getOutputData();
 				if(funcIndex ==existingTuple.size() )
 				{
 					existingTuple.add(tup);
@@ -308,8 +293,6 @@ public class GroupByOperator implements Operator {
 			}catch(Exception ex)
 			{
 				System.out.println("errorrr");
-				System.out.println(hashKey);
-				Util.printTuple(outputData.get(hashKey).getOutputData());
 				ex.printStackTrace();
 				throw ex;
 			}
@@ -319,13 +302,24 @@ public class GroupByOperator implements Operator {
 	private HashMap<String, ColumnDetail> getOutputSchema() {
 
 		copyInputSchemaToOutputSchema();
+
+
+		Util.printSchema(outputSchema);
 		int index =inputSchema.keySet().size();
 		for(AggregateFunctionColumn agf :this.aggregateFunctions)
 		{
 
 			String key = agf.getFunction().toString();
 			ColumnDetail colDet = getColumnDetailForFunction(agf.getFunction());
+
+			if(colDet.getColumnDefinition() == null)
+			{
+				System.out.println("colDet.getColumnDefinition() is null");
+			}
+
+
 			colDet.setIndex(index);
+
 			outputSchema.put(key, colDet);
 
 			if(agf.getAliasName()!=null && !agf.getAliasName().equalsIgnoreCase(""))
@@ -335,7 +329,7 @@ public class GroupByOperator implements Operator {
 
 			index++;
 		}
-
+		Util.printSchema(outputSchema);
 		// System.out.println(inputSchema.keySet().size() + " "+this.aggregateFunctions.size() + " " + index);
 		return outputSchema;
 	}
@@ -344,7 +338,11 @@ public class GroupByOperator implements Operator {
 	{
 
 		//colDet.setColumnDefinition(coldef.setColDataType(););
-		ColumnDetail colDet = null;
+		ColumnDetail colDet = new ColumnDetail();
+		colDet.setColumnDefinition(new ColumnDefinition());
+		colDet.getColumnDefinition().setColDataType(new ColDataType());
+		colDet.getColumnDefinition().getColDataType().setDataType("decimal");
+		/*
 		ExpressionList exps = func.getParameters();
 
 		if (exps != null){
@@ -357,15 +355,16 @@ public class GroupByOperator implements Operator {
 				}
 			}
 		}
-
-		return new ColumnDetail();
+		 */
+		return colDet;
 	}
 
 	private ArrayList<Tuple> getGroupByColumnArrayList(ArrayList<Tuple> tuple, List<Column> columns )
 	{
+
 		ArrayList<Tuple> groupByColArrayList = new ArrayList<>();
 
-		if(columns==null||columns.size() == 0)
+		if(columns==null||columns.size() ==0 )
 			return groupByColArrayList; 
 
 		for(Column col: columns)
@@ -411,6 +410,7 @@ public class GroupByOperator implements Operator {
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+
 		}
 
 		return tup;
@@ -437,36 +437,23 @@ public class GroupByOperator implements Operator {
 		List<Integer> avg = getAvgFunctionIndices();
 		if(avg.size()>=1)
 		{
-			for(Map.Entry<String, GroupByOutput> colDetail: this.outputData.entrySet()){
-				// System.out.println("Count"+ colDetail.getValue().getCount());
-				Integer count = colDetail.getValue().getCount()/avg.size();
-				// System.out.println("Count"+ count);
-				for(Integer avgIndex :avg)
-				{
-					// System.out.println("Index:" +avgIndex);
-					Tuple sum = colDetail.getValue().getOutputData().get(avgIndex);
-					// System.out.println("Before:"+ colDetail.getValue().getOutputData().get(avgIndex));
-					sum = sum.divideBy(new Tuple("int",count.toString()));
-					// System.out.println("After:"+ colDetail.getValue().getOutputData().get(avgIndex));
-					
-				}
+			// System.out.println("Count"+ colDetail.getValue().getCount());
+			Integer count = groupbyOutput.getCount()/avg.size();
+			// System.out.println("Count"+ count);
+			for(Integer avgIndex :avg)
+			{
+				// System.out.println("Index:" +avgIndex);
+				Tuple sum = groupbyOutput.getOutputData().get(avgIndex);
+				// System.out.println("Before:"+ colDetail.getValue().getOutputData().get(avgIndex));
+				sum = sum.divideBy(new Tuple("int",count.toString()));
+				// System.out.println("After:"+ colDetail.getValue().getOutputData().get(avgIndex));
 
 			}
-		}
-	}
-
-	private ArrayList<ArrayList<Tuple>> getArrayListFromHashMap(HashMap<String,GroupByOutput> outputData)
-	{
-		ArrayList<ArrayList<Tuple>> outputDataList = new ArrayList<ArrayList<Tuple>>();
-		for(Map.Entry<String, GroupByOutput> colDetail: outputData.entrySet()){
-
-			//System.out.println(colDetail.getValue().getOutputData().get(8));
-			outputDataList.add(colDetail.getValue().getOutputData());
 
 		}
-		return outputDataList;
 
 	}
+
 
 	private void copyInputSchemaToOutputSchema()
 	{
@@ -477,9 +464,8 @@ public class GroupByOperator implements Operator {
 
 		}
 	}
-	
 	public String toString(){
-		return "GROUP BY " + groupByColumns.toString();
+		return "GROUP BY " + groupByColumns ;
 	}
 
 	private ArrayList<Tuple> clone(ArrayList<Tuple> tuple)
@@ -488,16 +474,19 @@ public class GroupByOperator implements Operator {
 
 		for( Tuple t: tuple)
 		{
+
 			clonedTuple.add(t.cloneTuple(t));
 		}
 		return clonedTuple;
 	}
-	
+
+
+
 	public void setChildOp(Operator child) {		
 		this.input = child;	
 		input.setParent(this);
-		
 		reset();
+		
 	}
 
 	@Override
@@ -509,11 +498,20 @@ public class GroupByOperator implements Operator {
 	public void setParent(Operator parent) {
 		this.parentOperator = parent;		
 	}
-	
+
 	//TODO to sathish : check if u should include aggregate columns in the output of this method getGroupByColumns()
 	public List<Column> getGroupByColumns()
 	{
 		return this.groupByColumns;		
 	}
+
+	
+
+
+
+	@Override
+	public Operator getChildOp() {
+		// TODO Auto-generated method stub
+		return this.input;
+	}
 }
-*/
