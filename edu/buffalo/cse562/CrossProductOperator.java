@@ -159,9 +159,7 @@ public class CrossProductOperator implements Operator {
 	
 	public void setChildOp(Operator child) {		
 		this.left = child;		
-		left.setParent(this);
-		if(this.right != null) this.reset();
-		
+		left.setParent(this);		
 	}
 	
 	public void setRightOp(Operator child){
