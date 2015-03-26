@@ -265,8 +265,8 @@ public class QueryOptimizer {
 					if(expr instanceof EqualsTo)
 					{
 						EqualsTo equalsExpr = (EqualsTo)expr;
-						 System.out.println("Left "+equalsExpr.getLeftExpression());
-						 System.out.println("Right "+equalsExpr.getRightExpression());
+						// System.out.println("Left "+equalsExpr.getLeftExpression());
+						// System.out.println("Right "+equalsExpr.getRightExpression());
 						 
 						if(expressionMatchesJoinOp(equalsExpr, crossPOperator))
 						{							

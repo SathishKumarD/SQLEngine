@@ -46,10 +46,6 @@ public class ScanOperator implements Operator {
 		this.operatorTableSchema = this.initialiseOperatorTableSchema(intSchema);
 		
 		
-		// change the extensionnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn
-		// tbl to dat
-		
-		
 		this.dataFile = FileSystems.getDefault().getPath(ConfigManager.getDataDir(), tableName.toLowerCase() +".dat");		
 		
 		reset();
@@ -59,6 +55,7 @@ public class ScanOperator implements Operator {
 	public ArrayList<Tuple> readOneTuple() {
 		if(buffer == null) return null;
 		String line = null;
+		
 
 		try {
 			line = buffer.readLine();

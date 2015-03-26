@@ -69,7 +69,7 @@ public class Main {
 								//System.out.println("______________________________________");
 								//System.out.println("	Old Execution Plan's Result");
 								//System.out.println("______________________________________");
-								//ExecuteQuery(op);							
+								// ExecuteQuery(op);							
 								System.out.println("______________________________________");
 
 								System.out.println("	Optimized Execution Plan");
@@ -80,7 +80,7 @@ public class Main {
 								System.out.println("	Optimized Execution Plan's Result");
 								System.out.println("______________________________________");
 
-								//							ExecuteQuery(op);													
+								ExecuteQuery(op);													
 							}
 							catch(Exception ex)
 							{
