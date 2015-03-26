@@ -112,10 +112,6 @@ public class GroupByOperator2 implements Operator {
 
 		}while( !isChange );
 
-		//System.out.println("returning groupby");
-		//System.out.println(isNew);
-		//System.out.println(previousValue);
-		//System.out.println(groupbyOutput.getOutputData());
 		return gp.getOutputData();
 	}
 
