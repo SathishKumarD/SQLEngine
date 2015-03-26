@@ -48,7 +48,8 @@ public class ExternalSortOperator implements Operator {
 		for (OrderByElement ob : orderByElements){
 //			String fullFieldName = getFullField(ob.getExpression().toString());
 			System.out.println(ob);
-			int index = this.outputSchema.get(ob.getExpression().toString()).getIndex();
+			//int index = this.outputSchema.get(ob.getExpression().toString()).getIndex();
+			int index = Evaluator.getColumnDetail(this.outputSchema,ob.getExpression().toString()).getIndex();
 			sortFields.put(index, ob.isAsc());
 		}
 		this.orderByElements = orderByElements;

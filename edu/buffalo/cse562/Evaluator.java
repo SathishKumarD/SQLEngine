@@ -70,5 +70,32 @@ public class Evaluator extends Eval {
 		return null;
 	}
 	
+	public static ColumnDetail getColumnDetail(HashMap<String, ColumnDetail> tupleSchema, String columnName)
+	{
+		ColumnDetail col = tupleSchema.get(columnName);
+		if(col!=null)
+		{
+			return col;
+		}
+		else
+		{
+			for(Map.Entry<String, ColumnDetail> colDetail: tupleSchema.entrySet()){
+				String key = colDetail.getKey();
+				if(key.split("\\.").length>1)
+				{
+					// extract ColumnName from TableName.ColumnName
+					String columnValue = key.split("\\.")[1];
+
+					// validate it with the column passed
+					if( columnValue.equalsIgnoreCase(columnName))
+					{
+						return 	 colDetail.getValue();
+					}
+				}
+			}
+		}
+		return null;
+	}
+	
 	
 }
