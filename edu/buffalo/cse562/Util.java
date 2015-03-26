@@ -21,8 +21,27 @@ public class Util {
 		if(DEBUG)
 		{
 			for(Map.Entry<String, ColumnDetail> colDetail: inputSchema.entrySet()){
+				
+				try
+				{
 
-				System.out.println(colDetail.getKey() + "   " + colDetail.getValue().getIndex() + "  " + colDetail.getValue().getColumnDefinition().getColDataType());		
+				System.out.println(colDetail.getKey() + "   " + colDetail.getValue().getIndex() + "  " + colDetail.getValue().getColumnDefinition().getColDataType());
+				}
+				catch(Exception ex)
+				{
+					System.out.println("error starts");
+					System.out.println("Column name: "+ colDetail.getKey());
+					System.out.println("Column index: " + colDetail.getValue().getIndex());
+					if(colDetail.getValue().getColumnDefinition() == null)
+					{
+						System.out.println("colDetail.getValue().getColumnDefinition() is null");
+					}
+					
+					System.out.println("Column ends: "+ colDetail.getValue().getColumnDefinition().getColDataType());
+					
+					System.out.println("error ends");
+					
+				}
 			}
 			System.out.println("________________________________");
 		}

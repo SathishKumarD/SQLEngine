@@ -214,7 +214,7 @@ public class ExtendedProjection implements Operator {
 	}
 
 	public String toString(){
-		return "SELECT " + this.SelectItem_List.toString();
+		return "Extended Projection Operator: " + this.SelectItem_List.toString();
 	}
 
 	public Operator getChildOp(){

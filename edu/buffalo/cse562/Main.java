@@ -30,12 +30,12 @@ public class Main {
 			return;
 		}
 
-//TODO shiva testing
+		//TODO shiva testing
 		if (args[0].equals("--data")){
 			ConfigManager.setDataDir(args[1]);
 		}
 		int sqlIndex = 2;
-		
+
 		if (args[2].equals("--swap")){
 			ConfigManager.setSwapDir(args[3]);
 			sqlIndex = 4;
@@ -62,30 +62,30 @@ public class Main {
 							Operator op = e.generateTree(select);
 							try
 							{
-							System.out.println("______________________________________");
-							System.out.println("	Old Execution Plan");
-							System.out.println("______________________________________");
-							printPlan(op);
-							System.out.println("______________________________________");
-							System.out.println("	Old Execution Plan's Result");
-							System.out.println("______________________________________");
-							ExecuteQuery(op);							
-							System.out.println("______________________________________");
-								
-							System.out.println("	Optimized Execution Plan");
-							System.out.println("______________________________________");
-							new QueryOptimizer(op);	
-							printPlan(op);
-							System.out.println("______________________________________");
-							System.out.println("	Optimized Execution Plan's Result");
-							System.out.println("______________________________________");
-							
-//							ExecuteQuery(op);													
+								System.out.println("______________________________________");
+								System.out.println("	Old Execution Plan");
+								System.out.println("______________________________________");
+								printPlan(op);
+								//System.out.println("______________________________________");
+								//System.out.println("	Old Execution Plan's Result");
+								//System.out.println("______________________________________");
+								//ExecuteQuery(op);							
+								System.out.println("______________________________________");
+
+								System.out.println("	Optimized Execution Plan");
+								System.out.println("______________________________________");
+								new QueryOptimizer(op);	
+								printPlan(op);
+								System.out.println("______________________________________");
+								System.out.println("	Optimized Execution Plan's Result");
+								System.out.println("______________________________________");
+
+								//							ExecuteQuery(op);													
 							}
 							catch(Exception ex)
 							{
 								System.err.println("ERROR MSG");
-							    System.err.println(select);
+								System.err.println(select);
 								System.out.println(ex.getMessage());
 								ex.printStackTrace();
 							}
@@ -172,9 +172,9 @@ public class Main {
 		}
 		System.out.println();
 	}	
-	
+
 	static String getTupleAsString(ArrayList<Tuple> singleTuple) {
-		
+
 		StringBuilder sb = new  StringBuilder();
 		for(int i=0; i < singleTuple.size();i++){
 
@@ -211,10 +211,10 @@ public class Main {
 			}
 
 		}while(dt!=null);
-		
+
 		System.out.print(sb.toString());			
 	}	
-	
+
 	static void printPlan(Operator op)
 	{
 		while(op!=null)
