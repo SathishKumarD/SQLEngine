@@ -381,7 +381,7 @@ public class QueryOptimizer {
 			
 			orderByElements.add(orderByElem);		
 		}
-		SortOperator externalSortOp = new SortOperator(groupByOp.getChildOp(), orderByElements);
+		ExternalSortOperator externalSortOp = new ExternalSortOperator(groupByOp.getChildOp(), orderByElements);
 		
 		//System.out.println("settng child");
 		groupByOp.setChildOp(externalSortOp);	
