@@ -26,8 +26,10 @@ public class ExpressionTree {
 		current = addScanOperator(current, select);
 		current = addJoinOperator(current, select);
 		current = addSelectionOperator(current, select);
+		
+		current = addSortOperator(current, select); // this has to be interchanged
 		current = addGroupByOperator(current,select);		
-		current = addSortOperator(current, select);
+	
 		current = addExtendedProjectionOperator(current, select);
 		current = addLimitOperator(current, select);
 		return current;
@@ -113,7 +115,7 @@ public class ExpressionTree {
 		if(groupByColumns!=null ||aggregateFunctions.size() >0 )
 		{
 			// System.out.println("groupby cols not null"+ groupByColumns.size());
-			current = new GroupByOperator(current, groupByColumns,aggregateFunctions );
+			current = new GroupByOperator2(current, groupByColumns,aggregateFunctions );
 		}
 
 		// if group by has a 'having' condition add a select operator

@@ -5,10 +5,6 @@ package edu.buffalo.cse562;
 
 import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 
-/**
- * @author Sathish
- *
- */
 public class ColumnDetail {
 	
 	

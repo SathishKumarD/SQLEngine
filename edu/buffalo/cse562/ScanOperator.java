@@ -42,7 +42,13 @@ public class ScanOperator implements Operator {
 			this.indexMaps = Main.indexTypeMaps.get(this.tableName.toUpperCase());
 		}
 		this.operatorTableSchema = this.initialiseOperatorTableSchema(intSchema);
-		this.dataFile = FileSystems.getDefault().getPath(ConfigManager.getDataDir(), tableName.toLowerCase() +".dat");		
+		
+		
+		// change the extensionnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn
+		// tbl to dat
+		
+		
+		this.dataFile = FileSystems.getDefault().getPath(ConfigManager.getDataDir(), tableName.toLowerCase() +".tbl");		
 		
 		reset();
 	}
