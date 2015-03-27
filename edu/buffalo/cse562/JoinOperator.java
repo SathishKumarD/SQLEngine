@@ -17,6 +17,7 @@ public class JoinOperator implements Operator {
 	protected Expression expr;
 	protected int leftIndex;
 	protected int rightIndex;
+	private Operator parentOperator;
 	
 	public JoinOperator(Operator left, Operator right, Expression expr){
 		this.left = left;
@@ -58,27 +59,40 @@ public class JoinOperator implements Operator {
 	}
 
 	@Override
+	public void setChildOp(Operator child) {		
+		this.left = child;		
+		left.setParent(this);		
+	}
+	
+	@Override
 	public Operator getChildOp() {
 		// TODO Auto-generated method stub
-		return null;
+		return this.left;
 	}
-
-	@Override
-	public void setChildOp(Operator child) {
-		// TODO Auto-generated method stub
-
+	
+	public void setRightOp(Operator child){
+		this.right = child;
+		right.setParent(this);
+	}
+	
+	public Operator getLeftOperator()
+	{
+		return left;
+	}
+	
+	public Operator getRightOperator()
+	{
+		return right;
 	}
 
 	@Override
 	public Operator getParent() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.parentOperator;
 	}
 
 	@Override
 	public void setParent(Operator parent) {
-		// TODO Auto-generated method stub
-
+		this.parentOperator = parent;		
 	}
 	
 	private void generateOutputSchema(){
@@ -109,5 +123,7 @@ public class JoinOperator implements Operator {
 		// TODO Auto-generated method stub
 		return "Join on " + this.expr;
 	}
+
+
 
 }

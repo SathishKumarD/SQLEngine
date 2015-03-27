@@ -350,7 +350,7 @@ public class ExternalSortOperator implements Operator {
 	@Override
 	public void setParent(Operator parent) {
 		// TODO Auto-generated method stub
-
+		
 	}
 
 	public String toString(){
