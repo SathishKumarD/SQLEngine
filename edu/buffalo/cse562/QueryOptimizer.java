@@ -81,9 +81,9 @@ public class QueryOptimizer {
 				}
 			}
 			
-			if(currOperator instanceof GroupByOperator2)
+			if(currOperator instanceof GroupByOperator)
 			{
-				replaceGroupBy((GroupByOperator2)currOperator);				
+				//replaceGroupBy((GroupByOperator)currOperator);				
 			}			
 			
 			parentOperator = currOperator;
@@ -369,7 +369,7 @@ public class QueryOptimizer {
 	}
 	
 	//to be changed to external sort! : TODO to keno
-	private void replaceGroupBy(GroupByOperator2 groupByOp)
+	private void replaceGroupBy(GroupByOperator groupByOp)
 	{
 		List<Column> grpByExpressionsList = groupByOp.getGroupByColumns();
 		List<OrderByElement> orderByElements = new ArrayList<OrderByElement>();

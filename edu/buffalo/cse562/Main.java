@@ -137,7 +137,7 @@ public class Main {
 			columnDetail.setColumnDefinition(colDef);
 			columnDetail.setIndex(colCount);
 
-			String columnFullName = tableName + "."+ colDef.getColumnName();
+			String columnFullName = tableName + "."+ colDef.getColumnName().toLowerCase();
 
 			typeInfo.put(colCount, colDef.getColDataType().getDataType()); //indexMaps : {tableName:{columnIndex:columnType}}
 

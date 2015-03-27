@@ -13,6 +13,8 @@ import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.statement.create.table.ColDataType;
+import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 import net.sf.jsqlparser.statement.select.AllColumns;
 
 /**
@@ -82,7 +84,11 @@ public class GroupByOperator implements Operator {
 	@Override
 	public HashMap<String, ColumnDetail> getOutputTupleSchema() {
 		// TODO Auto-generated method stub
-		return  this.outputSchema;
+		if(this.outputSchema == null)
+		{
+			this.outputSchema = getOutputSchema();
+		}
+		return this.outputSchema ;
 	}
 	
 	private void ComputeGroupBy()
@@ -344,7 +350,11 @@ public class GroupByOperator implements Operator {
 	{
 
 		//colDet.setColumnDefinition(coldef.setColDataType(););
-		ColumnDetail colDet = null;
+		ColumnDetail colDet = new ColumnDetail();
+		colDet.setColumnDefinition(new ColumnDefinition());
+		colDet.getColumnDefinition().setColDataType(new ColDataType());
+		colDet.getColumnDefinition().getColDataType().setDataType("decimal");
+		/*
 		ExpressionList exps = func.getParameters();
 
 		if (exps != null){
@@ -357,10 +367,9 @@ public class GroupByOperator implements Operator {
 				}
 			}
 		}
-
-		return new ColumnDetail();
+		 */
+		return colDet;
 	}
-
 	private ArrayList<Tuple> getGroupByColumnArrayList(ArrayList<Tuple> tuple, List<Column> columns )
 	{
 		ArrayList<Tuple> groupByColArrayList = new ArrayList<>();
@@ -484,6 +493,8 @@ public class GroupByOperator implements Operator {
 
 	private ArrayList<Tuple> clone(ArrayList<Tuple> tuple)
 	{
+		if(tuple == null)
+			return null;
 		ArrayList<Tuple> clonedTuple = new ArrayList<Tuple>();
 
 		for( Tuple t: tuple)
