@@ -64,9 +64,9 @@ public class Main {
 							{
 
 							//System.out.println("______________________________________");
-							//System.out.println("	Old Execution Plan");
-							//System.out.println("______________________________________");
-							//printPlan(op);
+							System.out.println("	Old Execution Plan");
+							System.out.println("______________________________________");
+							printPlan(op);
 							//System.out.println("______________________________________");
 							//System.out.println("	Old Execution Plan's Result");
 							//System.out.println("______________________________________");
@@ -81,7 +81,7 @@ public class Main {
 							//System.out.println("	Optimized Execution Plan's Result");
 							//System.out.println("______________________________________");
 							
-							//ExecuteQuery(op);													
+//							ExecuteQuery(op);													
 
 							}
 							catch(Exception ex)
@@ -100,7 +100,7 @@ public class Main {
 							for (PlainSelect s : pselects){
 								uop.addOperator(e.generateTree(s));
 							}
-							ExecuteQuery(uop);
+//							ExecuteQuery(uop);
 						}
 
 					}

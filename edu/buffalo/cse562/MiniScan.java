@@ -18,10 +18,11 @@ public class MiniScan{
 		Charset charset = Charset.forName("US-ASCII");
 		this.br = Files.newBufferedReader(filename.toPath(), charset);
 		this.typeMap = typeMap;
+		System.out.println(typeMap);
 	}
 	
 	private ArrayList<Tuple> parseLine(String raw){
-		String col[] = line.split("\\|");	
+		String col[] = line.split("\\|");
 		ArrayList<Tuple> tuples = new ArrayList<Tuple>();
 		for(Map.Entry<Integer, String> entry : typeMap.entrySet()) {
 			tuples.add(new Tuple(entry.getValue(), col[entry.getKey()]));	

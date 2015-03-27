@@ -42,6 +42,10 @@ public class CrossProductOperator implements Operator {
 		
 		this.expr = expr;
 		generateOutputSchema();
+		
+		System.out.println("============== My name is " + this.toString() +"  =================== ");
+		System.out.println("============== My schema is  =================== ");
+		System.out.println(outputSchema);
 	}
 	
 	@Override
