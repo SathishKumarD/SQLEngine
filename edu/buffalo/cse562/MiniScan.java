@@ -18,7 +18,6 @@ public class MiniScan{
 		Charset charset = Charset.forName("US-ASCII");
 		this.br = Files.newBufferedReader(filename.toPath(), charset);
 		this.typeMap = typeMap;
-		System.out.println(typeMap);
 	}
 	
 	private ArrayList<Tuple> parseLine(String raw){

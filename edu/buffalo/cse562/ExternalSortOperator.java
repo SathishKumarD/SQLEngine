@@ -72,10 +72,6 @@ public class ExternalSortOperator implements Operator {
 		for (ColumnDetail c : outputSchema.values()){
 			typeMap.put(c.getIndex(), c.getColumnDefinition().getColDataType().toString().toLowerCase());
 		}
-		System.out.println("============== My name is " + this.toString() +"  =================== ");
-		System.out.println("============== My child is " + this.child +"  =================== ");
-		System.out.println("============== My schema is  =================== ");
-		System.out.println(outputSchema);
 	}
 
 	@Override

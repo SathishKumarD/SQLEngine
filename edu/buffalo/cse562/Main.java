@@ -73,15 +73,15 @@ public class Main {
 //							ExecuteQuery(op);							
 							//System.out.println("______________________________________");
 								
-							//System.out.println("	Optimized Execution Plan");
-							//System.out.println("______________________________________");
+							System.out.println("	Optimized Execution Plan");
+							System.out.println("______________________________________");
 							new QueryOptimizer(op);	
 							printPlan(op);
 							//System.out.println("______________________________________");
 							//System.out.println("	Optimized Execution Plan's Result");
 							//System.out.println("______________________________________");
 							
-//							ExecuteQuery(op);													
+							ExecuteQuery(op);													
 
 							}
 							catch(Exception ex)
@@ -100,7 +100,7 @@ public class Main {
 							for (PlainSelect s : pselects){
 								uop.addOperator(e.generateTree(s));
 							}
-//							ExecuteQuery(uop);
+							ExecuteQuery(uop);
 						}
 
 					}
