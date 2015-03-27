@@ -24,6 +24,7 @@ public class JoinOperator implements Operator {
 		this.right = right;
 		this.expr = expr;
 		
+		
 		String[] fields = expr.toString().split("=");
 		
 		//Test left, then right
@@ -38,7 +39,9 @@ public class JoinOperator implements Operator {
 			rightIndex = Evaluator.getColumnDetail(right.getOutputTupleSchema(), fields[1].trim()).getIndex();
 		}		
 		
-		generateOutputSchema();
+		setChildOp(left);
+		setRightOp(right);
+		
 	}
 	
 	@Override
@@ -55,13 +58,14 @@ public class JoinOperator implements Operator {
 	@Override
 	public void reset() {
 		// TODO Auto-generated method stub
-
+		generateOutputSchema();
 	}
 
 	@Override
 	public void setChildOp(Operator child) {		
 		this.left = child;		
-		left.setParent(this);		
+		left.setParent(this);
+		//reset();
 	}
 	
 	@Override
@@ -73,6 +77,7 @@ public class JoinOperator implements Operator {
 	public void setRightOp(Operator child){
 		this.right = child;
 		right.setParent(this);
+		if(this.left != null) reset();
 	}
 	
 	public Operator getLeftOperator()
@@ -121,7 +126,17 @@ public class JoinOperator implements Operator {
 	@Override
 	public String toString() {
 		// TODO Auto-generated method stub
-		return "Join on " + this.expr;
+		
+		StringBuilder b = new StringBuilder("JOIN WITH \n");
+		Operator childOfRightBranch = this.right;
+		
+		while(childOfRightBranch != null)
+		{
+			b.append('\t' +childOfRightBranch.toString() + '\n');
+			childOfRightBranch = childOfRightBranch.getChildOp();
+		}
+		
+		return b.toString();
 	}
 
 }

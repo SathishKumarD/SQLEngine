@@ -31,7 +31,7 @@ public class SelectionOperator implements Operator {
 	public SelectionOperator(Operator input, Expression exp){
 		setChildOp(input);		
 		setSelectExpression(exp);
-		Util.printSchema(inputSchema);
+		//Util.printSchema(inputSchema);
 	}
 	
 	//TODO change
@@ -39,7 +39,7 @@ public class SelectionOperator implements Operator {
 		setChildOp(input);		
 		setSelectExpression(expList);
 				
-		Util.printSchema(inputSchema);
+		//Util.printSchema(inputSchema);
 	}
 	
 	public ArrayList<Tuple> readOneTuple() {

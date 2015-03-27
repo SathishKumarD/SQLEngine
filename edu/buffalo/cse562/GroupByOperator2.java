@@ -324,7 +324,7 @@ public class GroupByOperator2 implements Operator {
 		copyInputSchemaToOutputSchema();
 
 
-		Util.printSchema(outputSchema);
+		//Util.printSchema(outputSchema);
 		int index =inputSchema.keySet().size();
 		for(AggregateFunctionColumn agf :this.aggregateFunctions)
 		{
@@ -349,7 +349,7 @@ public class GroupByOperator2 implements Operator {
 
 			index++;
 		}
-		Util.printSchema(outputSchema);
+		//Util.printSchema(outputSchema);
 		// System.out.println(inputSchema.keySet().size() + " "+this.aggregateFunctions.size() + " " + index);
 		return outputSchema;
 	}
