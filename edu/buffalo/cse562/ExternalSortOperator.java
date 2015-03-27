@@ -54,10 +54,10 @@ public class ExternalSortOperator implements Operator {
 			}
 			catch(Exception ex)
 			{
-				System.out.println("Error in getting index for column:  " + ob.getExpression().toString().toLowerCase());
-				System.out.println("parent: " + this.getParent());
-				System.out.println("current: " + this);
-				System.out.println("child: " + child);
+				System.err.println("Error in getting index for column:  " + ob.getExpression().toString().toLowerCase());
+				System.err.println("parent: " + this.getParent());
+				System.err.println("current: " + this);
+				System.err.println("child: " + child);
 				throw ex;
 				
 			}
@@ -363,8 +363,6 @@ public class ExternalSortOperator implements Operator {
 
 	@Override
 	public void setParent(Operator parent) {
-		System.out.println("setting parent operator:");
-		System.out.println(parent);
 		this.parentOperator = parent;		
 	}
 
