@@ -81,7 +81,7 @@ public class Main {
 							//System.out.println("	Optimized Execution Plan's Result");
 							//System.out.println("______________________________________");
 							
-							ExecuteQuery(op);													
+							//ExecuteQuery(op);													
 
 							}
 							catch(Exception ex)
