@@ -62,7 +62,7 @@ public class GroupByOperator implements Operator {
 		if(outputDataList.size()>rowIndex)
 		{
 			tuple = outputDataList.get(rowIndex);
-			Util.printTuple(tuple);
+			//Util.printTuple(tuple);
 		}
 		rowIndex ++;
 
@@ -96,7 +96,6 @@ public class GroupByOperator implements Operator {
 		if(!isGroupByComputed)
 		{
 			ArrayList<Tuple> inputtuple = input.readOneTuple();
-			inputtuple = clone(inputtuple);
 			ArrayList<Tuple> gropuByCols = null;
 			while(inputtuple!=null)
 			{
@@ -164,23 +163,25 @@ public class GroupByOperator implements Operator {
 
 		if(outputData.get(hashKey) == null)
 		{
-			outputtuple.add(tup.cloneTuple(tup));
-			outputData.put(hashKey,new GroupByOutput( clone(outputtuple)));
+			outputtuple.add(tup);
+			outputData.put(hashKey, new GroupByOutput( outputtuple));
 		}
 		else
 		{
 
+			
 			ArrayList<Tuple> existingTuple = outputData.get(hashKey).getOutputData();
+
 			if(funcIndex ==existingTuple.size() )
 			{
-				existingTuple.add(tup.cloneTuple(tup));
+				existingTuple.add(tup);
 			}
 			else
 			{
 				Tuple sumDatum = existingTuple.get(funcIndex);
-				sumDatum = sumDatum.add(tup.cloneTuple(tup));
+				sumDatum = sumDatum.add(tup);
 			}
-			//Util.printTuple(existingTuple);
+			// System.out.println("AVG "+funcIndex+" " +sumDatum.toString() + " "+existingTuple.get(funcIndex) + " "+  outputData.get(hashKey).getOutputData().get(funcIndex) );
 		}
 
 
@@ -198,8 +199,8 @@ public class GroupByOperator implements Operator {
 
 		if(outputData.get(hashKey) == null)
 		{
-			outputtuple.add(tup.cloneTuple(tup));
-			outputData.put(hashKey, new GroupByOutput( clone(outputtuple)));
+			outputtuple.add(tup);
+			outputData.put(hashKey, new GroupByOutput( outputtuple));
 		}
 		else
 		{
@@ -229,7 +230,7 @@ public class GroupByOperator implements Operator {
 		if(outputData.get(hashKey) == null)
 		{
 			outputtuple.add(tup);
-			outputData.put(hashKey, new GroupByOutput( clone(outputtuple)));
+			outputData.put(hashKey, new GroupByOutput( outputtuple));
 		}
 		else
 		{
@@ -257,7 +258,7 @@ public class GroupByOperator implements Operator {
 		if(outputData.get(hashKey) == null)
 		{
 			outputtuple.add(tup);
-			outputData.put(hashKey, new GroupByOutput( clone(outputtuple)));
+			outputData.put(hashKey, new GroupByOutput( outputtuple));
 		}
 		else
 		{
@@ -286,7 +287,7 @@ public class GroupByOperator implements Operator {
 		if(outputData.get(hashKey) == null)
 		{
 			outputtuple.add(tup);
-			outputData.put(hashKey, new GroupByOutput( clone(outputtuple)));
+			outputData.put(hashKey, new GroupByOutput( outputtuple));
 
 			//System.out.println(hashKey);
 			//Util.printTuple(outputData.get(hashKey).getOutputData());
@@ -310,7 +311,7 @@ public class GroupByOperator implements Operator {
 				//Util.printTuple(outputData.get(hashKey).getOutputData());
 				//System.out.println();
 				// Util.printTuple(existingTuple);
-				//System.out.println("COUNT "+funcIndex+" " +sumDatum.toString() + " "+existingTuple.get(funcIndex) + " "+  outputData.get(hashKey).getOutputData().get(funcIndex) );
+				// System.out.println("COUNT "+funcIndex+"  "+existingTuple.get(funcIndex) + " "+  outputData.get(hashKey).getOutputData().get(funcIndex) );
 			}catch(Exception ex)
 			{
 				System.out.println("errorrr");
@@ -350,11 +351,8 @@ public class GroupByOperator implements Operator {
 	{
 
 		//colDet.setColumnDefinition(coldef.setColDataType(););
-		ColumnDetail colDet = new ColumnDetail();
-		colDet.setColumnDefinition(new ColumnDefinition());
-		colDet.getColumnDefinition().setColDataType(new ColDataType());
-		colDet.getColumnDefinition().getColDataType().setDataType("decimal");
-		/*
+		
+		ColumnDetail colDet = null;
 		ExpressionList exps = func.getParameters();
 
 		if (exps != null){
@@ -367,7 +365,12 @@ public class GroupByOperator implements Operator {
 				}
 			}
 		}
-		 */
+		 
+		
+		colDet = new ColumnDetail();
+		colDet.setColumnDefinition(new ColumnDefinition());
+		colDet.getColumnDefinition().setColDataType(new ColDataType());
+		colDet.getColumnDefinition().getColDataType().setDataType("decimal");
 		return colDet;
 	}
 	private ArrayList<Tuple> getGroupByColumnArrayList(ArrayList<Tuple> tuple, List<Column> columns )
