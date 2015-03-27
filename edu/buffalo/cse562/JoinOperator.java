@@ -48,7 +48,7 @@ public class JoinOperator implements Operator {
 	@Override
 	public HashMap<String, ColumnDetail> getOutputTupleSchema() {
 		// TODO Auto-generated method stub
-		return null;
+		return outputSchema;
 	}
 
 	@Override

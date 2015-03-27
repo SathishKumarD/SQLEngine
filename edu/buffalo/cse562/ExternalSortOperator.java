@@ -43,10 +43,8 @@ public class ExternalSortOperator implements Operator {
 		}
 		this.outputSchema = child.getOutputTupleSchema();
 		this.sortFields = new LinkedHashMap<Integer, Boolean>(orderByElements.size());
-		//		System.out.println(child);			
 
 		for (OrderByElement ob : orderByElements){
-			//			String fullFieldName = getFullField(ob.getExpression().toString());
 			System.out.println(ob);
 			//int index = this.outputSchema.get(ob.getExpression().toString()).getIndex();
 int index = 0;
@@ -61,9 +59,8 @@ int index = 0;
 				
 			}
 			sortFields.put(index, ob.isAsc());
-
-
 		}
+		
 		this.orderByElements = orderByElements;
 		this.child = child;
 
@@ -82,7 +79,6 @@ int index = 0;
 		// TODO Auto-generated method stub
 		ArrayList<Tuple> currentTuple;
 
-		// First run; sorts input tuples in batches, and writes to separate files on disk
 
 		if (!sorted){
 			long start = new Date().getTime();
@@ -108,6 +104,8 @@ int index = 0;
 		int index = 0;
 		int nPass = 0;
 		File currentFileHandler = getFileHandle(index, nPass);
+		
+		// First run; sorts input tuples in batches, and writes to separate files on disk
 		while((currentTuple = child.readOneTuple())!= null){
 			if (addToSet(currentTuple, true, currentFileHandler)){
 				index = index + 1;
@@ -119,7 +117,6 @@ int index = 0;
 		flushWorkingSet(currentFileHandler, true);
 		System.out.println("Working set now " +workingSet.size());
 		mergeFull(currentFileHandler, index, nPass);
-
 	}
 
 	private void mergeFull(File currentFileHandler, int size, int nPass){		
@@ -173,7 +170,9 @@ int index = 0;
 			while (rightTup != null){
 				addToSet(rightTup, false, ofName);
 				rightTup = right.readTuple();
-			}			
+			}
+			
+			//cleanup
 			flushWorkingSet(ofName, false);			
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
