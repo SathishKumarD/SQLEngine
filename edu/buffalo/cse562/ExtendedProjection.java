@@ -103,7 +103,7 @@ public class ExtendedProjection implements Operator {
 
 			}	
 
-			 //     Util.printTuple(outputTuples);
+			//     Util.printTuple(outputTuples);
 			return outputTuples;
 		} while(inputTuples != null);
 	}
@@ -214,19 +214,39 @@ public class ExtendedProjection implements Operator {
 	}
 
 	public String toString(){
-		return "Extended Projection Operator: " + this.SelectItem_List.toString();
+		String str = "";
+		try
+		{
+			str = "Extended Projection Operator: " + this.SelectItem_List.toString();
+		}
+		catch ( Exception ex)
+		{
+			System.err.println("Error in printing data extended projection:");
+			if(this.SelectItem_List == null)
+			{
+				System.err.println("this.SelectItem_List is null");
+			}
+			throw ex;
+		}
+		return str;
 	}
 
 	public Operator getChildOp(){
 		return this.input;
 	}
-	
+
 	public void setProjectionExpressions(List<SelectItem> SelectItem_List) {		
+
+		if(SelectItem_List == null)
+		{
+			System.err.println("Selection list in selection operator is null");
+		}
 		this.SelectItem_List = SelectItem_List;
+
 		setOutputSchema();
 	}
 
-	
+
 	@Override
 	public HashMap<String, ColumnDetail> getOutputTupleSchema() {
 		return outputSchema;
@@ -247,5 +267,5 @@ public class ExtendedProjection implements Operator {
 	public void setParent(Operator parent) {
 		this.parentOperator = parent;		
 	}
-	
+
 }

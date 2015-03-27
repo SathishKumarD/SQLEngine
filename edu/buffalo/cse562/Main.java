@@ -66,7 +66,7 @@ public class Main {
 							//System.out.println("______________________________________");
 							// System.out.println("	Old Execution Plan");
 							// System.out.println("______________________________________");
-							// printPlan(op);
+							 printPlan(op);
 							//System.out.println("______________________________________");
 							//System.out.println("	Old Execution Plan's Result");
 							//System.out.println("______________________________________");
@@ -75,7 +75,7 @@ public class Main {
 								
 							// System.out.println("	Optimized Execution Plan");
 							// System.out.println("______________________________________");
-							new QueryOptimizer(op);	
+							//new QueryOptimizer(op);	
 							printPlan(op);
 							//System.out.println("______________________________________");
 							//System.out.println("	Optimized Execution Plan's Result");
