@@ -43,18 +43,15 @@ public class ExternalSortOperator implements Operator {
 		}
 		this.outputSchema = child.getOutputTupleSchema();
 		this.sortFields = new LinkedHashMap<Integer, Boolean>(orderByElements.size());
-		//		System.out.println(child);			
 
 		for (OrderByElement ob : orderByElements){
-			//			String fullFieldName = getFullField(ob.getExpression().toString());
 			System.out.println(ob);
 			//int index = this.outputSchema.get(ob.getExpression().toString()).getIndex();
 
 			int index = Evaluator.getColumnDetail(child.getOutputTupleSchema(),ob.getExpression().toString().toLowerCase()).getIndex();
 			sortFields.put(index, ob.isAsc());
-
-
 		}
+		
 		this.orderByElements = orderByElements;
 		this.child = child;
 
@@ -73,7 +70,6 @@ public class ExternalSortOperator implements Operator {
 		// TODO Auto-generated method stub
 		ArrayList<Tuple> currentTuple;
 
-		// First run; sorts input tuples in batches, and writes to separate files on disk
 
 		if (!sorted){
 			long start = new Date().getTime();
@@ -99,6 +95,8 @@ public class ExternalSortOperator implements Operator {
 		int index = 0;
 		int nPass = 0;
 		File currentFileHandler = getFileHandle(index, nPass);
+		
+		// First run; sorts input tuples in batches, and writes to separate files on disk
 		while((currentTuple = child.readOneTuple())!= null){
 			if (addToSet(currentTuple, true, currentFileHandler)){
 				index = index + 1;
@@ -110,7 +108,6 @@ public class ExternalSortOperator implements Operator {
 		flushWorkingSet(currentFileHandler, true);
 		System.out.println("Working set now " +workingSet.size());
 		mergeFull(currentFileHandler, index, nPass);
-
 	}
 
 	private void mergeFull(File currentFileHandler, int size, int nPass){		
@@ -164,7 +161,9 @@ public class ExternalSortOperator implements Operator {
 			while (rightTup != null){
 				addToSet(rightTup, false, ofName);
 				rightTup = right.readTuple();
-			}			
+			}
+			
+			//cleanup
 			flushWorkingSet(ofName, false);			
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
