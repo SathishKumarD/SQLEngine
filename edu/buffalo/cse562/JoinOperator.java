@@ -124,6 +124,4 @@ public class JoinOperator implements Operator {
 		return "Join on " + this.expr;
 	}
 
-
-
 }
