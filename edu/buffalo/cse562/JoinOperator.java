@@ -41,7 +41,7 @@ public class JoinOperator implements Operator {
 		
 		setChildOp(left);
 		setRightOp(right);
-		
+		generateOutputSchema();
 	}
 	
 	@Override
@@ -103,9 +103,9 @@ public class JoinOperator implements Operator {
 	private void generateOutputSchema(){
 		outputSchema = new HashMap<String, ColumnDetail>();
 		leftSchema = new HashMap<String, ColumnDetail>(left.getOutputTupleSchema());
-		rightSchema = new HashMap<String, ColumnDetail>(right.getOutputTupleSchema());
+		rightSchema = new HashMap<String, ColumnDetail>(right.getOutputTupleSchema());		
 		int offset = 0;
-		for (Entry<String, ColumnDetail> en : rightSchema.entrySet()){
+		for (Entry<String, ColumnDetail> en : leftSchema.entrySet()){
 			String key = en.getKey();
 			ColumnDetail value = en.getValue().clone();
 			int index = value.getIndex();
@@ -114,7 +114,7 @@ public class JoinOperator implements Operator {
 			}
 			outputSchema.put(key, value);
 		}
-		for (Entry<String, ColumnDetail> en : leftSchema.entrySet()){
+		for (Entry<String, ColumnDetail> en : rightSchema.entrySet()){
 			String key = en.getKey();
 			ColumnDetail value = en.getValue().clone();
 			int index = value.getIndex();

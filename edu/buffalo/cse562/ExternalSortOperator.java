@@ -26,7 +26,7 @@ public class ExternalSortOperator implements Operator {
 	Comparator<ArrayList<Tuple>> comp;
 	int bufferLength;
 	HashMap<String, ColumnDetail> outputSchema;
-	private static final int BUFFER_SIZE = 5000;
+	private static final int BUFFER_SIZE = 10000;
 	TreeMap<Integer, String> typeMap;
 	List<ArrayList<Tuple>> workingSet;
 	boolean sorted = false;
@@ -45,9 +45,9 @@ public class ExternalSortOperator implements Operator {
 		this.sortFields = new LinkedHashMap<Integer, Boolean>(orderByElements.size());
 
 		for (OrderByElement ob : orderByElements){
-			System.out.println(ob);
+//			System.out.println(ob);
 			//int index = this.outputSchema.get(ob.getExpression().toString()).getIndex();
-int index = 0;
+			int index = 0;
 			try
 			{
 			 index = Evaluator.getColumnDetail(child.getOutputTupleSchema(),ob.getExpression().toString().toLowerCase()).getIndex();
@@ -60,7 +60,7 @@ int index = 0;
 			}
 			sortFields.put(index, ob.isAsc());
 		}
-		
+
 		this.orderByElements = orderByElements;
 		this.child = child;
 
@@ -330,7 +330,7 @@ int index = 0;
 	@Override
 	public HashMap<String, ColumnDetail> getOutputTupleSchema() {
 		// TODO Auto-generated method stub
-		return child.getOutputTupleSchema();
+		return this.outputSchema;
 	}	
 
 
@@ -347,7 +347,9 @@ int index = 0;
 	@Override
 	public void setChildOp(Operator child) {
 		// TODO Auto-generated method stub
+		System.out.println("changing child of external sort");
 		this.child = child;
+		this.outputSchema = child.getOutputTupleSchema();
 	}
 
 	@Override

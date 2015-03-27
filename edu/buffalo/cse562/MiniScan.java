@@ -21,7 +21,7 @@ public class MiniScan{
 	}
 	
 	private ArrayList<Tuple> parseLine(String raw){
-		String col[] = line.split("\\|");	
+		String col[] = line.split("\\|");
 		ArrayList<Tuple> tuples = new ArrayList<Tuple>();
 		for(Map.Entry<Integer, String> entry : typeMap.entrySet()) {
 			tuples.add(new Tuple(entry.getValue(), col[entry.getKey()]));	
