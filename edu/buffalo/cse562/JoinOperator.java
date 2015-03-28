@@ -136,7 +136,9 @@ public class JoinOperator implements Operator {
 	public String toString() {
 		// TODO Auto-generated method stub
 		
-		StringBuilder b = new StringBuilder("JOIN WITH \n");
+		StringBuilder b = new StringBuilder("JOIN ON ");
+		b.append(expr);
+		b.append("\n");
 		Operator childOfRightBranch = this.right;
 		
 		while(childOfRightBranch != null)

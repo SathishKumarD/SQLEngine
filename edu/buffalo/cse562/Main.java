@@ -51,15 +51,19 @@ public class Main {
 		for (File f : queryFiles){		
 			try{
 				CCJSqlParser parser = new CCJSqlParser(new FileReader(f));
-				ExpressionTree e = new ExpressionTree();
+				 SanitizeQuery sq = new SanitizeQuery();
+				// ExpressionTree sq = new ExpressionTree();
 				while ((statement = parser.Statement()) != null){
 					//					System.out.println(statement);
 					if(statement instanceof Select){
+						
+						
 						SelectBody select = ((Select) statement).getSelectBody();
 
 						if (select instanceof PlainSelect){
 							// 	System.err.println(select);
-							Operator op = e.generateTree(select);
+							// Operator op = e.generateTree(select);
+							Operator op = sq.generateTree(select);
 							try
 							{
 
@@ -98,7 +102,8 @@ public class Main {
 							UnionOperator uop = new UnionOperator();
 							List<PlainSelect> pselects = (List<PlainSelect>) un.getPlainSelects();
 							for (PlainSelect s : pselects){
-								uop.addOperator(e.generateTree(s));
+								
+								uop.addOperator(sq.generateTree(s));
 							}
 							ExecuteQuery(uop);
 						}

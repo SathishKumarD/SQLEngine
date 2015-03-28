@@ -30,7 +30,7 @@ public class Evaluator extends Eval {
 
 	@Override
 	public LeafValue eval(Column column) {
-
+		
 		int colID = getIndex(tupleSchema,column);	
 		LeafValue leafValue = tuple.get(colID).val;
 		// Util.printTuple(tuple);
@@ -52,6 +52,11 @@ public class Evaluator extends Eval {
 		}
 		else
 		{
+			System.err.println("this line should never be hit");
+			//Util.printSchema(tupleSchema);
+			System.err.println(column.getWholeColumnName());
+		
+			
 			for(Map.Entry<String, ColumnDetail> colDetail: tupleSchema.entrySet()){
 				String key = colDetail.getKey();
 				if(key.split("\\.").length>1)

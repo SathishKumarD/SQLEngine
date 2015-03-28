@@ -22,8 +22,11 @@ import net.sf.jsqlparser.expression.Function;
 public class ExpressionTree {
 	public Operator generateTree(SelectBody sel){
 		Operator current = null;
-		PlainSelect select = (PlainSelect) sel;		
+		PlainSelect select = (PlainSelect) sel;
+		System.out.println("Scan start");
 		current = addScanOperator(current, select);
+		System.out.println("Scan end");
+
 		current = addJoinOperator(current, select);
 		current = addSelectionOperator(current, select);
 		current = addGroupByOperator(current,select);		
@@ -38,7 +41,7 @@ public class ExpressionTree {
 		if(OrderByElements != null && OrderByElements.size() > 0){
 			current = new ExternalSortOperator(current, OrderByElements);
 		}
-		
+
 		return current;
 	}
 	private Operator addJoinOperator(Operator current,PlainSelect select)
@@ -79,6 +82,7 @@ public class ExpressionTree {
 		Table table  = null;		
 		if (fi instanceof Table){
 			table = (Table) fi;
+			System.out.println("hello "  + table.getName());
 			current = new ScanOperator(table);			
 		}
 		else if (fi instanceof SubSelect){
@@ -90,8 +94,9 @@ public class ExpressionTree {
 	}
 	public Operator buildJoins(Operator current, Join j){
 		FromItem fr = j.getRightItem();
-		
+
 		if (fr instanceof Table){
+			System.out.println("hi" + ((Table) fr).getName());
 			current = new CrossProductOperator(current, new ScanOperator(((Table) fr)), j.getOnExpression());
 		}	
 		return current;
@@ -110,16 +115,10 @@ public class ExpressionTree {
 
 		List<Column> groupByColumns =  getGroupByColumns(select);
 		List<AggregateFunctionColumn> aggregateFunctions = getFunctionList( select);
-		
-//		System.out.println(groupByColumns);
-//		System.out.println(aggregateFunctions);
 
 		if(groupByColumns!=null ||aggregateFunctions.size() >0 )
 		{
-			// System.out.println("groupby cols not null"+ groupByColumns.size());
 			current = new GroupByOperator(current, groupByColumns,aggregateFunctions );
-			//Util.printSchema(current.getOutputTupleSchema());
-			
 		}
 
 		// if group by has a 'having' condition add a select operator
@@ -140,10 +139,10 @@ public class ExpressionTree {
 
 			for(Expression exp: groupByColumnExp)
 			{
-			
+
 				if( exp instanceof Column)
 				{
-					
+
 					groupByColumns.add((Column)exp);
 
 				}
@@ -161,7 +160,7 @@ public class ExpressionTree {
 		{
 			if(selItem instanceof SelectExpressionItem)
 			{
-				
+
 				String alias = ((SelectExpressionItem)selItem).getAlias();
 				Expression expr = ((SelectExpressionItem) selItem).getExpression();
 				if(expr instanceof Function)
