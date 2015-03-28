@@ -17,7 +17,9 @@ public class JoinOperator implements Operator {
 	protected Expression expr;
 	protected int leftIndex;
 	protected int rightIndex;
-	private Operator parentOperator;
+	protected Operator parentOperator;
+	protected int divider;
+	
 	
 	public JoinOperator(Operator left, Operator right, Expression expr){
 		this.left = left;
@@ -58,6 +60,8 @@ public class JoinOperator implements Operator {
 	@Override
 	public void reset() {
 		// TODO Auto-generated method stub
+		left.reset();
+		right.reset();
 		generateOutputSchema();
 	}
 
@@ -121,6 +125,7 @@ public class JoinOperator implements Operator {
 			value.setIndex(index + offset + 1);
 			outputSchema.put(key, value);
 		}
+		this.divider = offset;
 	}
 	
 	@Override
