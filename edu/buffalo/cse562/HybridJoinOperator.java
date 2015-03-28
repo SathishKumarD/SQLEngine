@@ -33,7 +33,6 @@ public class HybridJoinOperator extends JoinOperator{
 			long start = new Date().getTime();
 			rightTuple = right.readOneTuple();		
 			while(rightTuple != null){
-//				System.out.println("***** Opening");
 				String key = rightTuple.get(rightIndex).toString();
 				List<ArrayList<Tuple>> prev = joinHash.get(key);
 //				System.out.println("current tuples " +prev);
@@ -45,11 +44,11 @@ public class HybridJoinOperator extends JoinOperator{
 				rightTuple = right.readOneTuple();
 			}
 			hashed = true;
-			// System.out.println("==== Hashed in " + ((float) (new Date().getTime() - start)/ 1000) + "s");
+			System.out.println("==== Hashed in " + ((float) (new Date().getTime() - start)/ 1000) + "s");
 		}
 		
-		//try to read more
-		if (!currentBag.hasNext()){		
+		//try to match more, if the current list is empty
+		if (!currentBag.hasNext()){
 			leftTuple = left.readOneTuple();
 			while (leftTuple != null){
 				String key = leftTuple.get(leftIndex).toString();
@@ -58,14 +57,17 @@ public class HybridJoinOperator extends JoinOperator{
 					currentBag = hashedRight.iterator();
 					break;
 				}
-				leftTuple = left.readOneTuple();
+				else{
+					leftTuple = left.readOneTuple();
+				}
 			}
 		}
 		
-		if (leftTuple == null){
+		if (leftTuple != null){
 			if (currentBag.hasNext()) {
+				//replace right half of output
 				if (leftTuple.size() > this.divider){
-					leftTuple = (ArrayList<Tuple>) leftTuple.subList(0, divider);
+					leftTuple = new ArrayList<Tuple>(leftTuple.subList(0, divider+1));
 				}
 				leftTuple.addAll(currentBag.next());
 				return leftTuple;
@@ -77,5 +79,6 @@ public class HybridJoinOperator extends JoinOperator{
 	@Override
 	public void reset(){
 		super.reset();
+		currentBag = new ArrayList<ArrayList<Tuple>>().iterator();		
 	}
 }
