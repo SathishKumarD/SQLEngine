@@ -17,6 +17,8 @@ import net.sf.jsqlparser.statement.select.Select;
 import java.util.HashMap;
 
 import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
+import net.sf.jsqlparser.statement.select.AllColumns;
+import net.sf.jsqlparser.statement.select.AllTableColumns;
 import net.sf.jsqlparser.statement.select.FromItem;
 import net.sf.jsqlparser.statement.select.Join;
 import net.sf.jsqlparser.statement.select.Limit;
@@ -265,12 +267,14 @@ public class SanitizeQuery extends Eval {
 	{
 
 		String key = "";
+		String tableName = "";
 		try
 		{
 			for(Map.Entry<String,String> tabNameAlias:tableNameAlias.entrySet())
 			{
-				key = tabNameAlias.getKey() + "." + columnName;
-				if( Main.tableMapping.get(tabNameAlias.getKey().toLowerCase()).get(key.toLowerCase())!=null) 
+				tableName = tabNameAlias.getKey().toLowerCase();
+				key = tableName + "." + columnName.toLowerCase();
+				if( Main.tableMapping.get(tableName).get(key)!=null) 
 				{
 
 					return tabNameAlias.getKey();
@@ -281,6 +285,8 @@ public class SanitizeQuery extends Eval {
 			System.err.println(columnName);
 			System.err.println(key);
 
+			Util.printSchema(Main.tableMapping.get(tableName));
+			
 
 			throw ex;
 
@@ -316,7 +322,7 @@ public class SanitizeQuery extends Eval {
 		{
 			evaluateExpression(exp);
 		}
-		
+
 	}
 
 	private void evaluateExtendedProjection(PlainSelect select)
@@ -324,31 +330,33 @@ public class SanitizeQuery extends Eval {
 		List<SelectItem> selItems = (List<SelectItem>) select.getSelectItems();
 		for(SelectItem s : selItems)
 		{
-			Expression expr = ((SelectExpressionItem) s).getExpression();
-			if(!(expr instanceof Function))
+			if(!(s instanceof AllTableColumns) && !(s instanceof AllColumns))
 			{
-				//System.out.println("evaluating: " +expr );
-
-				evaluateExpression(expr);
-			}
-			else if( expr!=null)
-			{
-				try
+				Expression expr = ((SelectExpressionItem) s).getExpression();
+				if(!(expr instanceof Function))
 				{
-					ExpressionList exps =((Function)expr).getParameters();
-					if(exps!=null)
+					//System.out.println("evaluating: " +expr );
+
+					evaluateExpression(expr);
+				}
+				else if( expr!=null)
+				{
+					try
 					{
-						Expression exp = (Expression) exps.getExpressions().get(0);
-						evaluateExpression(exp);
+						ExpressionList exps =((Function)expr).getParameters();
+						if(exps!=null)
+						{
+							Expression exp = (Expression) exps.getExpressions().get(0);
+							evaluateExpression(exp);
+						}
 					}
-				}
-				catch (Exception ex)
-				{
-					System.err.println("func evaluating: " +expr );
-				}
+					catch (Exception ex)
+					{
+						System.err.println("func evaluating: " +expr );
+					}
 
-				//System.out.println("func evaluating: " +expr );
-			}
+					//System.out.println("func evaluating: " +expr );
+				}}
 
 		}
 
