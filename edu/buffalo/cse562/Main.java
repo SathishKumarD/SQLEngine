@@ -1,7 +1,9 @@
 package edu.buffalo.cse562;
 import java.io.File;
 import java.io.FileReader;
+import java.util.Date;
 import java.util.List;
+
 import net.sf.jsqlparser.parser.CCJSqlParser;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
@@ -84,8 +86,10 @@ public class Main {
 							//System.out.println("______________________________________");
 							//System.out.println("	Optimized Execution Plan's Result");
 							//System.out.println("______________________________________");
-							
+							long start = new Date().getTime();
+
 							ExecuteQuery(op);													
+							System.out.println("==== Query executed in " + ((float) (new Date().getTime() - start)/ 1000) + "s");
 
 							}
 							catch(Exception ex)
