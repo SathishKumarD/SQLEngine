@@ -171,7 +171,18 @@ public class Tuple implements Comparable<Tuple> {
 		}
 		return false;		
 	}	
-
+	
+	@Override
+	public boolean equals(Object obj) {
+		// TODO Auto-generated method stub
+		if (obj instanceof Tuple){
+			if (this.toString().compareTo(((Tuple) obj).toString()) == 0){
+				return true;
+			}
+		}
+		return super.equals(obj);
+	}
+	
 	public int compareTo(Tuple nxtTuple) 
 	{
 		try 
