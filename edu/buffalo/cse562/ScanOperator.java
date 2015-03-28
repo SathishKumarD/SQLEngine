@@ -61,7 +61,8 @@ public class ScanOperator implements Operator {
 			line = buffer.readLine();
 		} 
 		catch (IOException e) {
-			e.printStackTrace();
+//			e.printStackTrace();
+			return null;
 		}
 
 		if(line == null || line.isEmpty()) { try {

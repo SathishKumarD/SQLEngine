@@ -82,7 +82,7 @@ public class ExpressionTree {
 		Table table  = null;		
 		if (fi instanceof Table){
 			table = (Table) fi;
-			System.out.println("hello "  + table.getName());
+//			System.out.println("hello "  + table.getName());
 			current = new ScanOperator(table);			
 		}
 		else if (fi instanceof SubSelect){
@@ -96,8 +96,8 @@ public class ExpressionTree {
 		FromItem fr = j.getRightItem();
 
 		if (fr instanceof Table){
-			System.out.println("hi" + ((Table) fr).getName());
-			current = new CrossProductOperator(current, new ScanOperator(((Table) fr)), j.getOnExpression());
+//			System.out.println("hi" + ((Table) fr).getName());
+			current = new CrossProductOperator(new ScanOperator(((Table) fr)), current, j.getOnExpression());
 		}	
 		return current;
 	}
