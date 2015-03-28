@@ -312,7 +312,11 @@ public class SanitizeQuery extends Eval {
 	private void evaluateSelect(PlainSelect select)
 	{
 		Expression exp = (Expression) select.getWhere();
-		evaluateExpression(exp);
+		if ( exp !=null)
+		{
+			evaluateExpression(exp);
+		}
+		
 	}
 
 	private void evaluateExtendedProjection(PlainSelect select)
