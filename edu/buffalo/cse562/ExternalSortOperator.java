@@ -84,10 +84,11 @@ public class ExternalSortOperator implements Operator {
 
 
 		if (!sorted){
+			System.out.println("Begun sorting...");
 			long start = new Date().getTime();
 			twoWaySort();
 			sorted = true;
-			// System.out.println("==== Sorted in " + ((float) (new Date().getTime() - start)/ 1000) + "s");
+			System.out.println("==== Sorted in " + ((float) (new Date().getTime() - start)/ 1000) + "s");
 		}
 
 
@@ -174,7 +175,8 @@ public class ExternalSortOperator implements Operator {
 				addToSet(rightTup, false, ofName);
 				rightTup = right.readTuple();
 			}
-			
+			left.close();
+			right.close();
 			//cleanup
 			flushWorkingSet(ofName, false);			
 		} catch (FileNotFoundException e) {

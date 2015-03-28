@@ -53,7 +53,7 @@ public class HybridJoinOperator extends JoinOperator{
 			while (rightTuple != null){
 				String key = rightTuple.get(rightIndex).toString();
 				List<ArrayList<Tuple>> hashedRight = joinHash.get(key);
-				if (hashedRight != null){					
+				if (hashedRight != null){				
 					currentBag = hashedRight.iterator();
 //					System.out.println("list size - " +hashedRight.size());
 					break;
@@ -72,6 +72,7 @@ public class HybridJoinOperator extends JoinOperator{
 					output = new ArrayList<Tuple>(output.subList(0, divider+1));
 				}
 				output.addAll(rightTuple);
+				System.out.println("Returning " + output);
 				return output;
 			}
 		}
