@@ -46,7 +46,7 @@ public class ScanOperator implements Operator {
 		this.operatorTableSchema = this.initialiseOperatorTableSchema(intSchema);
 		
 		
-		this.dataFile = FileSystems.getDefault().getPath(ConfigManager.getDataDir(), tableName.toLowerCase() +".tbl");		
+		this.dataFile = FileSystems.getDefault().getPath(ConfigManager.getDataDir(), tableName.toLowerCase() +".dat");		
 		
 		reset();
 	}
