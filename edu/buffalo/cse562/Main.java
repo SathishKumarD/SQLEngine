@@ -82,14 +82,14 @@ public class Main {
 							// System.out.println("	Optimized Execution Plan");
 							// System.out.println("______________________________________");
 							new QueryOptimizer(op);	
-							printPlan(op);
+//							printPlan(op);
 							//System.out.println("______________________________________");
 							//System.out.println("	Optimized Execution Plan's Result");
 							//System.out.println("______________________________________");
 							long start = new Date().getTime();
 
 							ExecuteQuery(op);													
-							System.out.println("==== Query executed in " + ((float) (new Date().getTime() - start)/ 1000) + "s");
+//							System.out.println("==== Query executed in " + ((float) (new Date().getTime() - start)/ 1000) + "s");
 
 							}
 							catch(Exception ex)

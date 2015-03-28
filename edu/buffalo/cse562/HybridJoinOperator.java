@@ -44,7 +44,7 @@ public class HybridJoinOperator extends JoinOperator{
 				leftTuple = left.readOneTuple();
 			}
 			hashed = true;
-			System.out.println("==== Hashed in " + ((float) (new Date().getTime() - start)/ 1000) + "s");
+//			System.out.println("==== Hashed in " + ((float) (new Date().getTime() - start)/ 1000) + "s");
 		}
 		
 		//try to match more, if the current list is empty
@@ -72,7 +72,7 @@ public class HybridJoinOperator extends JoinOperator{
 					output = new ArrayList<Tuple>(output.subList(0, divider+1));
 				}
 				output.addAll(rightTuple);
-				System.out.println("Returning " + output);
+//				System.out.println("Returning " + output);
 				return output;
 			}
 		}
