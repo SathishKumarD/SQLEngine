@@ -117,7 +117,7 @@ public class ExpressionTree {
 		if(groupByColumns!=null ||aggregateFunctions.size() >0 )
 		{
 			// System.out.println("groupby cols not null"+ groupByColumns.size());
-			current = new GroupByOperator2(current, groupByColumns,aggregateFunctions );
+			current = new GroupByOperator(current, groupByColumns,aggregateFunctions );
 			//Util.printSchema(current.getOutputTupleSchema());
 			
 		}

@@ -34,7 +34,7 @@ public class ExternalSortOperator implements Operator {
 	boolean ascending;
 	ArrayList<Tuple> lastFlushed;
 	List<OrderByElement> orderByElements;
-
+	Operator parentOperator = null;
 	public ExternalSortOperator(Operator child, List<OrderByElement> orderByElements) {
 		// TODO Auto-generated constructor stub
 		swapDir = new File(ConfigManager.getSwapDir(), UUID.randomUUID().toString());
@@ -54,7 +54,10 @@ public class ExternalSortOperator implements Operator {
 			}
 			catch(Exception ex)
 			{
-				System.out.println(child);
+				System.err.println("Error in getting index for column:  " + ob.getExpression().toString().toLowerCase());
+				System.err.println("parent: " + this.getParent());
+				System.err.println("current: " + this);
+				System.err.println("child: " + child);
 				throw ex;
 				
 			}
@@ -84,7 +87,7 @@ public class ExternalSortOperator implements Operator {
 			long start = new Date().getTime();
 			twoWaySort();
 			sorted = true;
-			System.out.println("==== Sorted in " + ((float) (new Date().getTime() - start)/ 1000) + "s");
+			// System.out.println("==== Sorted in " + ((float) (new Date().getTime() - start)/ 1000) + "s");
 		}
 
 
@@ -115,7 +118,7 @@ public class ExternalSortOperator implements Operator {
 		index = index + 1;
 		currentFileHandler = getFileHandle(index, nPass);
 		flushWorkingSet(currentFileHandler, true);
-		System.out.println("Working set now " +workingSet.size());
+		// System.out.println("Working set now " +workingSet.size());
 		mergeFull(currentFileHandler, index, nPass);
 	}
 
@@ -193,8 +196,8 @@ public class ExternalSortOperator implements Operator {
 			return false;
 		}
 		else{
-			System.err.println(" Collecting garbage with " 
-					+(Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())/1000000 +"MB currently used");
+		//	System.err.println(" Collecting garbage with " 
+		//			+(Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())/1000000 +"MB currently used");
 			flushWorkingSet(currentFileHandle, sort);
 			workingSet.add(toAdd);	
 			return true;
@@ -207,8 +210,8 @@ public class ExternalSortOperator implements Operator {
 		}
 		writeToDisk(workingSet, currFileHandle);
 		System.gc();
-		System.out.println("Memory used: " + 
-				((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())/1000000) + "MB");
+		// System.out.println("Memory used: " + 
+		// 		((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())/1000000) + "MB");
 		workingSet = new ArrayList<ArrayList<Tuple>>(this.bufferLength);
 		return true;
 	}
@@ -347,21 +350,20 @@ public class ExternalSortOperator implements Operator {
 	@Override
 	public void setChildOp(Operator child) {
 		// TODO Auto-generated method stub
-		System.out.println("changing child of external sort");
+		// System.out.println("changing child of external sort");
 		this.child = child;
+		child.setParent(this);
 		this.outputSchema = child.getOutputTupleSchema();
 	}
 
 	@Override
 	public Operator getParent() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.parentOperator;
 	}
 
 	@Override
 	public void setParent(Operator parent) {
-		// TODO Auto-generated method stub
-		
+		this.parentOperator = parent;		
 	}
 
 	public String toString(){

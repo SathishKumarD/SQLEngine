@@ -45,7 +45,7 @@ public class HybridJoinOperator extends JoinOperator{
 				rightTuple = right.readOneTuple();
 			}
 			hashed = true;
-			System.out.println("==== Hashed in " + ((float) (new Date().getTime() - start)/ 1000) + "s");
+			// System.out.println("==== Hashed in " + ((float) (new Date().getTime() - start)/ 1000) + "s");
 		}
 		
 		//try to read more

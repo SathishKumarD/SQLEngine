@@ -38,7 +38,16 @@ public class JoinOperator implements Operator {
 		}
 		
 		else{
+			try
+			{
 			rightIndex = Evaluator.getColumnDetail(right.getOutputTupleSchema(), fields[1].trim()).getIndex();
+			}
+			catch(Exception ex)
+			{
+				System.err.println("Error in join while trying to access the index of :"+ fields[1].trim());
+				Util.printSchema(right.getOutputTupleSchema());
+				System.err.println("column not present in schema");
+			}
 		}		
 		
 		setChildOp(left);
