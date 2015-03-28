@@ -5,8 +5,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map.Entry;
-
 import net.sf.jsqlparser.expression.Expression;
 
 public class HybridJoinOperator extends JoinOperator{
@@ -17,11 +15,13 @@ public class HybridJoinOperator extends JoinOperator{
 	private HashMap<String, List<ArrayList<Tuple>>> joinHash;
 	Iterator<ArrayList<Tuple>> currentBag;
 	boolean hashed = false;
+	private ArrayList<ArrayList<Tuple>> sent;
 
 	public HybridJoinOperator(Operator left, Operator right, Expression expr){
 		super(left, right, expr);		
 		joinHash = new HashMap<String, List<ArrayList<Tuple>>>();
 		currentBag = new ArrayList<ArrayList<Tuple>>().iterator();
+		sent = new ArrayList<ArrayList<Tuple>>();
 	}
 	
 	@Override
@@ -31,46 +31,48 @@ public class HybridJoinOperator extends JoinOperator{
 		
 		if (!hashed){
 			long start = new Date().getTime();
-			rightTuple = right.readOneTuple();		
-			while(rightTuple != null){
-				String key = rightTuple.get(rightIndex).toString();
+			leftTuple = left.readOneTuple();		
+			while(leftTuple != null){
+				String key = leftTuple.get(leftIndex).toString();
 				List<ArrayList<Tuple>> prev = joinHash.get(key);
 //				System.out.println("current tuples " +prev);
 				if (prev == null){
 					prev = new ArrayList<ArrayList<Tuple>>();
 					joinHash.put(key, prev);
 				}
-				prev.add(rightTuple);
-				rightTuple = right.readOneTuple();
+				prev.add(leftTuple);
+				leftTuple = left.readOneTuple();
 			}
 			hashed = true;
-			//System.out.println("==== Hashed in " + ((float) (new Date().getTime() - start)/ 1000) + "s");
+			System.out.println("==== Hashed in " + ((float) (new Date().getTime() - start)/ 1000) + "s");
 		}
 		
 		//try to match more, if the current list is empty
 		if (!currentBag.hasNext()){
-			leftTuple = left.readOneTuple();
-			while (leftTuple != null){
-				String key = leftTuple.get(leftIndex).toString();
+			rightTuple = right.readOneTuple();
+			while (rightTuple != null){
+				String key = rightTuple.get(rightIndex).toString();
 				List<ArrayList<Tuple>> hashedRight = joinHash.get(key);
-				if (hashedRight != null){
+				if (hashedRight != null){					
 					currentBag = hashedRight.iterator();
+//					System.out.println("list size - " +hashedRight.size());
 					break;
 				}
 				else{
-					leftTuple = left.readOneTuple();
+					rightTuple = right.readOneTuple();
 				}
 			}
 		}
 		
-		if (leftTuple != null){
+		if (rightTuple != null){
 			if (currentBag.hasNext()) {
+				ArrayList<Tuple> output = currentBag.next();
 				//replace right half of output
-				if (leftTuple.size() > this.divider){
-					leftTuple = new ArrayList<Tuple>(leftTuple.subList(0, divider+1));
+				if (output.size() > this.divider){
+					output = new ArrayList<Tuple>(output.subList(0, divider+1));
 				}
-				leftTuple.addAll(currentBag.next());
-				return leftTuple;
+				output.addAll(rightTuple);
+				return output;
 			}
 		}
 		return null;

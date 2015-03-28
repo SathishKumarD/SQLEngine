@@ -35,7 +35,7 @@ public class CrossProductOperator implements Operator {
 	private Operator parentOperator = null;
 	
 
-	public CrossProductOperator(Operator left, Operator right, Expression expr){
+	public CrossProductOperator(Operator left, Operator right,	Expression expr){
 		setChildOp(left);
 		
 		setRightOp(right);
