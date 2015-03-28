@@ -26,7 +26,7 @@ public class ExternalSortOperator implements Operator {
 	Comparator<ArrayList<Tuple>> comp;
 	int bufferLength;
 	HashMap<String, ColumnDetail> outputSchema;
-	private static final int BUFFER_SIZE = 10000;
+	private static final int BUFFER_SIZE = 100000;
 	TreeMap<Integer, String> typeMap;
 	List<ArrayList<Tuple>> workingSet;
 	boolean sorted = false;
@@ -84,10 +84,11 @@ public class ExternalSortOperator implements Operator {
 
 
 		if (!sorted){
+//			System.out.println("Begun sorting...");
 			long start = new Date().getTime();
 			twoWaySort();
 			sorted = true;
-			// System.out.println("==== Sorted in " + ((float) (new Date().getTime() - start)/ 1000) + "s");
+//			System.out.println("==== Sorted in " + ((float) (new Date().getTime() - start)/ 1000) + "s");
 		}
 
 
@@ -174,7 +175,8 @@ public class ExternalSortOperator implements Operator {
 				addToSet(rightTup, false, ofName);
 				rightTup = right.readTuple();
 			}
-			
+			left.close();
+			right.close();
 			//cleanup
 			flushWorkingSet(ofName, false);			
 		} catch (FileNotFoundException e) {

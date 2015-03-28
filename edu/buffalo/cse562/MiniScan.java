@@ -47,4 +47,13 @@ public class MiniScan{
 		}
 		return null;			
 	}
+	
+	public void close(){
+		try {
+			this.br.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 }

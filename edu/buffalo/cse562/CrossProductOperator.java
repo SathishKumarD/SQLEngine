@@ -35,7 +35,7 @@ public class CrossProductOperator implements Operator {
 	private Operator parentOperator = null;
 	
 
-	public CrossProductOperator(Operator left, Operator right, Expression expr){
+	public CrossProductOperator(Operator left, Operator right,	Expression expr){
 		setChildOp(left);
 		
 		setRightOp(right);
@@ -55,7 +55,7 @@ public class CrossProductOperator implements Operator {
 			this.leftTuple = left.readOneTuple();
 		}
 		
-		if (leftTuple == null){
+		if (leftTuple == null || rightTuple == null){
 			return null;
 		}
 		
@@ -71,6 +71,10 @@ public class CrossProductOperator implements Operator {
 	@Override
 	public void reset() {
 		// TODO Auto-generated method stub
+		left.reset();
+		right.reset();
+		leftTuple = null;
+		rightTuple = null;
 	}
 	
 	public String toString(){

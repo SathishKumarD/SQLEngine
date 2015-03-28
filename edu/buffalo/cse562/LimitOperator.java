@@ -48,11 +48,17 @@ public class LimitOperator implements Operator {
 	public void reset() {
 
 	}
+	
+	@Override
+	public String toString() {
+		// TODO Auto-generated method stub
+		return "LIMIT " + this.limit.getRowCount() + "\n" + this.source.toString();
+	}
 
 
 	@Override
 	public Operator getChildOp() {
-		return null;
+		return this.source;
 	}
 
 
