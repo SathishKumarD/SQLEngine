@@ -64,7 +64,14 @@ public class ScanOperator implements Operator {
 			e.printStackTrace();
 		}
 
-		if(line == null || line.isEmpty()) return null;
+		if(line == null || line.isEmpty()) { try {
+			buffer.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+			return null; 
+		}
 
 		String col[] = line.split("\\|");	
 		ArrayList<Tuple> tuples = new ArrayList<Tuple>();
