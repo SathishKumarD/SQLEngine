@@ -15,13 +15,11 @@ public class HybridJoinOperator extends JoinOperator{
 	private HashMap<String, List<ArrayList<Tuple>>> joinHash;
 	Iterator<ArrayList<Tuple>> currentBag;
 	boolean hashed = false;
-	private ArrayList<ArrayList<Tuple>> sent;
 
 	public HybridJoinOperator(Operator left, Operator right, Expression expr){
 		super(left, right, expr);		
 		joinHash = new HashMap<String, List<ArrayList<Tuple>>>();
 		currentBag = new ArrayList<ArrayList<Tuple>>().iterator();
-		sent = new ArrayList<ArrayList<Tuple>>();
 	}
 	
 	@Override

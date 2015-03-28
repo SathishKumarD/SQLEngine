@@ -28,7 +28,7 @@ public class JoinOperator implements Operator {
 		
 		
 		String[] fields = expr.toString().split("=");
-		
+
 		//Test left, then right
 		ColumnDetail cd = left.getOutputTupleSchema().get(fields[0].trim());
 		if (cd == null){
@@ -38,6 +38,7 @@ public class JoinOperator implements Operator {
 		}
 		
 		else{
+			leftIndex = cd.getIndex();
 			try
 			{
 			rightIndex = Evaluator.getColumnDetail(right.getOutputTupleSchema(), fields[1].trim()).getIndex();
@@ -49,10 +50,10 @@ public class JoinOperator implements Operator {
 				System.err.println("column not present in schema");
 			}
 		}		
-		
+		generateOutputSchema();
+
 		setChildOp(left);
 		setRightOp(right);
-		generateOutputSchema();
 	}
 	
 	@Override
@@ -78,6 +79,7 @@ public class JoinOperator implements Operator {
 	public void setChildOp(Operator child) {		
 		this.left = child;		
 		left.setParent(this);
+		generateOutputSchema();
 		//reset();
 	}
 	
@@ -90,7 +92,7 @@ public class JoinOperator implements Operator {
 	public void setRightOp(Operator child){
 		this.right = child;
 		right.setParent(this);
-		if(this.left != null) reset();
+//		if(this.left != null) reset();
 	}
 	
 	public Operator getLeftOperator()
