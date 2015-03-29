@@ -210,8 +210,8 @@ public class SanitizeQuery extends Eval {
 		try
 		{
 			String tableName = getTableName(column.getColumnName().toLowerCase());
-			System.out.println(" tablename "+ tableName);
-			System.out.println("getWholeColumnName: "+ column.getWholeColumnName());
+			// System.out.println(" tablename "+ tableName);
+			// System.out.println("getWholeColumnName: "+ column.getWholeColumnName());
 			if(tableName !=null && column.getColumnName()==column.getWholeColumnName())
 			{
 				//System.out.println("Setting table");
@@ -311,7 +311,7 @@ public class SanitizeQuery extends Eval {
 				eval(exp);
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				// e.printStackTrace();
 			}
 		}
 	}

@@ -95,6 +95,7 @@ public class ExpressionTree {
 		if (fr instanceof Table){
 //			System.out.println("hi" + ((Table) fr).getName());
 			current = new CrossProductOperator(new ScanOperator(((Table) fr)), current, j.getOnExpression());
+			//current = new JoinOperator(current, new ScanOperator(((Table) fr)), j.getOnExpression());
 		}	
 		return current;
 	}
