@@ -86,13 +86,12 @@ public class Main {
 
 								if(ConfigManager.getSwapDir() == null || ConfigManager.getSwapDir().isEmpty()) 
 								{
-									// System.out.println("swap dir is empty");
 									new QueryOptimizer(op);
 								}
 								else
 								{
-									// System.out.println("swap dir is not empty");
-									new QueryOptimizer2(op);
+									new QueryOptimizer(op);
+									// new QueryOptimizer2(op);
 								}
 
 								//printPlan(op);
