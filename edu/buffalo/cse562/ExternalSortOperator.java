@@ -41,7 +41,10 @@ public class ExternalSortOperator implements Operator {
 		if (!swapDir.exists()){
 			swapDir.mkdir();
 		}
-		this.outputSchema = child.getOutputTupleSchema();
+		
+		this.orderByElements = orderByElements;
+		setChildOp(child);
+		
 		this.sortFields = new LinkedHashMap<Integer, Boolean>(orderByElements.size());
 
 		for (OrderByElement ob : orderByElements){
@@ -64,8 +67,6 @@ public class ExternalSortOperator implements Operator {
 			sortFields.put(index, ob.isAsc());
 		}
 
-		this.orderByElements = orderByElements;
-		this.child = child;
 
 		this.comp = new TupleComparator(sortFields);
 

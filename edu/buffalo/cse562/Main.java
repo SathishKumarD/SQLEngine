@@ -31,8 +31,7 @@ public class Main {
 			System.out.println("Incomplete arguments");
 			return;
 		}
-
-		//TODO shiva testing
+		
 		if (args[0].equals("--data")){
 			ConfigManager.setDataDir(args[1]);
 		}
@@ -54,7 +53,7 @@ public class Main {
 			try{
 				CCJSqlParser parser = new CCJSqlParser(new FileReader(f));
 				 SanitizeQuery sq = new SanitizeQuery();
-				// ExpressionTree sq = new ExpressionTree();
+			     //ExpressionTree sq = new ExpressionTree();
 				while ((statement = parser.Statement()) != null){
 					//					System.out.println(statement);
 					if(statement instanceof Select){
@@ -71,18 +70,23 @@ public class Main {
 
 							//System.out.println("______________________________________");
 							// System.out.println("	Old Execution Plan");
-							// System.out.println("______________________________________");
-							 //printPlan(op);
+							 //System.out.println("______________________________________");
+							 // printPlan(op);
 							//System.out.println("______________________________________");
 							//System.out.println("	Old Execution Plan's Result");
 							//System.out.println("______________________________________");
-//							ExecuteQuery(op);							
+								// ExecuteQuery(op);							
 							//System.out.println("______________________________________");
 								
 							// System.out.println("	Optimized Execution Plan");
 							// System.out.println("______________________________________");
-							new QueryOptimizer(op);	
-//							printPlan(op);
+								
+							if(ConfigManager.getSwapDir() == null || ConfigManager.getSwapDir().isEmpty()) 
+								new QueryOptimizer(op);
+							else
+								new QueryOptimizer2(op);
+							
+							//printPlan(op);
 							//System.out.println("______________________________________");
 							//System.out.println("	Optimized Execution Plan's Result");
 							//System.out.println("______________________________________");
