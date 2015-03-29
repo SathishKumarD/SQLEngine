@@ -53,7 +53,7 @@ public class ScanOperator implements Operator {
 		// new one
 		this.operatorTableSchema = this.initialiseOutputTableSchema(intSchema);
 		
-		this.dataFile = FileSystems.getDefault().getPath(ConfigManager.getDataDir(), tableName.toLowerCase() +".tbl");		
+		this.dataFile = FileSystems.getDefault().getPath(ConfigManager.getDataDir(), tableName.toLowerCase() +".dat");		
 		
 		reset();
 	}
