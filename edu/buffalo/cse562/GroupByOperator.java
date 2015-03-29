@@ -24,7 +24,6 @@ import net.sf.jsqlparser.statement.select.AllColumns;
 
 
 public class GroupByOperator implements Operator {
-
 	private  HashMap<String, ColumnDetail> inputSchema = null;
 	private  HashMap<String, ColumnDetail> outputSchema = null;
 	private ArrayList<ArrayList<Tuple>> outputDataList =null;
@@ -542,6 +541,10 @@ public class GroupByOperator implements Operator {
 	public List<Column> getGroupByColumns()
 	{
 		return this.groupByColumns;		
+	}
+	
+	public List<AggregateFunctionColumn> getAggregateFunctions(){
+		return this.aggregateFunctions;
 	}
 }
 
