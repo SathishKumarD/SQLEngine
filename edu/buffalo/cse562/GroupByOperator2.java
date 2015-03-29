@@ -526,9 +526,6 @@ public class GroupByOperator2 implements Operator {
 	}
 
 
-
-
-
 	@Override
 	public Operator getChildOp() {
 		// TODO Auto-generated method stub

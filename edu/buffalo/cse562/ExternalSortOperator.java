@@ -19,6 +19,8 @@ import java.util.TreeMap;
 import java.util.UUID;
 
 
+
+import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.select.OrderByElement;
 
 public class ExternalSortOperator implements Operator {
@@ -400,4 +402,9 @@ public class ExternalSortOperator implements Operator {
 		return "External Sort on  " + orderByElements ;
 	}
 
+	public List<OrderByElement> getOrderByColumns()
+	{
+		return this.orderByElements;		
+	}
+	
 }

@@ -1,7 +1,9 @@
 package edu.buffalo.cse562;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -9,13 +11,16 @@ import java.util.Set;
 
 import net.sf.jsqlparser.expression.BinaryExpression;
 import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.LeafValue;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.select.OrderByElement;
 
-public class QueryOptimizer2 {
+public class QueryOptimizer2 extends Eval {
 
+	ArrayList<String> tables;
+	ArrayList<String> columns;
 	public QueryOptimizer2()
 	{
 
@@ -23,6 +28,8 @@ public class QueryOptimizer2 {
 
 	public QueryOptimizer2(Operator current)
 	{
+		tables = new ArrayList<String>();
+		columns = new ArrayList<String>();
 		current = pushSelection(current);
 		current = replaceOperators(current);		
 	}	
@@ -83,9 +90,18 @@ public class QueryOptimizer2 {
 			
 			if(currOperator instanceof GroupByOperator)
 			{
-				replaceGroupBy((GroupByOperator)currOperator);				
+				//replaceGroupBy((GroupByOperator)currOperator);				
 			}			
 			
+			if(currOperator instanceof ExternalSortOperator)
+			{
+				 Operator op_modifiedTree = replaceSortOnConditionMatch((ExternalSortOperator)currOperator);
+				
+				 if(op_modifiedTree != null){
+						currOperator = op_modifiedTree;
+				 }
+			}	
+
 			parentOperator = currOperator;
 			currOperator = parentOperator.getChildOp();
 		}
@@ -95,7 +111,92 @@ public class QueryOptimizer2 {
 		
 		return root;
 	}	
+
+	//iteratively go down the tree checking for order by and chck groupBy below it for same condition matches
+//	private Operator patternMatchSortOnGroupBy(ExternalSortOperator sortOp)
+//	{
+//		Operator oldSortOp = sortOp;				
+//		Operator modifiedSortOp = null;
+//		
+//		do{
+//			if(modifiedSortOp != null) oldSortOp = modifiedSortOp;
+//
+//			modifiedSortOp = replaceSortOnConditionMatch((ExternalSortOperator)oldSortOp);
+//
+//			if(!(modifiedSortOp instanceof ExternalSortOperator)) 
+//			{
+//				return modifiedSortOp;
+//			}
+//
+//		}while(!modifiedSortOp.equals(oldSortOp));
+//		
+//		return modifiedSortOp;
+		
+//		return replaceSortOnConditionMatch(sortOp);
+//	}
+	
+	/***
+	 *check all groupBy under a sort until condition matches or if child is null
+	if a match is found replace the underlying grp by with sorted groupBy2
+	delete the present sortOp and send the parent operator reference of sortOp
+	else send back the operator
+	 * @param sortOp
+	 * @return
+	 */
+
+	private Operator replaceSortOnConditionMatch(ExternalSortOperator sortOp)
+	{
+		if(sortOp == null || sortOp.getChildOp() == null) return null;
+		
+		Set<String> hashSet_OrderBy = getHashSet(sortOp.getOrderByColumns());
+		Operator childOp = sortOp.getChildOp();
+		
+		while(childOp != null)
+		{
+			if(childOp instanceof GroupByOperator)
+			{
+				GroupByOperator grpBy = ((GroupByOperator) childOp);
+				if(checkSortGroupConditionMatch(hashSet_OrderBy, grpBy.getGroupByColumns()))
+				 {
+					Operator modifiedTree = replaceGroupBy(grpBy);
+					
+					//Delete current sort operator and give back the parentOperatr reference(to iteration purpose) to the caller function
+					sortOp.getParent().setChildOp(modifiedTree);					
+					return sortOp.getParent();
+				 }
+			}
 			
+			childOp = childOp.getChildOp();
+		}
+		
+		return sortOp;
+	}
+	
+	private Set<String> getHashSet(List<OrderByElement> orderByCols)
+	{
+		Set<String> hashSet = new HashSet<String>();
+		
+		for(OrderByElement orderByElem : orderByCols)
+		{
+			hashSet.add(orderByElem.getExpression().toString());
+		}
+		
+		return hashSet;
+	}
+	
+	//check whether the conditions of order by and group by.
+	private boolean checkSortGroupConditionMatch(Set<String> hashSet_OrderBy, List<Column> groupByCols)
+	{
+		if(hashSet_OrderBy.size() != groupByCols.size()) return false;
+		
+		for(Expression expr : groupByCols)
+		{
+			if(!hashSet_OrderBy.contains(expr.toString())) return false;
+		}
+		
+		return true;
+	}
+	
 	//iteratively keep sending the input selection down to pattern match cross products sitting below
 	//until select conditions are empty or until the last child in the tree
 	private Operator patternMatchSelectionOnCrossProduct(SelectionOperator selectionOperator)
@@ -211,8 +312,32 @@ public class QueryOptimizer2 {
 					isExistsInRight = true;
 			}
 		}
-		
-		if(isExistsInLeft && isExistsInRight) return false;
+		else 
+		{
+			
+			tables.clear();
+			evaluateExpression(expr);
+			if(tables.size() ==1)
+			{
+				String colName = columns.get(0);
+				if(expressionExistsInSchema(colName, joinOp.getLeftOperator().getOutputTupleSchema().keySet()))
+					isExistsInLeft = true;
+				if(expressionExistsInSchema(colName, joinOp.getRightOperator().getOutputTupleSchema().keySet()))
+					isExistsInRight = true;
+				
+			}
+			else
+			{
+				return false;
+			}
+			// System.out.println(expr);
+		}
+
+		if(isExistsInLeft && isExistsInRight) 
+		{
+			// System.out.println("both left and right");
+			return false;
+		}
 		else if((isExistsInLeft && !(isExistsInRight)))
 		{										
 			newSelLeftExpr_List.add(expr);
@@ -232,10 +357,10 @@ public class QueryOptimizer2 {
 	{
 		if((leftExpr instanceof Column) && (rightExpr instanceof Column))
 		{
-			String leftCol = ((Column) leftExpr).getTable().getName();
-			String rightCol = ((Column) rightExpr).getTable().getName();
-			
-			if(!(leftCol.equalsIgnoreCase(rightCol))) return true;				
+			String leftTable = ((Column) leftExpr).getTable().getName();
+			String rightTable = ((Column) rightExpr).getTable().getName();
+
+			if(!(leftTable.equalsIgnoreCase(rightTable))) return true;				
 		}
 		
 		return false;
@@ -393,22 +518,37 @@ public class QueryOptimizer2 {
 	  return ret;
 	}
 	
-	private void replaceGroupBy(GroupByOperator groupByOp)
+	
+	
+	
+	
+	
+	
+		//replaceGroupBy to Sorted Group By
+	private Operator replaceGroupBy(GroupByOperator groupByOp)
 	{
 		List<Column> grpByExpressionsList = groupByOp.getGroupByColumns();
-		List<OrderByElement> orderByElementsList = new ArrayList<OrderByElement>();
-		
+		List<OrderByElement> orderByElements = new ArrayList<OrderByElement>();
+
 		for(Expression exp : grpByExpressionsList)
 		{
 			OrderByElement orderByElem = new OrderByElement();
 			orderByElem.setExpression(exp);
-			
-			orderByElementsList.add(orderByElem);		
+
+			orderByElements.add(orderByElem);		
 		}
-		ExternalSortOperator externalSortOp = new ExternalSortOperator(groupByOp.getChildOp(), orderByElementsList);
+		ExternalSortOperator externalSortOp = new ExternalSortOperator(groupByOp.getChildOp(), orderByElements);
+
+		GroupByOperator2 groupBy2 = new GroupByOperator2(externalSortOp, 
+															groupByOp.getGroupByColumns(), 
+															groupByOp.getAggregateFunctions());
+		//System.out.println("settng child");
+		groupByOp.getParent().setChildOp(groupBy2);		
+		//System.out.println("child set ");
 		
-		groupByOp.setChildOp(externalSortOp);	
+		return groupBy2;
 	}
+
 	
 	//returns a list of order by elem for purpose of external sort
 	public List<OrderByElement> getOrderByElemList(Expression expr)
@@ -419,5 +559,26 @@ public class QueryOptimizer2 {
 		orderByElemList.add(orderByElem);
 		return orderByElemList;
 	}
-
+	
+		@Override
+	public LeafValue eval(Column column) throws SQLException {
+		// TODO Auto-generated method stub
+		String tablename = column.getTable().getName();
+		if(!tables.contains(tablename))
+			tables.add(tablename);
+		
+		columns.add(column.getWholeColumnName());
+		return null;
+	}
+	
+	private void evaluateExpression(Expression exp)
+	{
+		try {
+			eval(exp);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			// e.printStackTrace();
+		}
+		
+	}
 }
