@@ -11,12 +11,14 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TreeMap;
 import java.util.UUID;
 
+import sun.security.krb5.Config;
 import net.sf.jsqlparser.statement.select.OrderByElement;
 
 public class ExternalSortOperator implements Operator {
@@ -26,7 +28,7 @@ public class ExternalSortOperator implements Operator {
 	Comparator<ArrayList<Tuple>> comp;
 	int bufferLength;
 	HashMap<String, ColumnDetail> outputSchema;
-	private static final int BUFFER_SIZE = 100000;
+	private static final int BUFFER_SIZE = 1000000;
 	TreeMap<Integer, String> typeMap;
 	List<ArrayList<Tuple>> workingSet;
 	boolean sorted = false;
@@ -35,6 +37,7 @@ public class ExternalSortOperator implements Operator {
 	ArrayList<Tuple> lastFlushed;
 	List<OrderByElement> orderByElements;
 	Operator parentOperator = null;
+	Iterator<ArrayList<Tuple>> currIter;
 	
 	
 	public ExternalSortOperator(Operator child, List<OrderByElement> orderByElements) {
@@ -90,7 +93,14 @@ public class ExternalSortOperator implements Operator {
 		if (!sorted){
 //			System.out.println("Begun sorting...");
 			long start = new Date().getTime();
-			twoWaySort();
+			if (ConfigManager.getSwapDir() == null){
+				internalSort();
+				Collections.sort(this.workingSet, this.comp);
+				currIter = this.workingSet.iterator();
+			}
+			else{
+				twoWaySort();
+			}
 			sorted = true;
 //			System.out.println("==== Sorted in " + ((float) (new Date().getTime() - start)/ 1000) + "s");
 		}
@@ -98,14 +108,28 @@ public class ExternalSortOperator implements Operator {
 
 		//##########	
 		//Finally, return tuples from sorted file
-		currentTuple = outputStream.readTuple();	
-		if (currentTuple != null){
-			return currentTuple;
+		if (ConfigManager.getSwapDir() != null){
+			currentTuple = outputStream.readTuple();	
+			if (currentTuple != null){
+				return currentTuple;
+			}
+		}		
+		else{
+			if (this.currIter.hasNext()){
+				return currIter.next();
+			}
 		}
 
 		return null;
 	}
-
+	private void internalSort(){
+		ArrayList<Tuple> currentTuple;
+		this.workingSet = new ArrayList<ArrayList<Tuple>>();		
+		// First run; sorts input tuples in batches, and writes to separate files on disk
+		while((currentTuple = child.readOneTuple())!= null){
+			this.workingSet.add(currentTuple);
+		}
+	}
 	private void twoWaySort(){
 		ArrayList<Tuple> currentTuple;
 		this.workingSet = new ArrayList<ArrayList<Tuple>>(this.bufferLength);

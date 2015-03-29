@@ -102,7 +102,7 @@ public class Main {
 								long start = new Date().getTime();
 
 								ExecuteQuery(op);													
-								//System.out.println("==== Query executed in " + ((float) (new Date().getTime() - start)/ 1000) + "s");
+								// System.out.println("==== Query executed in " + ((float) (new Date().getTime() - start)/ 1000) + "s");
 
 							}
 							catch(Exception ex)

@@ -1,5 +1,6 @@
 package edu.buffalo.cse562;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -9,48 +10,55 @@ import java.util.Set;
 
 import net.sf.jsqlparser.expression.BinaryExpression;
 import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.LeafValue;
+import net.sf.jsqlparser.expression.Parenthesis;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
+import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.select.OrderByElement;
 
-public class QueryOptimizer {
+public class QueryOptimizer extends Eval {
 
+	ArrayList<String> tables;
+	ArrayList<String> columns;
 	public QueryOptimizer()
 	{
-
+		
 	}
 
 	public QueryOptimizer(Operator current)
 	{
+		tables = new ArrayList<String>();
+		columns = new ArrayList<String>();
 		current = pushSelection(current);
 		current = replaceOperators(current);		
 	}	
-	
+
 	public Operator pushSelection(Operator current)
 	{
 		Operator currOperator = current;
 		Operator parentOperator = current;		
-		
+
 		do{				
 			if(currOperator instanceof SelectionOperator)
 			{		
 				Operator op_modifiedTree = pushDownSelection((SelectionOperator)currOperator);					
-				
+
 				if(op_modifiedTree != null){
 					currOperator = op_modifiedTree;
 				}
 			}	
-				parentOperator = currOperator;
-				currOperator = parentOperator.getChildOp();
+			parentOperator = currOperator;
+			currOperator = parentOperator.getChildOp();
 		}
 		while(currOperator != null);
-		
+
 		Operator root = getRoot(parentOperator);
-		
+
 		return root;
 	}	
-			
+
 	//returns the root of the tree
 	private Operator getRoot(Operator currOperator) {		
 		while(currOperator.getParent()!=null)
@@ -59,7 +67,7 @@ public class QueryOptimizer {
 		}	
 		return currOperator;
 	}
-	
+
 	/***
 	 * Replaces Selection sitting on CrossProducts With Hash Joins
 	 * Replaces Group By WIth GroupBy on top of External Sort 
@@ -70,54 +78,54 @@ public class QueryOptimizer {
 	{
 		Operator currOperator = current;
 		Operator parentOperator = current;		
-		
+
 		do{				
 			if(currOperator instanceof SelectionOperator)
 			{		
 				Operator op_modifiedTree = patternMatchSelectionOnCrossProduct((SelectionOperator)currOperator);					
-				
+
 				if(op_modifiedTree != null){
 					currOperator = op_modifiedTree;
 				}
 			}
-			
+
 			if(currOperator instanceof GroupByOperator)
 			{
 				//replaceGroupBy((GroupByOperator)currOperator);				
 			}			
-			
+
 			parentOperator = currOperator;
 			currOperator = parentOperator.getChildOp();
 		}
 		while(currOperator != null);
-		
+
 		Operator root = getRoot(parentOperator);
-		
+
 		return root;
 	}	
-			
+
 	//iteratively keep sending the input selection down to pattern match cross products sitting below
 	//until select conditions are empty or until the last child in the tree
 	private Operator patternMatchSelectionOnCrossProduct(SelectionOperator selectionOperator)
 	{
 		Operator oldSelectOp = selectionOperator;				
 		Operator modifiedSelect = null;		
-				
+
 		do{
 			if(modifiedSelect != null) oldSelectOp = modifiedSelect;
-			 
+
 			modifiedSelect = replaceCrossProductWithHashJoin((SelectionOperator)oldSelectOp);
-			
+
 			if(!(modifiedSelect instanceof SelectionOperator)) 
 			{
 				return modifiedSelect;
 			}
-			
+
 		}while(!modifiedSelect.equals(oldSelectOp));
-		
+
 		return modifiedSelect;
 	}
-	
+
 	//pushes Selection below cross product wherever applicable
 	private Operator pushDownSelection(SelectionOperator selectionOperator)
 	{
@@ -130,26 +138,26 @@ public class QueryOptimizer {
 			if(op.getChildOp() instanceof CrossProductOperator)
 			{
 				CrossProductOperator joinOp = (CrossProductOperator) op.getChildOp();
-				
+
 				List<Expression> newSelLeftExpr_List = new LinkedList<Expression>(); 
 				List<Expression> newSelRightExpr_List = new LinkedList<Expression>(); 
-				
+
 				populateNewSelectionList(newSelLeftExpr_List, newSelRightExpr_List, exprList, joinOp);
-				
+
 				if(newSelLeftExpr_List.size() > 0) 
 				{
 					Operator oper = new SelectionOperator(joinOp.getLeftOperator(), newSelLeftExpr_List);
-					
+
 					//left deep tree. left operator is the child! 
 					joinOp.setChildOp(oper);
 				}
 				if(newSelRightExpr_List.size() > 0)
 				{
 					Operator oper = new SelectionOperator(joinOp.getRightOperator(), newSelRightExpr_List);
-					
+
 					joinOp.setRightOp(oper);
 				}
-				
+
 				// if the selection has any conditions to enforce re-initialise it with modified expression list
 				// if it does not have any conditions to enforce just rest the parent child relation of its parent
 				if(exprList.size() > 0) 
@@ -164,37 +172,37 @@ public class QueryOptimizer {
 					return selectionOperator.getParent();
 				}
 			}
-						
+
 			op = op.getChildOp();
 		}while(op.getChildOp()!= null);
 
 		return selectionOperator;
 	}
 
-	
+
 	private void populateNewSelectionList(List<Expression> newSelLeftExpr_List, List<Expression> newSelRightExpr_List, List<Expression> selectionExprList, CrossProductOperator joinOp)
 	{		
 		for(Iterator<Expression> itr =  selectionExprList.iterator(); itr.hasNext();)
 		{
 			Expression expr = itr.next();	
-			
+
 			if(checkIfExpressionIsPushable(expr, joinOp, newSelLeftExpr_List, newSelRightExpr_List)) itr.remove();			
 		}
 	}
-	
+
 	private boolean checkIfExpressionIsPushable(Expression expr, CrossProductOperator joinOp, List<Expression> newSelLeftExpr_List, List<Expression> newSelRightExpr_List)
 	{
 		boolean isExistsInLeft = false;
 		boolean isExistsInRight = false;
-		
+
 		if(expr instanceof BinaryExpression) 
 		{
 			//if both the left n right expr is a column and the table names are diff return false//TODO
 			Expression leftExpr = ((BinaryExpression) expr).getLeftExpression();
 			Expression rightExpr = ((BinaryExpression) expr).getRightExpression();
-			
+
 			if(checkIfExprRefersMoreThanOneRelation(leftExpr, rightExpr)) return false;
-			
+
 			if(leftExpr instanceof Column)
 			{
 				if(expressionExistsInSchema(((Column) leftExpr).getWholeColumnName(), joinOp.getLeftOperator().getOutputTupleSchema().keySet()))
@@ -202,7 +210,7 @@ public class QueryOptimizer {
 				if(expressionExistsInSchema(((Column) leftExpr).getWholeColumnName(), joinOp.getRightOperator().getOutputTupleSchema().keySet()))
 					isExistsInRight = true;
 			}
-			
+
 			if(rightExpr instanceof Column)
 			{
 				if(expressionExistsInSchema(((Column) rightExpr).getWholeColumnName(), joinOp.getLeftOperator().getOutputTupleSchema().keySet()))
@@ -211,33 +219,61 @@ public class QueryOptimizer {
 					isExistsInRight = true;
 			}
 		}
-		
-		if(isExistsInLeft && isExistsInRight) return false;
+		else 
+		{
+			
+			tables.clear();
+			evaluateExpression(expr);
+			if(tables.size() ==1)
+			{
+				String colName = columns.get(0);
+				if(expressionExistsInSchema(colName, joinOp.getLeftOperator().getOutputTupleSchema().keySet()))
+					isExistsInLeft = true;
+				if(expressionExistsInSchema(colName, joinOp.getRightOperator().getOutputTupleSchema().keySet()))
+					isExistsInRight = true;
+				
+			}
+			else
+			{
+				return false;
+			}
+			// System.out.println(expr);
+		}
+
+		if(isExistsInLeft && isExistsInRight) 
+		{
+			// System.out.println("both left and right");
+			return false;
+		}
 		else if((isExistsInLeft && !(isExistsInRight)))
 		{										
 			newSelLeftExpr_List.add(expr);
+			// System.out.println("True left: " + expr);
 			return true;
 		}
 		else if((isExistsInRight && !(isExistsInLeft)))
 		{
 			newSelRightExpr_List.add(expr);
+			// System.out.println("True right: " + expr);
 			return true;
 		}
-		
+		//System.out.println("nothin");
 		return false;
 	}
+
+
 
 	//returns true if expression refers more than a relation
 	private boolean checkIfExprRefersMoreThanOneRelation(Expression leftExpr,Expression rightExpr)
 	{
 		if((leftExpr instanceof Column) && (rightExpr instanceof Column))
 		{
-			String leftCol = ((Column) leftExpr).getTable().getName();
-			String rightCol = ((Column) rightExpr).getTable().getName();
-			
-			if(!(leftCol.equalsIgnoreCase(rightCol))) return true;				
+			String leftTable = ((Column) leftExpr).getTable().getName();
+			String rightTable = ((Column) rightExpr).getTable().getName();
+
+			if(!(leftTable.equalsIgnoreCase(rightTable))) return true;				
 		}
-		
+
 		return false;
 	}
 	/***
@@ -251,17 +287,17 @@ public class QueryOptimizer {
 
 		List<Expression> exprList = splitANDClauses(selectionOperator.getExpression());
 		Operator childOperator = selectionOperator.getChildOp();
-		
+
 		do
 		{			
 			if(childOperator instanceof CrossProductOperator)
 			{
 				CrossProductOperator crossPOperator = (CrossProductOperator)childOperator;						
-										
+
 				for(Iterator<Expression> itr =  exprList.iterator(); itr.hasNext();)
 				{
 					Expression expr = itr.next();
-										
+
 					if(expr instanceof EqualsTo)
 					{
 						EqualsTo equalsExpr = (EqualsTo)expr;
@@ -273,9 +309,9 @@ public class QueryOptimizer {
 							// removes the equalTo expression before passing on to Selection Operator!
 
 
-							 itr.remove();
-							 childOperator.getParent().setChildOp(hashjoinOp);	
-							 break;
+							itr.remove();
+							childOperator.getParent().setChildOp(hashjoinOp);	
+							break;
 						}
 					}											
 				}	
@@ -289,16 +325,16 @@ public class QueryOptimizer {
 				else 
 				{
 					selectionOperator.getParent().setChildOp(selectionOperator.getChildOp());
-					
+
 					return selectionOperator.getParent();
 				}
 			}	
 			childOperator = childOperator.getChildOp();
 		} while(childOperator != null);
-		
+
 		return selectionOperator;
 	}
-	
+
 	/***
 	 *  checks if expression macthes with a join operator
 	 */
@@ -306,31 +342,31 @@ public class QueryOptimizer {
 	{		
 		HashMap<String, ColumnDetail> leftSchema = (crossPop.getLeftOperator()).getOutputTupleSchema();
 		HashMap<String, ColumnDetail> rightSchema = (crossPop.getRightOperator()).getOutputTupleSchema();
-		
+
 		Expression left =  ((EqualsTo) equalsExpression).getLeftExpression();
 		Expression right =  ((EqualsTo) equalsExpression).getRightExpression();
-		
+
 		if(left instanceof Column && right instanceof Column)
 		{
 			String leftExprName_Str = ((Column) left).getWholeColumnName();
 			String rightExprName_Str = ((Column) right).getWholeColumnName();
-			
+
 			if(
 					(
 							expressionExistsInSchema(leftExprName_Str, leftSchema.keySet()) && 
 							expressionExistsInSchema(rightExprName_Str, rightSchema.keySet())
-					)
+							)
 							|| 
-					(		
-							expressionExistsInSchema(leftExprName_Str, rightSchema.keySet()) && 
-							expressionExistsInSchema(rightExprName_Str, leftSchema.keySet())
+							(		
+									expressionExistsInSchema(leftExprName_Str, rightSchema.keySet()) && 
+									expressionExistsInSchema(rightExprName_Str, leftSchema.keySet())
+									)
 					)
-			 )
 			{
 				return true;
 			}					
 		}
-		
+
 		return false;
 	}
 
@@ -344,48 +380,92 @@ public class QueryOptimizer {
 		}
 		return false;
 	}
-
+	
+	
 	/***
 	 * Splits and clauses to multiple and clauses
 	 * @param e
 	 * @return
 	 */
 	private List<Expression> splitANDClauses(Expression e) {
-	  List<Expression> ret = new LinkedList<Expression>();
-	     
-	  if(e instanceof AndExpression){
-	    AndExpression a = (AndExpression)e;
-	    ret.addAll(
-	    		splitANDClauses(a.getLeftExpression())
-	    );
-	    ret.addAll(
-	    		splitANDClauses(a.getRightExpression())
-	    );
-	  } else {
-	    ret.add(e);
-	  }
-	  
-	  return ret;
+		List<Expression> ret = new LinkedList<Expression>();
+
+		if(e instanceof AndExpression){
+			AndExpression a = (AndExpression)e;
+			ret.addAll(
+					splitANDClauses(a.getLeftExpression())
+					);
+			ret.addAll(
+					splitANDClauses(a.getRightExpression())
+					);
+		} else {
+			ret.add(e);
+		}
+
+		return ret;
 	}
-	
+
+
+	private List<Expression> splitORClauses(Expression e) {
+		List<Expression> ret = new LinkedList<Expression>();
+
+		if(e instanceof AndExpression){
+			OrExpression a = (OrExpression)e;
+			ret.addAll(
+					splitORClauses(a.getLeftExpression())
+					);
+			ret.addAll(
+					splitORClauses(a.getRightExpression())
+					);
+		} else {
+			ret.add(e);
+		}
+
+		return ret;
+	}
+
+
+
 	//to be changed to external sort! : TODO to keno
 	private void replaceGroupBy(GroupByOperator groupByOp)
 	{
 		List<Column> grpByExpressionsList = groupByOp.getGroupByColumns();
 		List<OrderByElement> orderByElements = new ArrayList<OrderByElement>();
-		
+
 		for(Expression exp : grpByExpressionsList)
 		{
 			OrderByElement orderByElem = new OrderByElement();
 			orderByElem.setExpression(exp);
-			
+
 			orderByElements.add(orderByElem);		
 		}
 		ExternalSortOperator externalSortOp = new ExternalSortOperator(groupByOp.getChildOp(), orderByElements);
-		
+
 		//System.out.println("settng child");
 		groupByOp.setChildOp(externalSortOp);	
 		//System.out.println("child set ");
 	}
+
+	@Override
+	public LeafValue eval(Column column) throws SQLException {
+		// TODO Auto-generated method stub
+		String tablename = column.getTable().getName();
+		if(!tables.contains(tablename))
+			tables.add(tablename);
+		
+		columns.add(column.getWholeColumnName());
+		return null;
+	}
 	
+	private void evaluateExpression(Expression exp)
+	{
+		try {
+			eval(exp);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			// e.printStackTrace();
+		}
+		
+	}
+
 }
