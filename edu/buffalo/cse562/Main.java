@@ -90,11 +90,11 @@ public class Main {
 								}
 								else
 								{
-									new QueryOptimizer(op);
-									// new QueryOptimizer2(op);
+//									new QueryOptimizer(op);
+									 new QueryOptimizer2(op);
 								}
 
-								//printPlan(op);
+//								printPlan(op);
 
 								//System.out.println("______________________________________");
 								//System.out.println("	Optimized Execution Plan's Result");

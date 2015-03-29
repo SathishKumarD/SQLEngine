@@ -175,6 +175,7 @@ public class ExternalSortOperator implements Operator {
 		}
 	}
 	private void mergeOnce(File ifName1, File ifName2, File ofName){
+//		System.out.println("merging " +ifName1.getName() +" and " +ifName2.getName());
 		try {
 			MiniScan left = new MiniScan(ifName1, typeMap);
 			MiniScan right = new MiniScan(ifName2, typeMap);
@@ -226,8 +227,6 @@ public class ExternalSortOperator implements Operator {
 			return false;
 		}
 		else{
-		//	System.err.println(" Collecting garbage with " 
-		//			+(Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())/1000000 +"MB currently used");
 			flushWorkingSet(currentFileHandle, sort);
 			workingSet.add(toAdd);	
 			return true;
