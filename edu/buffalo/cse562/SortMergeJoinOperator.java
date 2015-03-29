@@ -41,4 +41,22 @@ public class SortMergeJoinOperator extends JoinOperator{
 	public void setComparator(Comparator<ArrayList<Tuple>> comp){
 		this.comp = comp;
 	}
+	
+	@Override
+	public String toString() {
+		// TODO Auto-generated method stub
+		
+
+		StringBuilder b = new StringBuilder("SORT MERGE JOIN ON " + this.expr +" WITH \n");
+
+		Operator childOfRightBranch = this.right;
+		
+		while(childOfRightBranch != null)
+		{
+			b.append('\t' +childOfRightBranch.toString() + '\n');
+			childOfRightBranch = childOfRightBranch.getChildOp();
+		}
+		
+		return b.toString();
+	}
 }

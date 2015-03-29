@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+
 import net.sf.jsqlparser.expression.Expression;
 
 public class HybridJoinOperator extends JoinOperator{
@@ -82,4 +83,23 @@ public class HybridJoinOperator extends JoinOperator{
 		super.reset();
 		currentBag = new ArrayList<ArrayList<Tuple>>().iterator();		
 	}
+	
+	@Override
+	public String toString() {
+		// TODO Auto-generated method stub
+		
+
+		StringBuilder b = new StringBuilder("HYBRID JOIN ON " + this.expr +" WITH \n");
+
+		Operator childOfRightBranch = this.right;
+		
+		while(childOfRightBranch != null)
+		{
+			b.append('\t' +childOfRightBranch.toString() + '\n');
+			childOfRightBranch = childOfRightBranch.getChildOp();
+		}
+		
+		return b.toString();
+	}
+
 }

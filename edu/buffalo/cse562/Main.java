@@ -32,7 +32,7 @@ public class Main {
 			System.out.println("Incomplete arguments");
 			return;
 		}
-		
+
 		if (args[0].equals("--data")){
 			ConfigManager.setDataDir(args[1]);
 		}
@@ -53,13 +53,13 @@ public class Main {
 		for (File f : queryFiles){		
 			try{
 				CCJSqlParser parser = new CCJSqlParser(new FileReader(f));
-				 SanitizeQuery sq = new SanitizeQuery();
-			     //ExpressionTree sq = new ExpressionTree();
+				SanitizeQuery sq = new SanitizeQuery();
+				//ExpressionTree sq = new ExpressionTree();
 				while ((statement = parser.Statement()) != null){
 					//					System.out.println(statement);
 					if(statement instanceof Select){
-						
-						
+
+
 						SelectBody select = ((Select) statement).getSelectBody();
 
 						if (select instanceof PlainSelect){
@@ -69,40 +69,41 @@ public class Main {
 							try
 							{
 
-							//System.out.println("______________________________________");
-							// System.out.println("	Old Execution Plan");
-							 //System.out.println("______________________________________");
-							 // printPlan(op);
-							//System.out.println("______________________________________");
-							//System.out.println("	Old Execution Plan's Result");
-							//System.out.println("______________________________________");
+								//System.out.println("______________________________________");
+								// System.out.println("	Old Execution Plan");
+								//System.out.println("______________________________________");
+								// printPlan(op);
+								//System.out.println("______________________________________");
+								//System.out.println("	Old Execution Plan's Result");
+								//System.out.println("______________________________________");
 
-						//ExecuteQuery(op);							
-						//System.out.println("______________________________________");
-								
-							// System.out.println("	Optimized Execution Plan");
-							// System.out.println("______________________________________");
+								//ExecuteQuery(op);							
+								//System.out.println("______________________________________");
 
-							new QueryOptimizer(op);	
-
-							//printPlan(op);
+								// System.out.println("	Optimized Execution Plan");
+								// System.out.println("______________________________________");
 
 
-								
-							if(ConfigManager.getSwapDir() == null || ConfigManager.getSwapDir().isEmpty()) 
-								new QueryOptimizer(op);
-							else
-								new QueryOptimizer2(op);
-							
-							//printPlan(op);
+								if(ConfigManager.getSwapDir() == null || ConfigManager.getSwapDir().isEmpty()) 
+								{
+									// System.out.println("swap dir is empty");
+									new QueryOptimizer(op);
+								}
+								else
+								{
+									// System.out.println("swap dir is not empty");
+									new QueryOptimizer2(op);
+								}
 
-							//System.out.println("______________________________________");
-							//System.out.println("	Optimized Execution Plan's Result");
-							//System.out.println("______________________________________");
-							long start = new Date().getTime();
+								printPlan(op);
 
-							ExecuteQuery(op);													
-						//System.out.println("==== Query executed in " + ((float) (new Date().getTime() - start)/ 1000) + "s");
+								//System.out.println("______________________________________");
+								//System.out.println("	Optimized Execution Plan's Result");
+								//System.out.println("______________________________________");
+								long start = new Date().getTime();
+
+								ExecuteQuery(op);													
+								//System.out.println("==== Query executed in " + ((float) (new Date().getTime() - start)/ 1000) + "s");
 
 							}
 							catch(Exception ex)
@@ -119,7 +120,7 @@ public class Main {
 							UnionOperator uop = new UnionOperator();
 							List<PlainSelect> pselects = (List<PlainSelect>) un.getPlainSelects();
 							for (PlainSelect s : pselects){
-								
+
 								uop.addOperator(sq.generateTree(s));
 							}
 							ExecuteQuery(uop);

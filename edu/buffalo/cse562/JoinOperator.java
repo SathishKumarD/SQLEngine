@@ -142,22 +142,5 @@ public class JoinOperator implements Operator {
 		this.divider = offset;
 	}
 	
-	@Override
-	public String toString() {
-		// TODO Auto-generated method stub
-		
-
-		StringBuilder b = new StringBuilder("JOIN ON " + this.expr +" WITH \n");
-
-		Operator childOfRightBranch = this.right;
-		
-		while(childOfRightBranch != null)
-		{
-			b.append('\t' +childOfRightBranch.toString() + '\n');
-			childOfRightBranch = childOfRightBranch.getChildOp();
-		}
-		
-		return b.toString();
-	}
-
+	
 }

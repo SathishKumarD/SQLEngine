@@ -485,7 +485,7 @@ public class GroupByOperator2 implements Operator {
 		}
 	}
 	public String toString(){
-		return "GROUP BY " + groupByColumns ;
+		return "GROUP BY 2" + groupByColumns ;
 	}
 
 	private ArrayList<Tuple> clone(ArrayList<Tuple> tuple)
