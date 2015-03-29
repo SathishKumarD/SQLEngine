@@ -23,6 +23,7 @@ public class Main {
 
 	static HashMap<String, HashMap<String, ColumnDetail>> tableMapping = new HashMap<String, HashMap<String, ColumnDetail>>();
 	static HashMap<String,HashMap<Integer, String>> indexTypeMaps = new HashMap<String, HashMap<Integer, String>>();
+	static HashMap<String,ArrayList<String>> tableColumns = new HashMap<String, ArrayList<String>>();
 
 	static int queryCount = 0;
 	public static void main(String[] args) {		
@@ -76,14 +77,14 @@ public class Main {
 							//System.out.println("______________________________________");
 							//System.out.println("	Old Execution Plan's Result");
 							//System.out.println("______________________________________");
-//							ExecuteQuery(op);							
+						//ExecuteQuery(op);							
 							//System.out.println("______________________________________");
 								
 							// System.out.println("	Optimized Execution Plan");
 							// System.out.println("______________________________________");
 							new QueryOptimizer(op);	
 
-							printPlan(op);
+							//printPlan(op);
 
 							//System.out.println("______________________________________");
 							//System.out.println("	Optimized Execution Plan's Result");
@@ -91,7 +92,7 @@ public class Main {
 							long start = new Date().getTime();
 
 							ExecuteQuery(op);													
-//							System.out.println("==== Query executed in " + ((float) (new Date().getTime() - start)/ 1000) + "s");
+						//System.out.println("==== Query executed in " + ((float) (new Date().getTime() - start)/ 1000) + "s");
 
 							}
 							catch(Exception ex)

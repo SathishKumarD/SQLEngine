@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import net.sf.jsqlparser.expression.DoubleValue;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.LeafValue;
@@ -114,6 +115,8 @@ public class SanitizeQuery extends Eval {
 		FromItem fr = j.getRightItem();
 
 		if (fr instanceof Table){
+			Expression exp = j.getOnExpression();
+			evaluateExpression(exp);
 			current = new CrossProductOperator(current, new ScanOperator(((Table) fr)), j.getOnExpression());
 		}	
 		return current;
@@ -207,13 +210,14 @@ public class SanitizeQuery extends Eval {
 		try
 		{
 			String tableName = getTableName(column.getColumnName().toLowerCase());
-			//System.out.println(" tablename "+ tableName);
-			//System.out.println("getWholeColumnName: "+ column.getWholeColumnName());
+			System.out.println(" tablename "+ tableName);
+			System.out.println("getWholeColumnName: "+ column.getWholeColumnName());
 			if(tableName !=null && column.getColumnName()==column.getWholeColumnName())
 			{
 				//System.out.println("Setting table");
+				tableName =tableName.toLowerCase();
 				Table t = new Table();
-				t.setName(tableName.toLowerCase());
+				t.setName(tableName);
 				column.setTable(t);
 			}
 			if(column.getTable() !=null)
@@ -225,13 +229,17 @@ public class SanitizeQuery extends Eval {
 			}
 
 			column.setColumnName(column.getColumnName().toLowerCase());
+
+			String tn = column.getWholeColumnName().split("\\.")[0];
+			addColumnToTable(tn, column.getColumnName());
+
 		}
 		catch(Exception ex)
 		{
 			System.err.println("Error while sanitising the column: " + column.getColumnName());
 			ex.printStackTrace();
 		}
-		return null;
+		return new DoubleValue(0);
 	}
 
 
@@ -286,7 +294,7 @@ public class SanitizeQuery extends Eval {
 			System.err.println(key);
 
 			Util.printSchema(Main.tableMapping.get(tableName));
-			
+
 
 			throw ex;
 
@@ -297,11 +305,14 @@ public class SanitizeQuery extends Eval {
 
 	private void evaluateExpression(Expression exp)
 	{
-		try {
-			eval(exp);
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		if(exp!=null)
+		{
+			try {
+				eval(exp);
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -353,6 +364,7 @@ public class SanitizeQuery extends Eval {
 					catch (Exception ex)
 					{
 						System.err.println("func evaluating: " +expr );
+						ex.printStackTrace();
 					}
 
 					//System.out.println("func evaluating: " +expr );
@@ -360,6 +372,30 @@ public class SanitizeQuery extends Eval {
 
 		}
 
+	}
+
+
+	private void addColumnToTable(String tableName, String columnName)
+	{
+		// System.out.println("tableName: "+ tableName + "   columnName: " + columnName);
+		ArrayList<String> columns = null;
+
+		if(tableName!=null &&columnName !=null )
+		{
+			columns = Main.tableColumns.get(tableName);
+			if(columns == null)
+			{
+				columns = new ArrayList<String>();
+
+				Main.tableColumns.put(tableName, columns);
+			}
+
+			if(!columns.contains(columnName))
+			{
+				columns.add(columnName);
+			}
+
+		}
 	}
 
 }

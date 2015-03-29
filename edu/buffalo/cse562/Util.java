@@ -17,6 +17,7 @@ public class Util {
 	{
 		if(DEBUG)
 		{
+			System.out.println("________________________________");
 			for(Map.Entry<String, ColumnDetail> colDetail: inputSchema.entrySet()){
 				
 				try

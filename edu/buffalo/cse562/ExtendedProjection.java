@@ -83,11 +83,17 @@ public class ExtendedProjection implements Operator {
 					if(expr instanceof Function)
 					{				
 						String key = expr.toString();
+						System.out.println(key);
 						if(inputSchema.containsKey(key))
 						{
 							int index = inputSchema.get(expr.toString()).getIndex(); //.get(column.getWholeColumnName()).getIndex();
 							outputTuples.add(inputTuples.get(index));
-						}					   							 
+						}
+						else
+						{
+							Util.printSchema(inputSchema);
+							
+						}
 					}
 					else 
 					{

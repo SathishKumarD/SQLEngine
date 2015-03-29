@@ -35,6 +35,8 @@ public class ExternalSortOperator implements Operator {
 	ArrayList<Tuple> lastFlushed;
 	List<OrderByElement> orderByElements;
 	Operator parentOperator = null;
+	
+	
 	public ExternalSortOperator(Operator child, List<OrderByElement> orderByElements) {
 		// TODO Auto-generated constructor stub
 		swapDir = new File(ConfigManager.getSwapDir(), UUID.randomUUID().toString());
@@ -58,6 +60,7 @@ public class ExternalSortOperator implements Operator {
 				System.err.println("parent: " + this.getParent());
 				System.err.println("current: " + this);
 				System.err.println("child: " + child);
+				
 				throw ex;
 				
 			}

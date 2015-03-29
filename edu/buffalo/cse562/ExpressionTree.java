@@ -23,10 +23,7 @@ public class ExpressionTree {
 	public Operator generateTree(SelectBody sel){
 		Operator current = null;
 		PlainSelect select = (PlainSelect) sel;
-		System.out.println("Scan start");
 		current = addScanOperator(current, select);
-		System.out.println("Scan end");
-
 		current = addJoinOperator(current, select);
 		current = addSelectionOperator(current, select);
 		current = addGroupByOperator(current,select);		

@@ -46,7 +46,7 @@ public class GroupByOperator implements Operator {
 		this.groupByColumns = groupByColumns;
 		this.aggregateFunctions = aggregateFunctions;
 		this.outputSchema = getOutputSchema();
-		//Util.printSchema(outputSchema);
+		Util.printSchema(outputSchema);
 		outputData = new HashMap<String, GroupByOutput>();
 		isGroupByComputed = false;
 		rowIndex =0;
@@ -62,7 +62,7 @@ public class GroupByOperator implements Operator {
 		if(outputDataList.size()>rowIndex)
 		{
 			tuple = outputDataList.get(rowIndex);
-			//Util.printTuple(tuple);
+			Util.printTuple(tuple);
 		}
 		rowIndex ++;
 
@@ -121,9 +121,14 @@ public class GroupByOperator implements Operator {
 						Expression exp;
 						if (exps != null){
 							exp = (Expression) exps.getExpressions().get(0);
+							
 							Tuple tup = evaluateExpression(evaluator, exp);
 							handleAggregateFunctions(func,inputtuple,hashKey,funcIndex,tup);
 							funcIndex++;
+							
+							
+							
+							
 						}
 						else{
 							handleCountFunction(hashKey,inputtuple,funcIndex);
@@ -172,7 +177,7 @@ public class GroupByOperator implements Operator {
 
 		if(outputData.get(hashKey) == null)
 		{
-			outputtuple.add(tup);
+			outputtuple.add(tup.cloneTuple(tup));
 			outputData.put(hashKey, new GroupByOutput( outputtuple));
 		}
 		else
@@ -183,7 +188,7 @@ public class GroupByOperator implements Operator {
 
 			if(funcIndex ==existingTuple.size() )
 			{
-				existingTuple.add(tup);
+				existingTuple.add(tup.cloneTuple(tup));
 			}
 			else
 			{
@@ -208,7 +213,7 @@ public class GroupByOperator implements Operator {
 
 		if(outputData.get(hashKey) == null)
 		{
-			outputtuple.add(tup);
+			outputtuple.add(tup.cloneTuple(tup));
 			outputData.put(hashKey, new GroupByOutput( outputtuple));
 		}
 		else

@@ -64,6 +64,9 @@ public class JoinOperator implements Operator {
 	@Override
 	public HashMap<String, ColumnDetail> getOutputTupleSchema() {
 		// TODO Auto-generated method stub
+		//System.out.println("-------------------");
+		//Util.printSchema(outputSchema);
+		//System.out.println("-------------------");
 		return outputSchema;
 	}
 

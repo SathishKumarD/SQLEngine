@@ -23,11 +23,7 @@ public class Evaluator extends Eval {
 		this.tupleSchema = tupleSchema;
 	}
 
-	@Override
-	public LeafValue eval(Expression e) throws SQLException{
-		return super.eval(e);
-	}
-
+	
 	@Override
 	public LeafValue eval(Column column) {
 		
@@ -36,7 +32,10 @@ public class Evaluator extends Eval {
 		// Util.printTuple(tuple);
 		return (colID==-1)?null:leafValue;
 	}
-
+	
+	
+	
+	
 	public static int getIndex(HashMap<String, ColumnDetail> tupleSchema, Column column)
 	{
 		ColumnDetail col = getColumnDetail(tupleSchema,column);
