@@ -239,7 +239,7 @@ public class SanitizeQuery extends Eval {
 			System.err.println("Error while sanitising the column: " + column.getColumnName());
 			ex.printStackTrace();
 		}
-		return new DoubleValue(0);
+		return null;
 	}
 
 
@@ -363,8 +363,8 @@ public class SanitizeQuery extends Eval {
 					}
 					catch (Exception ex)
 					{
-						System.err.println("func evaluating: " +expr );
-						ex.printStackTrace();
+						// System.err.println("func evaluating: " +expr );
+						// ex.printStackTrace();
 					}
 
 					//System.out.println("func evaluating: " +expr );
