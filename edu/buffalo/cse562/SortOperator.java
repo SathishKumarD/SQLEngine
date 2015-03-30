@@ -28,8 +28,8 @@ public class SortOperator implements Operator {
 	
 	public SortOperator(Operator input, List<OrderByElement> orderByElements){
 		this.orderByElements = orderByElements;
-		this.input = input;
-		reset();			
+		setChildOp(input);
+		//reset;
 	}	
 
 	/* (non-Javadoc)s
@@ -207,5 +207,9 @@ public class SortOperator implements Operator {
 	public void setOrderByExpression(List<OrderByElement> orderByElements)
 	{
 		this.orderByElements = orderByElements;
+	}
+	public List<OrderByElement> getOrderByColumns()
+	{
+		return this.orderByElements;		
 	}
 }

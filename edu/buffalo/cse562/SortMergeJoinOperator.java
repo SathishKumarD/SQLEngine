@@ -55,7 +55,20 @@ public class SortMergeJoinOperator extends JoinOperator{
 		while (!(leftTuple == null) && !(rightTuple == null)){
 			leftBuffer = new LinkedList<ArrayList<Tuple>>();
 			rightBuffer = new LinkedList<ArrayList<Tuple>>();
-			int diff = leftTuple.get(leftIndex).compareTo(rightTuple.get(rightIndex));
+			int diff =0;
+			try
+			{
+			 diff= leftTuple.get(leftIndex).compareTo(rightTuple.get(rightIndex));
+			}
+			catch(Exception ex)
+			{
+				System.out.println("hey");
+				Util.printTuple(leftTuple);
+				Util.printTuple(rightTuple);
+				System.out.println(leftTuple.get(leftIndex));
+				System.out.println(rightTuple.get(rightIndex));
+				throw ex;
+			}
 //			System.out.println(" Comparing " + leftTuple.get(leftIndex) + " and " +rightTuple.get(rightIndex));
 			if (diff == 0){
 //				System.out.println("=== Matched!");
@@ -64,7 +77,20 @@ public class SortMergeJoinOperator extends JoinOperator{
 				while (diff2 == 0){
 					rightBuffer.add(rightTuple);
 					rightTuple = right.readOneTuple();
+					if(rightTuple == null|| leftTuple == null) break;
+					
+					try
+					{
 					diff2 = leftTuple.get(leftIndex).compareTo(rightTuple.get(rightIndex));
+					}
+					catch(Exception ex)
+					{
+						Util.printTuple(leftTuple);
+						Util.printTuple(rightTuple );
+						System.out.println(leftTuple.get(leftIndex));
+						System.out.println(rightTuple.get(rightIndex));
+						throw ex;
+					}
 //					System.out.println("Matched multiple on right!");
 				}
 				
@@ -74,6 +100,7 @@ public class SortMergeJoinOperator extends JoinOperator{
 						while (diff3 == 0 && leftTemp != null){
 							leftBuffer.add(rightTuple);
 							leftTuple = left.readOneTuple();
+							if(leftTuple == null) break;
 							diff2 = leftTuple.get(leftIndex).compareTo(leftTemp.get(leftIndex));
 //							System.out.println("Matched multiple on left!");
 						}
@@ -106,7 +133,7 @@ public class SortMergeJoinOperator extends JoinOperator{
 		}
 		leftBuffer = null;
 		rightBuffer = null;
-		System.gc();
+		// System.gc();
 
 //		System.out.println("Buffer size now " +outputBuffer.size());
 		currentBag = outputBuffer.iterator();

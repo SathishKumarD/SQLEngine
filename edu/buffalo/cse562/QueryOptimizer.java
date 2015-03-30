@@ -92,16 +92,27 @@ public class QueryOptimizer extends Eval {
 
 			if(currOperator instanceof GroupByOperator)
 			{				
-				//replaceGroupBy((GroupByOperator)currOperator);				
+				GroupByOperator gp =  (GroupByOperator)currOperator;
+				List<Column> grpByExpressionsList = gp.getGroupByColumns();
+
+				if(grpByExpressionsList.size() >4)
+				{
+					replaceGroupBy((GroupByOperator)currOperator);		
+				}
+				
 			}		
 			
-			if(currOperator instanceof ExternalSortOperator)
+			if(currOperator instanceof SortOperator)
 			{
-				 Operator op_modifiedTree = replaceSortOnConditionMatch((ExternalSortOperator)currOperator);
+				
+				/* Operator op_modifiedTree = replaceSortOnConditionMatch((SortOperator)currOperator);
 				
 				 if(op_modifiedTree != null){
 						currOperator = op_modifiedTree;
 				 }
+				 */
+				 
+				 
 			}	
 
 			parentOperator = currOperator;
@@ -146,7 +157,7 @@ public class QueryOptimizer extends Eval {
 	 * @return
 	 */
 
-	private Operator replaceSortOnConditionMatch(ExternalSortOperator sortOp)
+	private Operator replaceSortOnConditionMatch(SortOperator sortOp)
 	{
 		if(sortOp == null || sortOp.getChildOp() == null) return null;
 		
@@ -531,12 +542,11 @@ public class QueryOptimizer extends Eval {
 		{
 			OrderByElement orderByElem = new OrderByElement();
 			orderByElem.setExpression(exp);
-
 			orderByElements.add(orderByElem);		
 		}
-		ExternalSortOperator externalSortOp = new ExternalSortOperator(groupByOp.getChildOp(), orderByElements);
+		ExternalSortOperator SortOp = new ExternalSortOperator(groupByOp.getChildOp(), orderByElements);
 
-		GroupByOperator2 groupBy2 = new GroupByOperator2(externalSortOp, 
+		GroupByOperator2 groupBy2 = new GroupByOperator2(SortOp, 
 															groupByOp.getGroupByColumns(), 
 															groupByOp.getAggregateFunctions());
 		//System.out.println("settng child");

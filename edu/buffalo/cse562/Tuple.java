@@ -183,7 +183,7 @@ public class Tuple implements Comparable<Tuple> {
 		return super.equals(obj);
 	}
 	
-	public int compareTo(Tuple nxtTuple) 
+	public int compareTo(Tuple nxtTuple)
 	{
 		try 
 		{
@@ -214,6 +214,10 @@ public class Tuple implements Comparable<Tuple> {
 		catch(ParseException | InvalidLeaf e)
 		{
 			e.printStackTrace();
+			
+			System.err.println(this.val.toString());
+			System.err.println(nxtTuple.val.toString());
+			
 		}
 		return 0;
 	}	
