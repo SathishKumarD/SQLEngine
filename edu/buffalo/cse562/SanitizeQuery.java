@@ -4,6 +4,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import net.sf.jsqlparser.expression.DoubleValue;
 import net.sf.jsqlparser.expression.Expression;
@@ -36,8 +37,18 @@ public class SanitizeQuery extends Eval {
 
 	HashMap<String,String> tableNameAlias = null;
 
+	HashMap<String,Integer> joinTables;
+
+	public SanitizeQuery()
+	{
+		joinTables = new  HashMap<String,Integer>();
+		setJoinTableOrders();
+	}
+
+
 	public Operator generateTree(SelectBody sel){
 		Operator current = null;
+
 		PlainSelect select = (PlainSelect) sel;	
 
 		tableNameAlias = getAllTableNames(select);
@@ -66,14 +77,34 @@ public class SanitizeQuery extends Eval {
 	}
 	private Operator addJoinOperator(Operator current,PlainSelect select)
 	{
+
 		List<Join> joins = select.getJoins();
 		if (joins != null){
+			
+			System.out.println("old join order: ");
+			System.out.println("size: " +joins.size());
+			
+			
+			for (Join j : joins){
+				System.out.println(j);
+				}
+			
+			joins = getNewJoinOrder(joins );
+			System.out.println("----------------");
+			System.out.println("new join order: ");
+			System.out.println("size: " +joins.size());
+			for (Join j : joins){
+			System.out.println(j);
+			}
+			System.out.println();
+
 			if (joins.size() > 0){
 				for (Join j : joins){
 					current = buildJoins(current, j);
 				}
 			}
 		}
+
 		return current;
 	}
 
@@ -118,7 +149,8 @@ public class SanitizeQuery extends Eval {
 			Expression exp = j.getOnExpression();
 			evaluateExpression(exp);
 			current = new CrossProductOperator(current, new ScanOperator(((Table) fr)), j.getOnExpression());
-		}	
+		}
+		
 		return current;
 	}
 
@@ -398,4 +430,44 @@ public class SanitizeQuery extends Eval {
 		}
 	}
 
+	private List<Join>  getNewJoinOrder(List<Join> joins )
+	{
+		List<Join> newJoins = new ArrayList<Join>();
+		Join[] newJoinArr = new Join[6];
+
+		//may not be necessary but dont know about java
+
+
+		for(Join j : joins)
+		{
+			if(j.getRightItem() instanceof Table)
+			{
+				Table t = (Table)j.getRightItem();
+
+				int index = joinTables.get(t.getName());
+				newJoinArr[index] = j;
+			}
+
+		}
+
+		for( int i = 0; i <newJoinArr.length ; i++)
+		{
+			if(newJoinArr[i] != null)
+			{
+				newJoins.add(newJoinArr[i]);
+			}
+		}
+
+		return newJoins;
+	}
+	private void setJoinTableOrders()
+	{
+		joinTables.put( "region",0);
+		joinTables.put( "nation",1);
+		joinTables.put( "supplier",2);
+		joinTables.put("customer",3);
+		joinTables.put("orders",4);
+		joinTables.put("lineitem",5);
+
+	}
 }
