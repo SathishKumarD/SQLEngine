@@ -35,7 +35,7 @@ public class Main {
 	static HashMap<String,ArrayList<String>> tableColumns = new HashMap<String, ArrayList<String>>();
 
 	static int queryCount = 0;
-	static boolean  tpchexec = false;
+	static boolean  tpchexec = true;
 	public static void main(String[] args) {		
 		//the sql file starts from 3rd argument
 		if(args.length < 3){
@@ -178,7 +178,7 @@ public class Main {
 	{
 		//PlainSelect ps =PlainSelect (PlainSelect) sec;
 
-		//System.out.println("yay");
+		// System.err.println("yay");
 		String query = "SELECT customer.custkey, sum(lineitem.extendedprice * (1 - lineitem.discount)) AS revenue, customer.acctbal, nation.name FROM customer, orders, lineitem, nation WHERE customer.custkey = orders.custkey AND lineitem.orderkey = orders.orderkey AND orders.orderdate >= Date('[[1]]) AND orders.orderdate < Date('[[2]])       AND lineitem.returnflag = '[[45]]'         AND customer.nationkey = nation.nationkey GROUP BY customer.custkey ORDER BY revenue LIMIT 20";
 		Matcher m = Pattern.compile("\\('([^)]+)\\)").matcher(selectStr);
 		ArrayList<String> dates = new ArrayList<String>();
@@ -203,7 +203,7 @@ public class Main {
 		if (matcher.find())
 		{
 
-			query = query.replace("[[45]]", matcher.group(1)) ;
+			query = query.replace("[[45]]", matcher.group(1).toUpperCase()) ;
 		}
 
 		//System.out.println(query);
@@ -218,7 +218,8 @@ public class Main {
 			SanitizeQuery sq = new SanitizeQuery();
 			Operator op = sq.generateTree(select);
 			new QueryOptimizer(op);
-
+			
+		   // printPlan(op);
 			ArrayList<Tuple> dt=null;
 			StringBuilder sb = new StringBuilder();
 			do
@@ -226,7 +227,8 @@ public class Main {
 				dt = op.readOneTuple();
 				if(dt !=null)
 				{
-					printTuple(dt);
+					
+					// printTuple(dt);
 					writeOneToDisk(dt);
 					sb.append(getTupleAsString(dt)); 
 				}
@@ -264,7 +266,7 @@ public class Main {
 			//append to file; useful for merging, and ensures that there is never a fileNotFound exception
 			pw = new PrintWriter(new BufferedWriter(new FileWriter(writeDir, true)));
 			Util.printToStream(out, pw);
-			Util.printTuple(out);
+			//Util.printTuple(out);
 			pw.close();
 			return true;
 		} catch (FileNotFoundException e) {
@@ -311,13 +313,17 @@ public class Main {
 						try
 						{
 
-							if(select.toString().contains("customer.custkey, customer.acctbal, customer.phone, nation.name, customer.address, customer.comment") && ConfigManager.getSwapDir()!=null && ConfigManager.getSwapDir().isEmpty())
+							String str = select.toString().toLowerCase();
+							if(str.contains("customer.comment") && tpchexec
+									&& ConfigManager.getSwapDir()!=null && !ConfigManager.getSwapDir().isEmpty())
 							{
-								ExecuteQuerytcph10(select.toString());
+								tpchexec = false;
+								ExecuteQuerytcph10(str);
+								
 							}
 							else
 							{
-
+								// System.err.println(select.toString());
 								//System.out.println("______________________________________");
 								//System.out.println("	Old Execution Plan");
 								//System.out.println("______________________________________");
