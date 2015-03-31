@@ -397,13 +397,13 @@ public class QueryOptimizer2 extends Eval {
 
 							if(expressionExistsInSchema(equalsExpr.getLeftExpression(), crossPOperator.getLeftOperator().getOutputTupleSchema().keySet()))
 							{
-								leftExtSort = new ExternalSortOperator(crossPOperator.getLeftOperator(), getOrderByElemList(equalsExpr.getLeftExpression()));
-								rightExtSort = new ExternalSortOperator(crossPOperator.getRightOperator(), getOrderByElemList(equalsExpr.getRightExpression()));
+								leftExtSort = new SortOperator(crossPOperator.getLeftOperator(), getOrderByElemList(equalsExpr.getLeftExpression()));
+								rightExtSort = new SortOperator(crossPOperator.getRightOperator(), getOrderByElemList(equalsExpr.getRightExpression()));
 							}
 							else
 							{
-								leftExtSort = new ExternalSortOperator(crossPOperator.getLeftOperator(), getOrderByElemList(equalsExpr.getRightExpression()));
-								rightExtSort = new ExternalSortOperator(crossPOperator.getRightOperator(), getOrderByElemList(equalsExpr.getLeftExpression()));
+								leftExtSort = new SortOperator(crossPOperator.getLeftOperator(), getOrderByElemList(equalsExpr.getRightExpression()));
+								rightExtSort = new SortOperator(crossPOperator.getRightOperator(), getOrderByElemList(equalsExpr.getLeftExpression()));
 
 							}							
 
