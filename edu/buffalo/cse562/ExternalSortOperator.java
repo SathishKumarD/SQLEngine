@@ -30,7 +30,7 @@ public class ExternalSortOperator implements Operator {
 	Comparator<ArrayList<Tuple>> comp;
 	int bufferLength;
 	HashMap<String, ColumnDetail> outputSchema;
-	private static final int BUFFER_SIZE = 1000000;
+	private static final int BUFFER_SIZE = 100000000;
 	TreeMap<Integer, String> typeMap;
 	List<ArrayList<Tuple>> workingSet;
 	boolean sorted = false;

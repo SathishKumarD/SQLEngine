@@ -437,6 +437,11 @@ public class GroupByOperator implements Operator {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		catch(IndexOutOfBoundsException e)
+		{
+			System.out.println(exp);
+			e.printStackTrace();
+		}
 
 		return tup;
 	}

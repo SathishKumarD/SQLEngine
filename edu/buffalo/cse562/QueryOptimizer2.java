@@ -21,6 +21,7 @@ public class QueryOptimizer2 extends Eval {
 
 	ArrayList<String> tables;
 	ArrayList<String> columns;
+	ArrayList<String> primarykeys;
 	public QueryOptimizer2()
 	{
 
@@ -30,6 +31,8 @@ public class QueryOptimizer2 extends Eval {
 	{
 		tables = new ArrayList<String>();
 		columns = new ArrayList<String>();
+		primarykeys =new ArrayList<String>();
+		primarykeys.add("customer.custkey");
 		current = pushSelection(current);
 		current = replaceOperators(current);		
 	}	
@@ -93,20 +96,10 @@ public class QueryOptimizer2 extends Eval {
 				GroupByOperator gp =  (GroupByOperator)currOperator;
 				List<Column> grpByExpressionsList = gp.getGroupByColumns();
 
-				if(grpByExpressionsList.size() >4)
-				{
-					replaceGroupBy((GroupByOperator)currOperator);		
-				}
+				replaceGroupBy((GroupByOperator)currOperator);		
+
 			}			
 
-			if(currOperator instanceof ExternalSortOperator)
-			{
-				Operator op_modifiedTree = replaceSortOnConditionMatch((ExternalSortOperator)currOperator);
-
-				if(op_modifiedTree != null){
-					currOperator = op_modifiedTree;
-				}
-			}	
 
 			parentOperator = currOperator;
 			currOperator = parentOperator.getChildOp();
@@ -404,13 +397,13 @@ public class QueryOptimizer2 extends Eval {
 
 							if(expressionExistsInSchema(equalsExpr.getLeftExpression(), crossPOperator.getLeftOperator().getOutputTupleSchema().keySet()))
 							{
-								leftExtSort = new ExternalSortOperator(crossPOperator.getLeftOperator(), getOrderByElemList(equalsExpr.getLeftExpression()));
-								rightExtSort = new ExternalSortOperator(crossPOperator.getRightOperator(), getOrderByElemList(equalsExpr.getRightExpression()));
+								leftExtSort = new SortOperator(crossPOperator.getLeftOperator(), getOrderByElemList(equalsExpr.getLeftExpression()));
+								rightExtSort = new SortOperator(crossPOperator.getRightOperator(), getOrderByElemList(equalsExpr.getRightExpression()));
 							}
 							else
 							{
-								leftExtSort = new ExternalSortOperator(crossPOperator.getLeftOperator(), getOrderByElemList(equalsExpr.getRightExpression()));
-								rightExtSort = new ExternalSortOperator(crossPOperator.getRightOperator(), getOrderByElemList(equalsExpr.getLeftExpression()));
+								leftExtSort = new SortOperator(crossPOperator.getLeftOperator(), getOrderByElemList(equalsExpr.getRightExpression()));
+								rightExtSort = new SortOperator(crossPOperator.getRightOperator(), getOrderByElemList(equalsExpr.getLeftExpression()));
 
 							}							
 
@@ -530,29 +523,69 @@ public class QueryOptimizer2 extends Eval {
 
 
 
+
 	//replaceGroupBy to Sorted Group By
 	private Operator replaceGroupBy(GroupByOperator groupByOp)
 	{
+		boolean isOptimised = false;
+		//System.out.println("good");
 		List<Column> grpByExpressionsList = groupByOp.getGroupByColumns();
-
 		List<OrderByElement> orderByElements = new ArrayList<OrderByElement>();
-
+		//System.out.println(grpByExpressionsList.size());
+		Column column = groupByOp.getGroupByColumns().get(0);
+		String columnName = column.getWholeColumnName();
+		isOptimised = primarykeys.contains(columnName);
+		//System.out.println(isOptimised);
+		//System.out.println(columnName);
 		for(Expression exp : grpByExpressionsList)
 		{
 			OrderByElement orderByElem = new OrderByElement();
-			orderByElem.setExpression(exp);
+			if(exp instanceof Column)
+			{
+				
+				if(((Column)exp).getWholeColumnName().equalsIgnoreCase(columnName))
+				{
+					orderByElem.setExpression(exp);
+					orderByElements.add(orderByElem);	
+				}
+				else
+				{
+					//System.out.println(((Column)exp).getColumnName());
+				}
+			}
+			else
+			{
+				//System.out.println(exp);
+			}
 
-			orderByElements.add(orderByElem);		
 		}
-		ExternalSortOperator externalSortOp = new ExternalSortOperator(groupByOp.getChildOp(), orderByElements);
+		ExternalSortOperator SortOp = new ExternalSortOperator(groupByOp.getChildOp(), orderByElements);
 
-		GroupByOperator2 groupBy2 = new GroupByOperator2(externalSortOp, 
-				groupByOp.getGroupByColumns(), 
-				groupByOp.getAggregateFunctions());
+		// optimisation:
+
+
+		GroupByOperator2 groupBy2 = null;
+		List<Column> groupByColumn = new ArrayList<Column>();
+		if(isOptimised)
+		{
+			System.out.println("good");
+			groupByColumn.add(column);
+			groupBy2 = new GroupByOperator2(SortOp, 
+					groupByColumn
+					, 
+					groupByOp.getAggregateFunctions());
+		}
+		else
+		{
+			System.out.println("bad");
+			groupByColumn.add(groupByOp.getGroupByColumns().get(0));
+			groupBy2 = new GroupByOperator2(SortOp, 
+					groupByOp.getGroupByColumns(), 
+					groupByOp.getAggregateFunctions());
+		}
 		//System.out.println("settng child");
 		groupByOp.getParent().setChildOp(groupBy2);		
 		//System.out.println("child set ");
-
 
 		return groupBy2;
 	}

@@ -183,7 +183,7 @@ public class Tuple implements Comparable<Tuple> {
 		return super.equals(obj);
 	}
 	
-	public int compareTo(Tuple nxtTuple)
+	public int compareTo(Tuple nxtTuple) 
 	{
 		try 
 		{
@@ -198,7 +198,15 @@ public class Tuple implements Comparable<Tuple> {
 				}
 				if(this.val instanceof LongValue)
 				{
-					return Long.compare(this.val.toLong(), nxtTuple.val.toLong());
+					int returnVal;
+					try{
+						returnVal = Long.compare(this.val.toLong(), nxtTuple.val.toLong());
+					}
+					catch (Exception ex){
+						returnVal = Long.compare(this.val.toLong(), 
+								Long.parseLong(nxtTuple.val.toString().replace("\'", "")));
+					}
+					return returnVal;
 				}
 				
 				if(this.val instanceof DateValue)
@@ -214,10 +222,6 @@ public class Tuple implements Comparable<Tuple> {
 		catch(ParseException | InvalidLeaf e)
 		{
 			e.printStackTrace();
-			
-			System.err.println(this.val.toString());
-			System.err.println(nxtTuple.val.toString());
-			
 		}
 		return 0;
 	}	

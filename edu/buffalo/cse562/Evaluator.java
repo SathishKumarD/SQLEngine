@@ -28,7 +28,19 @@ public class Evaluator extends Eval {
 	public LeafValue eval(Column column) {
 		
 		int colID = getIndex(tupleSchema,column);	
-		LeafValue leafValue = tuple.get(colID).val;
+		LeafValue leafValue = null;
+		try
+		{
+			 leafValue = tuple.get(colID).val;
+		}
+		catch(Exception ex)
+		{
+			System.err.println(tuple);
+			System.out.println(column.getColumnName());
+			System.out.println(colID);
+			Util.printSchema(tupleSchema);
+		}
+		
 		// Util.printTuple(tuple);
 		return (colID==-1)?null:leafValue;
 	}

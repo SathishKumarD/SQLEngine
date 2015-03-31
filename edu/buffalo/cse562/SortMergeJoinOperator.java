@@ -16,7 +16,7 @@ public class SortMergeJoinOperator extends JoinOperator{
 	Iterator<ArrayList<Tuple>> currentBag;
 	boolean started = false;
 
-	
+
 	public SortMergeJoinOperator(Operator left, Operator right, Expression expr){
 		super(left, right, expr);
 		outputBuffer = new LinkedList<ArrayList<Tuple>>();
@@ -25,25 +25,25 @@ public class SortMergeJoinOperator extends JoinOperator{
 
 		currentBag = outputBuffer.iterator();
 	}
-	
+
 	@Override
 	public ArrayList<Tuple> readOneTuple() {
 		//try to match more, if the current list is empty		
 		if (!currentBag.hasNext()){
 			getNewBag();
 		}
-		
+
 		if (currentBag.hasNext()){
 			return currentBag.next();
 		}
-		
+
 		return null;
 	}
-	
+
 	public void setComparator(Comparator<ArrayList<Tuple>> comp){
 		this.comp = comp;
 	}
-	
+
 	private void getNewBag(){
 		if (!started) {
 			leftTuple = left.readOneTuple();
@@ -51,59 +51,36 @@ public class SortMergeJoinOperator extends JoinOperator{
 			started = true;
 		}
 		outputBuffer = new LinkedList<ArrayList<Tuple>>();
-		
+
 		while (!(leftTuple == null) && !(rightTuple == null)){
 			leftBuffer = new LinkedList<ArrayList<Tuple>>();
 			rightBuffer = new LinkedList<ArrayList<Tuple>>();
-			int diff =0;
-			try
-			{
-			 diff= leftTuple.get(leftIndex).compareTo(rightTuple.get(rightIndex));
-			}
-			catch(Exception ex)
-			{
-				System.out.println("hey");
-				Util.printTuple(leftTuple);
-				Util.printTuple(rightTuple);
-				System.out.println(leftTuple.get(leftIndex));
-				System.out.println(rightTuple.get(rightIndex));
-				throw ex;
-			}
-//			System.out.println(" Comparing " + leftTuple.get(leftIndex) + " and " +rightTuple.get(rightIndex));
+			int diff = leftTuple.get(leftIndex).compareTo(rightTuple.get(rightIndex));
+			//			System.out.println(" Comparing " + leftTuple.get(leftIndex) + " and " +rightTuple.get(rightIndex));
 			if (diff == 0){
-//				System.out.println("=== Matched!");
+				//				System.out.println("=== Matched!");
 				leftBuffer.add(leftTuple);
 				int diff2 = 0;
-				while (diff2 == 0){
+				while (diff2 == 0 && rightTuple != null){
 					rightBuffer.add(rightTuple);
 					rightTuple = right.readOneTuple();
-					if(rightTuple == null|| leftTuple == null) break;
-					
-					try
-					{
-					diff2 = leftTuple.get(leftIndex).compareTo(rightTuple.get(rightIndex));
+					if (rightTuple != null){
+						diff2 = leftTuple.get(leftIndex).compareTo(rightTuple.get(rightIndex));
 					}
-					catch(Exception ex)
-					{
-						Util.printTuple(leftTuple);
-						Util.printTuple(rightTuple );
-						System.out.println(leftTuple.get(leftIndex));
-						System.out.println(rightTuple.get(rightIndex));
-						throw ex;
-					}
-//					System.out.println("Matched multiple on right!");
+					//					System.out.println("Matched multiple on right!");
 				}
-				
+
 				ArrayList<Tuple> leftTemp = left.readOneTuple();
 				if (leftTemp != null && leftTuple != null){
 					int diff3 = leftTuple.get(leftIndex).compareTo(leftTemp.get(leftIndex));
-						while (diff3 == 0 && leftTemp != null){
-							leftBuffer.add(rightTuple);
-							leftTuple = left.readOneTuple();
-							if(leftTuple == null) break;
+					while (diff3 == 0 && leftTemp != null){
+						leftBuffer.add(rightTuple);
+						leftTuple = left.readOneTuple();
+						if (leftTuple != null){
 							diff2 = leftTuple.get(leftIndex).compareTo(leftTemp.get(leftIndex));
-//							System.out.println("Matched multiple on left!");
 						}
+						//							System.out.println("Matched multiple on left!");
+					}
 				}
 				leftTuple = leftTemp;
 				miniCross();
@@ -111,21 +88,21 @@ public class SortMergeJoinOperator extends JoinOperator{
 			}
 			else if (diff < 0){
 				leftTuple = left.readOneTuple();
-//				System.out.println("+++ Moving on");
+				//				System.out.println("+++ Moving on");
 			}
 			else{
 				rightTuple = right.readOneTuple();
-//				System.out.println("+++ Moving on");
+				//				System.out.println("+++ Moving on");
 			}
 		}
 	}
-	
+
 	public void miniCross() {
-//		System.out.println("Crossing " + leftBuffer.size()+ " and " +rightBuffer.size());
+		//		System.out.println("Crossing " + leftBuffer.size()+ " and " +rightBuffer.size());
 		for (ArrayList<Tuple> leftIter : leftBuffer){
-			ArrayList<Tuple> outputTuple = new ArrayList<Tuple>(this.getOutputTupleSchema().size());
+
 			for (ArrayList<Tuple> rightIter : rightBuffer){
-				outputTuple = new ArrayList<Tuple>(this.getOutputTupleSchema().size());
+				ArrayList<Tuple> outputTuple = new ArrayList<Tuple>(this.getOutputTupleSchema().size());
 				outputTuple.addAll(leftIter);
 				outputTuple.addAll(rightIter);
 				outputBuffer.add(outputTuple);
@@ -133,12 +110,12 @@ public class SortMergeJoinOperator extends JoinOperator{
 		}
 		leftBuffer = null;
 		rightBuffer = null;
-		// System.gc();
+		System.gc();
 
-//		System.out.println("Buffer size now " +outputBuffer.size());
+		//		System.out.println("Buffer size now " +outputBuffer.size());
 		currentBag = outputBuffer.iterator();
 	}
-	
+
 	@Override
 	public String toString() {
 		// TODO Auto-generated method stub
@@ -146,13 +123,13 @@ public class SortMergeJoinOperator extends JoinOperator{
 		StringBuilder b = new StringBuilder("SORT MERGE JOIN ON " + this.expr +" WITH \n");
 
 		Operator childOfRightBranch = this.right;
-		
+
 		while(childOfRightBranch != null)
 		{
 			b.append('\t' +childOfRightBranch.toString() + '\n');
 			childOfRightBranch = childOfRightBranch.getChildOp();
 		}
-		
+
 		return b.toString();
 	}
 }

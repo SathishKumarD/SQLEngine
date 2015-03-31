@@ -23,15 +23,18 @@ public class QueryOptimizer extends Eval {
 
 	ArrayList<String> tables;
 	ArrayList<String> columns;
+	ArrayList<String> primarykeys;
 	public QueryOptimizer()
 	{
-		
+
 	}
 
 	public QueryOptimizer(Operator current)
 	{
 		tables = new ArrayList<String>();
 		columns = new ArrayList<String>();
+		primarykeys =new ArrayList<String>();
+		primarykeys.add("customer.custkey");
 		current = pushSelection(current);
 		current = replaceOperators(current);		
 	}	
@@ -99,20 +102,20 @@ public class QueryOptimizer extends Eval {
 				{
 					replaceGroupBy((GroupByOperator)currOperator);		
 				}
-				
+
 			}		
-			
+
 			if(currOperator instanceof SortOperator)
 			{
-				
+
 				/* Operator op_modifiedTree = replaceSortOnConditionMatch((SortOperator)currOperator);
-				
+
 				 if(op_modifiedTree != null){
 						currOperator = op_modifiedTree;
 				 }
 				 */
-				 
-				 
+
+
 			}	
 
 			parentOperator = currOperator;
@@ -126,28 +129,28 @@ public class QueryOptimizer extends Eval {
 	}	
 
 	//iteratively go down the tree checking for order by and chck groupBy below it for same condition matches
-//	private Operator patternMatchSortOnGroupBy(ExternalSortOperator sortOp)
-//	{
-//		Operator oldSortOp = sortOp;				
-//		Operator modifiedSortOp = null;
-//		
-//		do{
-//			if(modifiedSortOp != null) oldSortOp = modifiedSortOp;
-//
-//			modifiedSortOp = replaceSortOnConditionMatch((ExternalSortOperator)oldSortOp);
-//
-//			if(!(modifiedSortOp instanceof ExternalSortOperator)) 
-//			{
-//				return modifiedSortOp;
-//			}
-//
-//		}while(!modifiedSortOp.equals(oldSortOp));
-//		
-//		return modifiedSortOp;
-		
-//		return replaceSortOnConditionMatch(sortOp);
-//	}
-	
+	//	private Operator patternMatchSortOnGroupBy(ExternalSortOperator sortOp)
+	//	{
+	//		Operator oldSortOp = sortOp;				
+	//		Operator modifiedSortOp = null;
+	//		
+	//		do{
+	//			if(modifiedSortOp != null) oldSortOp = modifiedSortOp;
+	//
+	//			modifiedSortOp = replaceSortOnConditionMatch((ExternalSortOperator)oldSortOp);
+	//
+	//			if(!(modifiedSortOp instanceof ExternalSortOperator)) 
+	//			{
+	//				return modifiedSortOp;
+	//			}
+	//
+	//		}while(!modifiedSortOp.equals(oldSortOp));
+	//		
+	//		return modifiedSortOp;
+
+	//		return replaceSortOnConditionMatch(sortOp);
+	//	}
+
 	/***
 	 *check all groupBy under a sort until condition matches or if child is null
 	if a match is found replace the underlying grp by with sorted groupBy2
@@ -160,56 +163,56 @@ public class QueryOptimizer extends Eval {
 	private Operator replaceSortOnConditionMatch(SortOperator sortOp)
 	{
 		if(sortOp == null || sortOp.getChildOp() == null) return null;
-		
+
 		Set<String> hashSet_OrderBy = getHashSet(sortOp.getOrderByColumns());
 		Operator childOp = sortOp.getChildOp();
-		
+
 		while(childOp != null)
 		{
 			if(childOp instanceof GroupByOperator)
 			{
 				GroupByOperator grpBy = ((GroupByOperator) childOp);
 				if(checkSortGroupConditionMatch(hashSet_OrderBy, grpBy.getGroupByColumns()))
-				 {
+				{
 					Operator modifiedTree = replaceGroupBy(grpBy);
-					
+
 					//Delete current sort operator and give back the parentOperatr reference(to iteration purpose) to the caller function
 					sortOp.getParent().setChildOp(modifiedTree);					
 					return sortOp.getParent();
-				 }
+				}
 			}
-			
+
 			childOp = childOp.getChildOp();
 		}
-		
+
 		return sortOp;
 	}
-	
+
 	private Set<String> getHashSet(List<OrderByElement> orderByCols)
 	{
 		Set<String> hashSet = new HashSet<String>();
-		
+
 		for(OrderByElement orderByElem : orderByCols)
 		{
 			hashSet.add(orderByElem.getExpression().toString());
 		}
-		
+
 		return hashSet;
 	}
-	
+
 	//check whether the conditions of order by and group by.
 	private boolean checkSortGroupConditionMatch(Set<String> hashSet_OrderBy, List<Column> groupByCols)
 	{
 		if(hashSet_OrderBy.size() != groupByCols.size()) return false;
-		
+
 		for(Expression expr : groupByCols)
 		{
 			if(!hashSet_OrderBy.contains(expr.toString())) return false;
 		}
-		
+
 		return true;
 	}
-	
+
 	//iteratively keep sending the input selection down to pattern match cross products sitting below
 	//until select conditions are empty or until the last child in the tree
 	private Operator patternMatchSelectionOnCrossProduct(SelectionOperator selectionOperator)
@@ -326,7 +329,7 @@ public class QueryOptimizer extends Eval {
 		}
 		else 
 		{
-			
+
 			tables.clear();
 			columns.clear();
 			evaluateExpression(expr);
@@ -337,7 +340,7 @@ public class QueryOptimizer extends Eval {
 					isExistsInLeft = true;
 				if(expressionExistsInSchema(colName, joinOp.getRightOperator().getOutputTupleSchema().keySet()))
 					isExistsInRight = true;
-				
+
 			}
 			else
 			{
@@ -486,8 +489,8 @@ public class QueryOptimizer extends Eval {
 		}
 		return false;
 	}
-	
-	
+
+
 	/***
 	 * Splits and clauses to multiple and clauses
 	 * @param e
@@ -535,24 +538,64 @@ public class QueryOptimizer extends Eval {
 	//replaceGroupBy to Sorted Group By
 	private Operator replaceGroupBy(GroupByOperator groupByOp)
 	{
+		boolean isOptimised = false;
+		//System.out.println("good");
 		List<Column> grpByExpressionsList = groupByOp.getGroupByColumns();
 		List<OrderByElement> orderByElements = new ArrayList<OrderByElement>();
-
+		//System.out.println(grpByExpressionsList.size());
+		Column column = groupByOp.getGroupByColumns().get(0);
+		String columnName = column.getWholeColumnName();
+		isOptimised = primarykeys.contains(columnName);
+		//System.out.println(isOptimised);
+		//System.out.println(columnName);
 		for(Expression exp : grpByExpressionsList)
 		{
 			OrderByElement orderByElem = new OrderByElement();
-			orderByElem.setExpression(exp);
-			orderByElements.add(orderByElem);		
+			if(exp instanceof Column)
+			{
+				
+				if(((Column)exp).getWholeColumnName().equalsIgnoreCase(columnName))
+				{
+					orderByElem.setExpression(exp);
+					orderByElements.add(orderByElem);	
+				}
+				else
+				{
+					//System.out.println(((Column)exp).getColumnName());
+				}
+			}
+			else
+			{
+				//System.out.println(exp);
+			}
+
 		}
 		ExternalSortOperator SortOp = new ExternalSortOperator(groupByOp.getChildOp(), orderByElements);
 
-		GroupByOperator2 groupBy2 = new GroupByOperator2(SortOp, 
-															groupByOp.getGroupByColumns(), 
-															groupByOp.getAggregateFunctions());
+		// optimisation:
+
+
+		GroupByOperator2 groupBy2 = null;
+		List<Column> groupByColumn = new ArrayList<Column>();
+		if(isOptimised)
+		{
+			groupByColumn.add(column);
+			groupBy2 = new GroupByOperator2(SortOp, 
+					groupByColumn
+					, 
+					groupByOp.getAggregateFunctions());
+		}
+		else
+		{
+			groupByColumn.add(groupByOp.getGroupByColumns().get(0));
+			groupBy2 = new GroupByOperator2(SortOp, 
+					groupByOp.getGroupByColumns(), 
+					groupByOp.getAggregateFunctions());
+		}
 		//System.out.println("settng child");
 		groupByOp.getParent().setChildOp(groupBy2);		
 		//System.out.println("child set ");
-		
+
 		return groupBy2;
 	}
 
@@ -562,11 +605,11 @@ public class QueryOptimizer extends Eval {
 		String tablename = column.getTable().getName();
 		if(!tables.contains(tablename))
 			tables.add(tablename);
-		
+
 		columns.add(column.getWholeColumnName());
 		return null;
 	}
-	
+
 	private void evaluateExpression(Expression exp)
 	{
 		try {
@@ -575,7 +618,7 @@ public class QueryOptimizer extends Eval {
 			// TODO Auto-generated catch block
 			// e.printStackTrace();
 		}
-		
+
 	}
 
 }

@@ -29,9 +29,9 @@ public class ScanOperator implements Operator {
 	private HashMap<String,ColumnDetail> operatorTableSchema = null; 
 	private HashMap<Integer, String> indexMaps = null;
 	private TreeMap<Integer,Integer> shrinkedIndexMap = null;
-	
+
 	private Operator parentOperator = null;
-	
+
 	/* (non-Javadoc)
 	 * @see edu.buffalo.cse562.Operator#readOneTuple()
 	 */	
@@ -40,7 +40,7 @@ public class ScanOperator implements Operator {
 		this.tableName = table.getName();
 		this.tableAlias = table.getAlias();	
 		shrinkedIndexMap = new TreeMap<Integer, Integer>();
-				
+
 		HashMap<String,ColumnDetail> intSchema = Main.tableMapping.get(this.tableName.toLowerCase());
 		this.indexMaps = Main.indexTypeMaps.get(this.tableName.toLowerCase());		
 		if (intSchema == null){
@@ -49,12 +49,19 @@ public class ScanOperator implements Operator {
 		}
 		// old one
 		// this.operatorTableSchema = this.initialiseOperatorTableSchema(intSchema);
-		
+
 		// new one
 		this.operatorTableSchema = this.initialiseOutputTableSchema(intSchema);
-		
-		this.dataFile = FileSystems.getDefault().getPath(ConfigManager.getDataDir(), tableName.toLowerCase() +".dat");		
-		
+
+		if(!tableName.toLowerCase().equalsIgnoreCase("temp"))
+		{
+			this.dataFile = FileSystems.getDefault().getPath(ConfigManager.getDataDir(), tableName.toLowerCase() +".dat");
+		}
+		else
+		{
+			this.dataFile = FileSystems.getDefault().getPath(ConfigManager.getSwapDir(), tableName.toLowerCase() +".dat");
+		}
+
 		reset();
 	}
 
@@ -62,13 +69,13 @@ public class ScanOperator implements Operator {
 	public ArrayList<Tuple> readOneTuple() {
 		if(buffer == null) return null;
 		String line = null;
-		
+
 
 		try {
 			line = buffer.readLine();
 		} 
 		catch (IOException e) {
-//			e.printStackTrace();
+			//			e.printStackTrace();
 			return null;
 		}
 
@@ -78,12 +85,12 @@ public class ScanOperator implements Operator {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} 
-			return null; 
+		return null; 
 		}
 
 		String col[] = line.split("\\|");	
 		ArrayList<Tuple> tuples = new ArrayList<Tuple>();
-		
+
 		// this for loop is previous naive method
 		/*for(int counter = 0;counter < col.length;counter++) {
 			if(indexMaps.containsKey(counter)){		
@@ -91,18 +98,18 @@ public class ScanOperator implements Operator {
 				tuples.add(new Tuple(type.toLowerCase(), col[counter]));	
 			}
 		}
-		*/
-		
-		
+		 */
+
+
 		// this for loop is optimised one. pick only the columns necessary
 		for(Entry<Integer,Integer> ind: shrinkedIndexMap.entrySet())
 		{
 			String type = indexMaps.get(ind.getValue());			
 			tuples.add(new Tuple(type.toLowerCase(), col[ind.getValue()]));	
-			
+
 		}
-		
-		
+
+
 		return tuples;
 	}
 
@@ -122,7 +129,7 @@ public class ScanOperator implements Operator {
 	}
 
 	public String toString(){
-		
+
 		return "SCAN TABLE " + dataFile.getFileName().toString();
 	}
 
@@ -135,7 +142,7 @@ public class ScanOperator implements Operator {
 	public void setChildOp(Operator child) {		
 		//null		
 	}
-	
+
 	// deep copies the map from static table schema object to operatorTableSchema
 	//Replaces table aliases
 	private HashMap<String,ColumnDetail> initialiseOperatorTableSchema(HashMap<String,ColumnDetail>  createTableSchemaMap)
@@ -144,7 +151,7 @@ public class ScanOperator implements Operator {
 		for(Entry<String, ColumnDetail> es : createTableSchemaMap.entrySet())
 		{
 			String nameKey = es.getKey();
-			
+
 			if(tableAlias != null) 
 			{
 				if(nameKey.contains("."))
@@ -155,22 +162,22 @@ public class ScanOperator implements Operator {
 			}
 			opT.put(nameKey,es.getValue().clone());
 		}
-		
+
 		return opT;
 	}
-	
-	
-	
+
+
+
 	private HashMap<String,ColumnDetail> initialiseOutputTableSchema(HashMap<String,ColumnDetail>  createTableSchemaMap)
 	{
 		HashMap<String,ColumnDetail> opT = new HashMap<String,ColumnDetail>();		
-		
+
 		String columnName = "";
 		int counter = 0;
 		for(Entry<String, ColumnDetail> es : createTableSchemaMap.entrySet())
 		{
 			String nameKey = es.getKey();
-			
+
 			if(tableAlias != null) 
 			{
 				if(nameKey.contains("."))
@@ -179,7 +186,7 @@ public class ScanOperator implements Operator {
 					nameKey = tableAlias +"."+columnWholeTableName[1]; 
 				}
 			}
-			
+
 			if(nameKey.contains("."))
 			{
 				String[] columnWholeTableName = nameKey.split("\\.");	
@@ -189,7 +196,7 @@ public class ScanOperator implements Operator {
 			{
 				columnName = es.getKey();
 			}
-			
+
 			if(Main.tableColumns.get(tableName.toLowerCase()).contains(columnName))
 			{
 				shrinkedIndexMap.put(counter, es.getValue().getIndex());
@@ -197,22 +204,22 @@ public class ScanOperator implements Operator {
 				cd.setIndex(counter);
 				opT.put(nameKey,cd);
 				counter++;
-				
+
 			}
-			
-			
-			
+
+
+
 			//opT.put(nameKey,es.getValue().clone());
 		}
-		
+
 		return opT;
 	}
-	
+
 	public String getTableName()
 	{
 		return this.tableName;
 	}
-	
+
 	@Override
 	public HashMap<String, ColumnDetail> getOutputTupleSchema() {
 		return this.operatorTableSchema;
@@ -220,13 +227,13 @@ public class ScanOperator implements Operator {
 
 	@Override
 	public Operator getParent() {
-		
+
 		return parentOperator;
 	}
 
 	@Override
 	public void setParent(Operator parent) {
 		this.parentOperator = parent;
-		
+
 	}
 }

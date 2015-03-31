@@ -38,12 +38,16 @@ public class SanitizeQuery extends Eval {
 	HashMap<String,String> tableNameAlias = null;
 
 	HashMap<String,Integer> joinTables;
-
+	HashMap<String, String> primaryKeys;
 	public SanitizeQuery()
 	{
 		joinTables = new  HashMap<String,Integer>();
+		primaryKeys = new HashMap<String, String>();
 		setJoinTableOrders();
+		setPrimaryKeys();
 	}
+
+
 
 
 	public Operator generateTree(SelectBody sel){
@@ -80,23 +84,7 @@ public class SanitizeQuery extends Eval {
 
 		List<Join> joins = select.getJoins();
 		if (joins != null){
-			
-			System.out.println("old join order: ");
-			System.out.println("size: " +joins.size());
-			
-			
-			for (Join j : joins){
-				System.out.println(j);
-				}
-			
-			joins = getNewJoinOrder(joins );
-			System.out.println("----------------");
-			System.out.println("new join order: ");
-			System.out.println("size: " +joins.size());
-			for (Join j : joins){
-			System.out.println(j);
-			}
-			System.out.println();
+
 
 			if (joins.size() > 0){
 				for (Join j : joins){
@@ -150,7 +138,7 @@ public class SanitizeQuery extends Eval {
 			evaluateExpression(exp);
 			current = new CrossProductOperator(current, new ScanOperator(((Table) fr)), j.getOnExpression());
 		}
-		
+
 		return current;
 	}
 
@@ -469,5 +457,9 @@ public class SanitizeQuery extends Eval {
 		joinTables.put("orders",4);
 		joinTables.put("lineitem",5);
 
+	}
+
+	private void setPrimaryKeys() {
+		primaryKeys.put("customer", "custkey");
 	}
 }
