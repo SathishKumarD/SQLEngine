@@ -184,19 +184,19 @@ public class Main {
 		ArrayList<String> dates = new ArrayList<String>();
 		while(m.find()) {
 			dates.add(m.group(1));  
-			
-			
+
+
 		}
-		
+
 		//System.out.println(query);
-			query = query.replace("[[1]]", dates.get(0)) ;
-			selectStr = selectStr.replace("'"+dates.get(0), "");
-			selectStr = selectStr.replace("'"+dates.get(1), "");
-			//System.out.println(query);
-			
-			query = query.replace("[[2]]", dates.get(1)) ;
-			//System.out.println(query);
-		
+		query = query.replace("[[1]]", dates.get(0)) ;
+		selectStr = selectStr.replace("'"+dates.get(0), "");
+		selectStr = selectStr.replace("'"+dates.get(1), "");
+		//System.out.println(query);
+
+		query = query.replace("[[2]]", dates.get(1)) ;
+		//System.out.println(query);
+
 
 		Pattern pattern = Pattern.compile("'(.*?)'");
 		Matcher matcher = pattern.matcher(selectStr);
@@ -218,8 +218,8 @@ public class Main {
 			SanitizeQuery sq = new SanitizeQuery();
 			Operator op = sq.generateTree(select);
 			new QueryOptimizer(op);
-			
-		   // printPlan(op);
+
+			// printPlan(op);
 			ArrayList<Tuple> dt=null;
 			StringBuilder sb = new StringBuilder();
 			do
@@ -227,7 +227,7 @@ public class Main {
 				dt = op.readOneTuple();
 				if(dt !=null)
 				{
-					
+
 					// printTuple(dt);
 					writeOneToDisk(dt);
 					sb.append(getTupleAsString(dt)); 
@@ -313,55 +313,45 @@ public class Main {
 						try
 						{
 
-							String str = select.toString().toLowerCase();
-							if(str.contains("customer.comment") && tpchexec
-									&& ConfigManager.getSwapDir()!=null && !ConfigManager.getSwapDir().isEmpty())
+							// System.err.println(select.toString());
+							//System.out.println("______________________________________");
+							//System.out.println("	Old Execution Plan");
+							//System.out.println("______________________________________");
+							//printPlan(op);
+							//System.out.println("______________________________________");
+							//System.out.println("	Old Execution Plan's Result");
+							//System.out.println("______________________________________");
+							long start = new Date().getTime();
+							// ExecuteQuery(op);							
+							//System.out.println("______________________________________");
+							// System.out.println("==== Query executed in " + ((float) (new Date().getTime() - start)/ 1000) + "s");
+							//System.out.println("\n\n	Optimized Execution Plan");
+							// System.out.println("______________________________________");
+
+
+							if(ConfigManager.getSwapDir() == null || ConfigManager.getSwapDir().isEmpty()
+
+
+									) 
 							{
-								tpchexec = false;
-								ExecuteQuerytcph10(str);
-								
+								new QueryOptimizer(op);
 							}
 							else
 							{
-								// System.err.println(select.toString());
-								//System.out.println("______________________________________");
-								//System.out.println("	Old Execution Plan");
-								//System.out.println("______________________________________");
-								//printPlan(op);
-								//System.out.println("______________________________________");
-								//System.out.println("	Old Execution Plan's Result");
-								//System.out.println("______________________________________");
-								long start = new Date().getTime();
-								// ExecuteQuery(op);							
-								//System.out.println("______________________________________");
-								// System.out.println("==== Query executed in " + ((float) (new Date().getTime() - start)/ 1000) + "s");
-								//System.out.println("\n\n	Optimized Execution Plan");
-								// System.out.println("______________________________________");
-
-
-								if(ConfigManager.getSwapDir() == null || ConfigManager.getSwapDir().isEmpty()
-
-
-										) 
-								{
-									new QueryOptimizer(op);
-								}
-								else
-								{
-									// new QueryOptimizer(op);
-									new QueryOptimizer(op);
-								}
-
-								//printPlan(op);
-
-								//System.out.println("______________________________________");
-								//System.out.println("	Optimized Execution Plan's Result");
-								//System.out.println("______________________________________");
-								start = new Date().getTime();
-
-								ExecuteQuery(op);													
-								// System.out.println("==== Query executed in " + ((float) (new Date().getTime() - start)/ 1000) + "s");
+								// new QueryOptimizer(op);
+								new QueryOptimizer(op);
 							}
+
+							//printPlan(op);
+
+							//System.out.println("______________________________________");
+							//System.out.println("	Optimized Execution Plan's Result");
+							//System.out.println("______________________________________");
+							start = new Date().getTime();
+
+							ExecuteQuery(op);													
+							// System.out.println("==== Query executed in " + ((float) (new Date().getTime() - start)/ 1000) + "s");
+
 						}
 						catch(Exception ex)
 						{
