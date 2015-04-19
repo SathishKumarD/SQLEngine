@@ -100,7 +100,7 @@ public class QueryOptimizer extends Eval {
 
 				if(grpByExpressionsList.size() >4)
 				{
-					replaceGroupBy((GroupByOperator)currOperator);		
+					// replaceGroupBy((GroupByOperator)currOperator);		
 				}
 
 			}		

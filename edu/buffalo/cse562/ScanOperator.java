@@ -27,6 +27,7 @@ public class ScanOperator implements Operator {
 	private String tableName = "";
 	private String tableAlias = "";
 	private HashMap<String,ColumnDetail> operatorTableSchema = null; 
+	
 	private HashMap<Integer, String> indexMaps = null;
 	private TreeMap<Integer,Integer> shrinkedIndexMap = null;
 
@@ -48,8 +49,8 @@ public class ScanOperator implements Operator {
 			this.indexMaps = Main.indexTypeMaps.get(this.tableName.toUpperCase());
 		}
 		// old one
-		// this.operatorTableSchema = this.initialiseOperatorTableSchema(intSchema);
-
+		
+	
 		// new one
 		this.operatorTableSchema = this.initialiseOutputTableSchema(intSchema);
 
@@ -91,18 +92,12 @@ public class ScanOperator implements Operator {
 		String col[] = line.split("\\|");	
 		ArrayList<Tuple> tuples = new ArrayList<Tuple>();
 
-		// this for loop is previous naive method
-		/*for(int counter = 0;counter < col.length;counter++) {
-			if(indexMaps.containsKey(counter)){		
-				String type = indexMaps.get(counter);			
-				tuples.add(new Tuple(type.toLowerCase(), col[counter]));	
-			}
-		}
-		 */
+	
+		
 
 
 		// this for loop is optimised one. pick only the columns necessary
-		for(Entry<Integer,Integer> ind: shrinkedIndexMap.entrySet())
+	for(Entry<Integer,Integer> ind: shrinkedIndexMap.entrySet())
 		{
 			String type = indexMaps.get(ind.getValue());			
 			tuples.add(new Tuple(type.toLowerCase(), col[ind.getValue()]));	
