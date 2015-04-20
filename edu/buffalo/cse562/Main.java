@@ -48,10 +48,16 @@ public class Main {
 		}
 		int sqlIndex = 2;
 
-		if (args[2].equals("--swap")){
-			ConfigManager.setSwapDir(args[3]);
+		if (args[2].equals("--db")){
+			ConfigManager.setDBDir(args[3]);
 			sqlIndex = 4;
 		}
+		
+		if (args[4].equals("--load")){
+			
+			return;
+		}
+
 
 		ArrayList<File> queryFiles = new ArrayList<File>();
 
