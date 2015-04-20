@@ -98,10 +98,10 @@ public class QueryOptimizer extends Eval {
 				GroupByOperator gp =  (GroupByOperator)currOperator;
 				List<Column> grpByExpressionsList = gp.getGroupByColumns();
 
-				if(grpByExpressionsList.size() >4)
-				{
+			//	if(grpByExpressionsList.size() >4)
+			//	{
 					// replaceGroupBy((GroupByOperator)currOperator);		
-				}
+			//	}
 
 			}		
 
