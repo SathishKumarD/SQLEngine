@@ -66,13 +66,7 @@ public class Main {
 		ArrayList<File> queryFiles = new ArrayList<File>();
 
 		for(int i=sqlIndex; i < args.length; i++){	
-			try {
-				String content = readFile(args[i], StandardCharsets.UTF_8);
-				System.err.println(args[i] + ": " + content);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			
 			queryFiles.add(new File(args[i]));
 		}
 		
@@ -82,7 +76,7 @@ public class Main {
 			try{
 				CCJSqlParser parser = new CCJSqlParser(new FileReader(f));
 				// System.err.println(statement);
-				// ExecuteFile(parser,statement);
+				 ExecuteFile(parser,statement);
 
 
 			}
