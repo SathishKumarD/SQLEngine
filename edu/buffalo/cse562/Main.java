@@ -7,6 +7,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringReader;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
 
@@ -52,9 +56,9 @@ public class Main {
 			ConfigManager.setDBDir(args[3]);
 			sqlIndex = 4;
 		}
-		
+
 		if (args[4].equals("--load")){
-			
+
 			return;
 		}
 
@@ -62,14 +66,22 @@ public class Main {
 		ArrayList<File> queryFiles = new ArrayList<File>();
 
 		for(int i=sqlIndex; i < args.length; i++){	
+			try {
+				String content = readFile(args[i], StandardCharsets.UTF_8);
+				System.err.println(args[i] + ": " + content);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			queryFiles.add(new File(args[i]));
 		}
+		
 		Statement statement =null;						
 
 		for (File f : queryFiles){		
 			try{
 				CCJSqlParser parser = new CCJSqlParser(new FileReader(f));
-				System.err.println(statement);
+				// System.err.println(statement);
 				// ExecuteFile(parser,statement);
 
 
@@ -299,6 +311,14 @@ public class Main {
 			}
 		}
 		return writeDir;
+	}
+
+
+	static String readFile(String path, Charset encoding) 
+			throws IOException 
+	{
+		byte[] encoded = Files.readAllBytes(Paths.get(path));
+		return new String(encoded, encoding);
 	}
 
 	public static void ExecuteFile(CCJSqlParser parser,Statement statement )
