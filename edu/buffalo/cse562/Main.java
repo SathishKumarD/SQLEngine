@@ -69,7 +69,8 @@ public class Main {
 		for (File f : queryFiles){		
 			try{
 				CCJSqlParser parser = new CCJSqlParser(new FileReader(f));
-				ExecuteFile(parser,statement);
+				System.err.println(statement);
+				// ExecuteFile(parser,statement);
 
 
 			}
