@@ -90,22 +90,30 @@ public class ScanOperator implements Operator {
 		}
 
 		String col[] = line.split("\\|");	
-		ArrayList<Tuple> tuples = new ArrayList<Tuple>();
+		
 
 	
 		
 
 
 		// this for loop is optimised one. pick only the columns necessary
-	for(Entry<Integer,Integer> ind: shrinkedIndexMap.entrySet())
+	
+
+
+		return getTuples( col);
+	}
+	
+	private ArrayList<Tuple> getTuples(String[] col)
+	{
+		ArrayList<Tuple> tuples = new ArrayList<Tuple>();
+		for(Entry<Integer,Integer> ind: shrinkedIndexMap.entrySet())
 		{
 			String type = indexMaps.get(ind.getValue());			
-			tuples.add(new Tuple(type.toLowerCase(), col[ind.getValue()]));	
+			tuples.add(new Tuple(type, col[ind.getValue()]));	
 
 		}
-
-
 		return tuples;
+		
 	}
 
 	/* (non-Javadoc)
