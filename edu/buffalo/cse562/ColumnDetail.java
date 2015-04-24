@@ -4,7 +4,7 @@
 package edu.buffalo.cse562;
 
 import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
- 
+  //te
 public class ColumnDetail {
 		
 	private ColumnDefinition columnDefinition;
