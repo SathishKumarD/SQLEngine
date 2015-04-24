@@ -32,7 +32,7 @@ public class ScanOperator implements Operator {
 	private TreeMap<Integer,Integer> shrinkedIndexMap = null;
 
 	private Operator parentOperator = null;
-
+	Integer[] shrinkedIndexMapArr = null;
 	/* (non-Javadoc)
 	 * @see edu.buffalo.cse562.Operator#readOneTuple()
 	 */	
@@ -62,7 +62,7 @@ public class ScanOperator implements Operator {
 		{
 			this.dataFile = FileSystems.getDefault().getPath(ConfigManager.getSwapDir(), tableName.toLowerCase() +".dat");
 		}
-
+		shrinkedIndexMapArr = getShrinkedIndexArr(shrinkedIndexMap);
 		reset();
 	}
 
@@ -103,18 +103,37 @@ public class ScanOperator implements Operator {
 		return getTuples( col);
 	}
 	
-	private ArrayList<Tuple> getTuples(String[] col)
+	public ArrayList<Tuple> getTuples(String[] col)
 	{
 		ArrayList<Tuple> tuples = new ArrayList<Tuple>();
-		for(Entry<Integer,Integer> ind: shrinkedIndexMap.entrySet())
+		
+                for(Integer i:shrinkedIndexMapArr)
 		{
-			String type = indexMaps.get(ind.getValue());			
-			tuples.add(new Tuple(type, col[ind.getValue()]));	
+			String type = indexMaps.get(i);			
+			tuples.add(new Tuple(type, col[i]));	
 
 		}
 		return tuples;
 		
 	}
+        
+        private Integer[] getShrinkedIndexArr(TreeMap<Integer,Integer> shrinkedIndexMap)
+        {
+            Integer[] shrinkedIndexMapArr = new Integer[shrinkedIndexMap.size()];
+            
+            int counter = 0;
+            for(Entry<Integer,Integer> ind: shrinkedIndexMap.entrySet())
+		{
+                    shrinkedIndexMapArr[counter] = ind.getValue();
+                    counter++;
+
+		}
+            
+            return shrinkedIndexMapArr;
+            
+        }
+	
+	
 
 	/* (non-Javadoc)
 	 * @see edu.buffalo.cse562.Operator#reset()
