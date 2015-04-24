@@ -6,7 +6,7 @@ package edu.buffalo.cse562;
 import net.sf.jsqlparser.expression.Function;
 
 /**
- * @author Sathish
+ * 
  *
  */
 public class AggregateFunctionColumn {
