@@ -79,9 +79,10 @@ public class SanitizeQuery extends Eval {
 
 		return current;
 	}
+	//
 	private Operator addJoinOperator(Operator current,PlainSelect select)
-	{
-
+	{ 
+  
 		List<Join> joins = select.getJoins();
 		if (joins != null){
 
