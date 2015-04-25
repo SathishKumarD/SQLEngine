@@ -19,7 +19,10 @@ import net.sf.jsqlparser.statement.select.AllTableColumns;
 import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SelectItem;
 
-
+/**
+ * @author Sathish
+ *
+ */
 public class ExtendedProjection implements Operator {
 	Operator input;
 	List<SelectItem> SelectItem_List;

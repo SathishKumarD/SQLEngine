@@ -27,7 +27,7 @@ public class ScanOperator implements Operator {
 	private String tableName = "";
 	private String tableAlias = "";
 	private HashMap<String,ColumnDetail> operatorTableSchema = null; 
-	
+
 	private HashMap<Integer, String> indexMaps = null;
 	private TreeMap<Integer,Integer> shrinkedIndexMap = null;
 
@@ -49,8 +49,8 @@ public class ScanOperator implements Operator {
 			this.indexMaps = Main.indexTypeMaps.get(this.tableName.toUpperCase());
 		}
 		// old one
-		
-	
+
+
 		// new one
 		this.operatorTableSchema = this.initialiseOutputTableSchema(intSchema);
 
@@ -90,172 +90,172 @@ public class ScanOperator implements Operator {
 		}
 
 		String col[] = line.split("\\|");	
-		
 
-	
-		
+
+
+
 
 
 		// this for loop is optimised one. pick only the columns necessary
-	
+
 
 
 		return getTuples( col);
 	}
-	
+
 	public ArrayList<Tuple> getTuples(String[] col)
 	{
 		ArrayList<Tuple> tuples = new ArrayList<Tuple>();
-		
-                for(Integer i:shrinkedIndexMapArr)
+
+		for(Integer i:shrinkedIndexMapArr)
 		{
 			String type = indexMaps.get(i);			
 			tuples.add(new Tuple(type, col[i]));	
 
 		}
 		return tuples;
-		
+
 	}
-        
-        private Integer[] getShrinkedIndexArr(TreeMap<Integer,Integer> shrinkedIndexMap)
-        {
-            Integer[] shrinkedIndexMapArr = new Integer[shrinkedIndexMap.size()];
-            
-            int counter = 0;
-            for(Entry<Integer,Integer> ind: shrinkedIndexMap.entrySet())
+
+	private Integer[] getShrinkedIndexArr(TreeMap<Integer,Integer> shrinkedIndexMap)
+	{
+		Integer[] shrinkedIndexMapArr = new Integer[shrinkedIndexMap.size()];
+
+		int counter = 0;
+		for(Entry<Integer,Integer> ind: shrinkedIndexMap.entrySet())
 		{
-                    shrinkedIndexMapArr[counter] = ind.getValue();
-                    counter++;
+			shrinkedIndexMapArr[counter] = ind.getValue();
+			counter++;
 
 		}
-            
-            return shrinkedIndexMapArr;
-            
-        }
-	
-	
+
+		return shrinkedIndexMapArr;
+
+	}
+
+
 
 	/* (non-Javadoc)
 	 * @see edu.buffalo.cse562.Operator#reset()
 	 */
-	@Override
-	public void reset() {
+	 @Override
+	 public void reset() {
 		// TODO Auto-generated method stub
-		try {
-			Charset charset = Charset.forName("US-ASCII");			
-			this.buffer = Files.newBufferedReader(dataFile, charset);
-		} 
-		catch (IOException e) {
-			e.printStackTrace();
-		}			
-	}
+		 try {
+			 Charset charset = Charset.forName("US-ASCII");			
+			 this.buffer = Files.newBufferedReader(dataFile, charset);
+		 } 
+		 catch (IOException e) {
+			 e.printStackTrace();
+		 }			
+	 }
 
-	public String toString(){
+	 public String toString(){
 
-		return "SCAN TABLE " + dataFile.getFileName().toString();
-	}
+		 return "SCAN TABLE " + dataFile.getFileName().toString();
+	 }
 
-	@Override
-	public Operator getChildOp() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	 @Override
+	 public Operator getChildOp() {
+		 // TODO Auto-generated method stub
+		 return null;
+	 }
 
-	public void setChildOp(Operator child) {		
-		//null		
-	}
+	 public void setChildOp(Operator child) {		
+		 //null		
+	 }
 
-	// deep copies the map from static table schema object to operatorTableSchema
-	//Replaces table aliases
-	private HashMap<String,ColumnDetail> initialiseOperatorTableSchema(HashMap<String,ColumnDetail>  createTableSchemaMap)
-	{
-		HashMap<String,ColumnDetail> opT = new HashMap<String,ColumnDetail>();		
-		for(Entry<String, ColumnDetail> es : createTableSchemaMap.entrySet())
-		{
-			String nameKey = es.getKey();
+	 // deep copies the map from static table schema object to operatorTableSchema
+	 //Replaces table aliases
+	 private HashMap<String,ColumnDetail> initialiseOperatorTableSchema(HashMap<String,ColumnDetail>  createTableSchemaMap)
+	 {
+		 HashMap<String,ColumnDetail> opT = new HashMap<String,ColumnDetail>();		
+		 for(Entry<String, ColumnDetail> es : createTableSchemaMap.entrySet())
+		 {
+			 String nameKey = es.getKey();
 
-			if(tableAlias != null) 
-			{
-				if(nameKey.contains("."))
-				{
-					String[] columnWholeTableName = nameKey.split("\\.");				
-					nameKey = tableAlias +"."+columnWholeTableName[1]; 
-				}
-			}
-			opT.put(nameKey,es.getValue().clone());
-		}
+			 if(tableAlias != null) 
+			 {
+				 if(nameKey.contains("."))
+				 {
+					 String[] columnWholeTableName = nameKey.split("\\.");				
+					 nameKey = tableAlias +"."+columnWholeTableName[1]; 
+				 }
+			 }
+			 opT.put(nameKey,es.getValue().clone());
+		 }
 
-		return opT;
-	}
-
-
-
-	private HashMap<String,ColumnDetail> initialiseOutputTableSchema(HashMap<String,ColumnDetail>  createTableSchemaMap)
-	{
-		HashMap<String,ColumnDetail> opT = new HashMap<String,ColumnDetail>();		
-
-		String columnName = "";
-		int counter = 0;
-		for(Entry<String, ColumnDetail> es : createTableSchemaMap.entrySet())
-		{
-			String nameKey = es.getKey();
-
-			if(tableAlias != null) 
-			{
-				if(nameKey.contains("."))
-				{
-					String[] columnWholeTableName = nameKey.split("\\.");				
-					nameKey = tableAlias +"."+columnWholeTableName[1]; 
-				}
-			}
-
-			if(nameKey.contains("."))
-			{
-				String[] columnWholeTableName = nameKey.split("\\.");	
-				columnName = columnWholeTableName[1];
-			}
-			else
-			{
-				columnName = es.getKey();
-			}
-
-			if(Main.tableColumns.get(tableName.toLowerCase()).contains(columnName))
-			{
-				shrinkedIndexMap.put(counter, es.getValue().getIndex());
-				ColumnDetail cd = es.getValue().clone();
-				cd.setIndex(counter);
-				opT.put(nameKey,cd);
-				counter++;
-
-			}
+		 return opT;
+	 }
 
 
 
-			//opT.put(nameKey,es.getValue().clone());
-		}
+	 private HashMap<String,ColumnDetail> initialiseOutputTableSchema(HashMap<String,ColumnDetail>  createTableSchemaMap)
+	 {
+		 HashMap<String,ColumnDetail> opT = new HashMap<String,ColumnDetail>();		
 
-		return opT;
-	}
+		 String columnName = "";
+		 int counter = 0;
+		 for(Entry<String, ColumnDetail> es : createTableSchemaMap.entrySet())
+		 {
+			 String nameKey = es.getKey();
 
-	public String getTableName()
-	{
-		return this.tableName;
-	}
+			 if(tableAlias != null) 
+			 {
+				 if(nameKey.contains("."))
+				 {
+					 String[] columnWholeTableName = nameKey.split("\\.");				
+					 nameKey = tableAlias +"."+columnWholeTableName[1]; 
+				 }
+			 }
 
-	@Override
-	public HashMap<String, ColumnDetail> getOutputTupleSchema() {
-		return this.operatorTableSchema;
-	}
+			 if(nameKey.contains("."))
+			 {
+				 String[] columnWholeTableName = nameKey.split("\\.");	
+				 columnName = columnWholeTableName[1];
+			 }
+			 else
+			 {
+				 columnName = es.getKey();
+			 }
 
-	@Override
-	public Operator getParent() {
+			 if(Main.tableColumns.get(tableName.toLowerCase()).contains(columnName))
+			 {
+				 shrinkedIndexMap.put(counter, es.getValue().getIndex());
+				 ColumnDetail cd = es.getValue().clone();
+				 cd.setIndex(counter);
+				 opT.put(nameKey,cd);
+				 counter++;
 
-		return parentOperator;
-	}
+			 }
 
-	@Override
-	public void setParent(Operator parent) {
-		this.parentOperator = parent;
 
-	}
+
+			 //opT.put(nameKey,es.getValue().clone());
+		 }
+
+		 return opT;
+	 }
+
+	 public String getTableName()
+	 {
+		 return this.tableName;
+	 }
+
+	 @Override
+	 public HashMap<String, ColumnDetail> getOutputTupleSchema() {
+		 return this.operatorTableSchema;
+	 }
+
+	 @Override
+	 public Operator getParent() {
+
+		 return parentOperator;
+	 }
+
+	 @Override
+	 public void setParent(Operator parent) {
+		 this.parentOperator = parent;
+
+	 }
 }

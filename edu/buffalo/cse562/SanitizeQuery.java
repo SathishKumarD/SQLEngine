@@ -74,7 +74,7 @@ public class SanitizeQuery extends Eval {
 	private Operator addSortOperator(Operator current, PlainSelect select){
 		List<OrderByElement> OrderByElements  = (List<OrderByElement>)select.getOrderByElements();		
 		if(OrderByElements != null && OrderByElements.size() > 0){
-			current = new SortOperator(current, OrderByElements);
+			current = new ExternalSortOperator(current, OrderByElements);
 		}
 
 		return current;

@@ -363,7 +363,7 @@ public class Main {
 								new QueryOptimizer(op);
 							}
 
-							// printPlan(op);
+							 printPlan(op);
 
 							//System.out.println("______________________________________");
 							//System.out.println("	Optimized Execution Plan's Result");
